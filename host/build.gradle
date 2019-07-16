@@ -211,10 +211,11 @@ task setupRemote << {
 
 
 task setupRelease(dependsOn: ['setupRemote']) << {
+println("----PXR------------------------------------------")
   grgit = Grgit.open(project.file('..'), new Credentials(username: github.owner, password: github.token));
 
   if (releaseRepoToken.equals('GITHUB_API_TOKEN')) {
-    throw new GradleException("Please setup your gradle.properties for GitHub Releases")
+   throw new GradleException("Please setup your gradle.properties for GitHub Releases")
   }
   def status = grgit.status();
   println("----------------------------------------------")
@@ -238,6 +239,7 @@ task setupRelease(dependsOn: ['setupRemote']) << {
   }
 
   github.tagName = tagName;
+  println("Tring tag: ${tagName}");
   grgit.tag.add(name: tagName);
   println("Added tag: ${tagName}");
 }
