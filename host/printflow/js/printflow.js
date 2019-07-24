@@ -17,14 +17,19 @@ function startpage(){
         }, 1000);
         
         setInterval(function() {
-            wifiupdate();    
+            wifiupdate();
+            doorupdate();
+            interruptcheck();    
         }, 3000);
         
         setTime();
         wifiupdate();
         printredirect();
         printerStatus();
+        doorupdate();
+        interruptcheck();
 }
+
 
 function setTime() {
 	var timeElement = document.getElementById("time");
@@ -47,6 +52,36 @@ function printerStatus(){
                 document.getElementById("printerstatus").src = PRINTEROFFIMAGE;
         }
     });
+}
+
+function doorupdate() {
+        $.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+                var text = JSON.stringify(result);
+                axisPos = text.indexOf("Y: not stopped");
+                if (axisPos > -1) {
+                        document.getElementById("doorcheck").src = "images/closed.png";
+                }
+                else {
+                        document.getElementById("doorcheck").src = "images/open.png";
+                }
+        });
+}
+
+function interruptcheck() {
+        $.getJSON('../services/printers/executeGCode/' + printerName + '/M408 S0', function (result) {
+                var tem = result["message"];
+                var messtripped = tem.substr(0, tem.length - 3); // to strip off end chars "msgBox.mode\":-1}\n\nok\n"
+                var messObj = JSON.parse(messtripped);
+                var HACKinterlockFlagArr = messObj["fanPercent"];   
+                var interlockSetTrue = HACKinterlockFlagArr[2] == 100;
+                if (interlockSetTrue) {
+                        document.getElementById("interlockcheck").src = "images/locked-padlock.png";
+                }
+                else {// if gets here - invalid value - but set unlocked
+                        document.getElementById("interlockcheck").src = "images/unlocked-padlock.png";
+                }
+
+        });
 }
 
 function updateWifiURL(signalstrength) {

@@ -1,33 +1,159 @@
 <html>
     <head>
-        <title>Maintain</title>
+        <title>Maintain Page</title>
         <style>
+		*{
+				cursor: none;
+			}
+		.homebutton{
+			position: absolute; 
+			top: 100px; 
+			left: 72px;
+			height: 110px;
+			width: 110px; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+		.LedOn{
+			position: absolute; 
+			top: 100px; 
+			left: 431px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+		
+		.LedOff{
+			position: absolute; 
+			top: 270px; 
+			left: 430px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
 
+		.show{
+			position: absolute;
+			top: 155px; 
+			left: 445px;
+			opacity:1;
+		}
+
+		.hide{
+			opacity:0; transition: opacity 3s;
+		}
+		
+		.calibrate{
+			position: absolute; 
+			top: 100px; 
+			left: 610px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+		
+		.homez{
+			position: absolute; 
+			top: 270px;
+			left: 250px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+
+		.pump{
+			position: absolute; 
+			top: 270px;
+			left: 72px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+
+		.testdisplaybtn{
+			position: absolute; 
+			top: 270px;
+			left: 610px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+		
 		.layerheight { 
 			position: absolute; 
 			top: 140px; 
 			left: 630px; 
 			color: white;
 		}
+		
 		.zheight { 
 			position: absolute; 
 			top: 185px; 
-			left: 630px; 
+			left: 680px; 
 			color: white;
 		}
 		
 		.togglebutton { 
-			position: absolute; 
-			top: 91px; 
+			position: absolute; line-height:11em;
+			top: 100px;
 			left: 250px;
-			width:356px;
-			color: white;
+			width: 110px;
 			text-align: center;
-			font-size: 30px;
-			z-index: 2;
+			height: 110px;
+			color: white;
+			font-size: 18px;
 		}
 
+		.IP { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+
+		.details { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
         </style>
+		<style type="text/css">
+			* {
+				cursor: none;
+			}
+		</style>
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
@@ -41,23 +167,28 @@
         <script src="../angular/js/angular.min.js"></script>
 
         <script src="js/moment.min.js"></script>
-		<script src="js/printerconfig.js"></script>
+		
 		<script src="js/printflow.js"></script>
+		<script src="js/printerconfig.js"></script>
+		
 		<script src="js/js.cookie.js"></script>
 		
 		<link href="css/printflow.css" rel="stylesheet">
     </head>
     <body style="background-color: black;" onload="init()">
 		<script>
-			var PRINTERONTEXT = "Enable Printer";
-			var PRINTEROFFTEXT = "Disable Printer";
-			var WAITINGTEXT = "Processing...";
+			
+			var PRINTERONTEXT = "Enable";
+			var PRINTEROFFTEXT = "Disable";
+			var WAITINGTEXT = "Processing";
 			var PRINTERONIMAGE = "images/printer-on.png";
 			var PRINTEROFFIMAGE = "images/printer-off.png";
 			var PRINTERMIDCHANGEIMAGE = "images/printer-midchange.png";
-			
+
 			function init(){
 				startpage();
+				pagelight();
+				setInterval(updateNetworkInfo(), 10000);
 				getLayerData();
 				setInterval(function(){
 				if (document.getElementById("printerstatus").src.indexOf(PRINTERONIMAGE) > -1){
@@ -70,11 +201,55 @@
 					document.getElementById("togglebutton").innerHTML=PRINTERONTEXT;
 				}
 				},1000);
-				
+				loadcustomizer();
+			}
+			
+			function pagelight(){
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R50 U0 B225');
+			}
+
+			function loadcustomizer(){
+				var url  = "http://localhost:9091/services/customizers/upsert";
+				var xhr = new XMLHttpRequest();
+				var data={
+					"name": "display_test_to_be_hidden.zip.Photocentric Magna",
+					"printerName": "Photocentric Magna",
+					"printableName": "display_test_to_be_hidden",
+					"printableExtension": "zip",
+					"supportsAffineTransformSettings": true,
+					"affineTransformSettings": {
+					"rotation": 0,
+					"affineTransformScriptCalculator": null,
+					"yflip": false,
+					"xshear": 0,
+					"yshear": 0,
+					"xflip": false,
+					"xtranslate": 0,
+					"ytranslate": 0,
+					"xscale": 1,
+					"yscale": 1
+					},
+					"externalImageAffectingState": "2019",
+					"cacheId": "ebe94f45e77b312a0e4d104e0fa925f61d82430f",
+					"nextSlice": 0,
+					"nextStep": "PerformHeader",
+					"imageManipulationCalculator": null,
+					"zscale": 1
+				}
+				xhr.open("POST",url, true);
+				//Send the proper header information along with the request
+				xhr.setRequestHeader("Content-Type", "application/json");
+				xhr.setRequestHeader("Accept", "application/json");
+				xhr.onreadystatechange = function() { // Call a function when the state changes.
+					if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+						// Request finished. Do processing here.
+					}
+				}
+				xhr.send(JSON.stringify(data));;
 			}
 			
 			function changez(height) {
-				if ((parseInt(document.getElementById("zdata").innerHTML)+parseInt(height))<200) {
+				if ((parseInt(document.getElementById("zdata").innerHTML)+parseInt(height))<600) {
 					$.getJSON('../services/printers/moveZ/'+printerName+'/'+height);
 					document.getElementById("zdata").innerHTML= parseInt(document.getElementById("zdata").innerHTML)+parseInt(height);
 				}
@@ -90,13 +265,9 @@
 				}
 			}
 			
-			function homez() {
-				$.getJSON('../services/printers/homeZ/'+printerName);
-				document.getElementById("zdata").innerHTML= 0;
-				$('#zheight').show();
-			}
-			
 			function togglePrinter() {
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0');
 				if (document.getElementById("togglebutton").innerHTML !== WAITINGTEXT){
 					document.getElementById("togglebutton").innerHTML = WAITINGTEXT;
 					document.getElementById("printerstatus").src = PRINTERMIDCHANGEIMAGE;
@@ -136,31 +307,155 @@
 					});
 				});
 			}
+
+			function lighton() {
+					$("#togglebutton").hide();
+					$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
+					lighttimer = setTimeout(function () {
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
+						$("#togglebutton").show();
+					}, 10000);
+				}
+
+			function lightoff(){
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
+				$("#LedOn").show();
+				$("#togglebutton").show();
+				 clearTimeout(lighttimer);
+				 clearTimeout(lighttimer2);
+				 clearTimeout(lightonbtntime);
+			}
+	
+			function pbutton(){
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0');
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna')
+				.done(function(data){
+					location.href='pump.html';
+				});
+			}
+
+			function hbutton(){
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0')
+				.done(function(data){
+					location.href="printflow.html";
+				});
+			}
+
+			function calibutton() {
+					$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0')
+				.done(function (data) {
+						location.href = "calibration_1.html";
+					});
+				}
+			
+			function testdisplay() {
+					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.Photocentric%20Magna')
+						.done(function (data) {
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1');
+							$("#togglebutton").hide();
+						});
+					lighttimer2 = setTimeout(function () { 
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
+						$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
+						$("#togglebutton").show();
+					}, 20000);
+			}
+
+			function zbutton() {
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
+				$('#warning').html("Platform moving up. Please wait.");
+				$('#warning').show();
+				setTimeout(function () {
+					$('#warning').hide();
+				}, 5000);
+				setTimeout(function () {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/G28 Z0')
+					.done(function (data) {
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
+						$("#homeZ").show();
+						$("#pump").show();
+						$("#calibrate").show();
+						$("#homebutton").show();
+					});
+				}, 3000);
+			}
+
+			function hidezelements() {
+				$("#homebutton").hide();
+				$("#homeZ").hide();
+				$("#pump").hide();
+				$("#calibrate").hide();
+			}
+			
+			function Doliftcheck() {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+						var text = JSON.stringify(result);
+						axisPos = text.indexOf("Y: not stopped");
+						if (axisPos > -1) {
+							hidezelements();
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
+								.done(function (data) {
+									zbutton();
+								});
+						}
+						else {
+							$('#warning').html("Please close the door and try again");
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						}
+					});
+				}
+
+			function updateNetworkInfo() {
+					$.getJSON('/services/machine/getNetworkHostConfiguration')
+						.done(function (data) {
+							var IPs = "";
+							$.each(data.IPs, function (key, value) {
+								IPs += ("IP: ") + value + (":9091   ");
+							});
+							document.getElementById("IPaddress").innerHTML = IPs;
+						})
+						.fail(function () {
+						});
+				}
+
 			</script>
         <div class="screen">
-            <div class="main">
+      	<div class="main">
 				<img class="uilayer" src="images/maintain.png" usemap="maintain" class="uilayer">
 				<map name="maintain">
-					<area  alt="" title="" href="maintain.html" shape="poly" coords="160,40,137,45,118,58,105,77,100,100,105,123,118,142,137,155,160,160,183,155,202,142,215,123,220,100,215,77,202,58,183,45" style="outline:none;" target="_self"     />
-					<area  alt="" title="" href="printflowsettings.html" shape="poly" coords="65,132,52,135,40,142,33,154,30,167,33,180,40,192,52,199,65,202,78,199,90,192,97,180,100,167,97,154,90,142,78,135" style="outline:none;" target="_self"     />
-					<area  alt="" title="" href="printflow.html" shape="poly" coords="48,16,35,19,25,26,18,36,15,49,18,62,25,72,35,79,48,82,61,79,71,72,78,62,81,49,78,36,71,26,61,19" style="outline:none;" target="_self"     />
-					<area  alt="" title="toggle" shape="rect" coords="252,41,608,103" style="outline:none;" target="_self" onclick="togglePrinter();"    />
-					<area  alt="" title="minus10"" shape="rect" coords="371,110,445,167" style="outline:none;" target="_self" onclick="changez(-10);"    />
-					<area  alt="" title="plus10"  shape="rect" coords="448,110,522,167" style="outline:none;" target="_self" onclick="changez(10);"    />
-					<area  alt="" title="plus50" shape="rect" coords="525,110,599,167" style="outline:none;" target="_self" onclick="changez(50);"    />
-					<area  alt="" title="homeZ" shape="rect" coords="252,172,608,236" style="outline:none;" target="_self" onclick="homez();"    />
-					<area  alt="" title="testDisplay" shape="rect" coords="252,238,608,302" style="outline:none;" target="_self" onclick="$.getJSON('../services/printers/showGridScreen/'+printerName+'/50');"     />
+					<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onclick="hbutton();"/>
+					<img name="LedOn" id="LedOn" class="LedOn" src="images/menumainbuttonANIM.png" onClick="lighton();lightonbtntimer();"/>
+					<img name="LedOff" id="LedOff" class="LedOff" src="images/menumainbuttonANIM.png" onclick="lightoff();"/>
+					<img name="calibrate" id="calibrate" class="calibrate" src="images/menumainbuttonANIM.png" onClick="calibutton();"/>
+					<img name="homeZ" id="homeZ" class="homeZ" src="images/menumainbuttonANIM.png" onclick="Doliftcheck();"/>
+					<img name="pump" id="pump" class="pump" src="images/menumainbuttonANIM.png" onClick="pbutton();"/>
+					<img name="testdisplaybtn" id="testdisplaybtn" class="testdisplaybtn" onClick="testdisplay();" src="images/menumainbuttonANIM.png"/>
 				</map>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
+				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
-				<div name="zheight" id="zheight" class="zheight collapse">PXR Current Z Height:<br><span name="zdata" id="zdata">0</span> mm</div>
-				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ><strong>Error</strong><br>Cannot move past Z axis limits!</div></div>
-				<div name="togglebutton" class="togglebutton" id="togglebutton" onClick="togglePrinter();"></div>
-				
-				<img name="homehighlight" id="homehighlight" class="homehighlight" src="images/homehighlightANIM.png" onClick="location.href='printflow.html';">
-				<img name="bigbuttonhighlight" id="bigbuttonhighlight" class="bigbuttonhighlight" src="images/bigbuttonANIM.png" onClick="location.href='maintain.html';">
-				<img name="smallbuttonhighlight" id="smallbuttonhighlight" class="smallbuttonhighlight" src="images/homehighlightANIM.png" onClick="location.href='printflowsettings.html';">
-            </div>
+				<div name="zheight" id="zheight" class="zheight collapse">Current Z Height:<br><span name="zdata" id="zdata">0</span> mm</div>
+				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse"><strong>Error</strong><br>Cannot move past Z axis limits!</div></div>
+				<div name="togglebutton" class="togglebutton" id="togglebutton" onClick="togglePrinter();">Enable</div>
+				<div name="webinfo" id="webinfo" class="webinfo">
+					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+				</div>
+				</div>
         </div>
 
 	

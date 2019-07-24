@@ -1,20 +1,25 @@
 <html>
     <head>
-        <title>Main Menu</title>
+        <title>Main Page</title>
         <style>
-		
+			*{
+				cursor: none;
+			}
+		::-webkit-scrollbar
+			{
+    		width:0px;
+			}
+			::-webkit-scrollbar-track-piece
+			{
+   			background-color:transparent;
+			}
+
 		.print{
 			position: absolute; 
-			top: 130px; 
-			left: 328px;
-			animation-iteration-count: infinite;
-			animation-name: rotate;
-			animation-duration: 2s;
-			animation-timing-function: linear;
-			-webkit-animation-name: rotate;
-			-webkit-animation-duration: 2s;
-			-webkit-animation-timing-function: linear;
-			-webkit-animation-iteration-count: infinite;
+			top: 50px; 
+			left: 270px;
+			height: 200px;
+			width: 250px;
 			z-index: 5;
 			user-drag: none; 
 			user-select: none;
@@ -24,21 +29,12 @@
 			-ms-user-select: none;
 		}
 		
-		
 		.maintain{
 			position: absolute; 
-			top: 58px; 
-			left: 532px;
-			animation-iteration-count: infinite;
-			animation-name: rotate;
-			animation-duration: 2s;
-			animation-timing-function: linear;
-			
-			-webkit-animation-name: rotate;
-			-webkit-animation-duration: 2s;
-			-webkit-animation-timing-function: linear;
-			-webkit-animation-iteration-count: infinite;
-			
+			top: 230px; 
+			left: 115px;
+			height: 150px;
+			width: 150px;
 			user-drag: none; 
 			user-select: none;
 			-moz-user-select: none;
@@ -49,21 +45,11 @@
 				
 		.settings{
 			position: absolute; 
-			top: 278px; 
-			left: 532px;
-			transform: rotate(180deg);
-			
-			animation-iteration-count: infinite;
-			animation-name: rotate;
-			animation-duration: 2s;
-			animation-timing-function: linear;
-			
-			-webkit-animation-name: rotate;
-			-webkit-animation-duration: 2s;
-			-webkit-animation-timing-function: linear;
-			-webkit-animation-iteration-count: infinite;
+			top: 230px; 
+			left: 525px;
+			height: 150px;
+			width: 150px;
 			z-index: 5;
-			
 			user-drag: none; 
 			user-select: none;
 			-moz-user-select: none;
@@ -72,9 +58,65 @@
 			-ms-user-select: none;
 		}
 		
-
+		.network{
+			position: absolute; 
+			top: 260px; 
+			left: 320px;
+			height: 150px;
+			width: 150px;
+			z-index: 5;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
 		
-        </style>
+		.IP { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		.details { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		
+		.visiblelabel { 
+			position: absolute; 
+			top: 65px; 
+			left: 460px;
+			width:350px;
+			color: white;
+			text-align: left;
+			padding-left: 20px;
+			padding-top: 5px;
+			font-size: 20px;
+			z-index: 2;
+		}
+
+		.wifiselect { 
+			position: absolute; 
+			top: 121px; 
+			left: 485px;
+			width: 270px;
+			height: 109px;
+			background-color: transparent;
+			color: white;
+			border: none;
+			line-height: 50px;
+			font-size: 20px;
+			overflow: hidden;
+		}
+		
+		</style>
+		<!-- <style type="text/css">
+			* {
+				cursor: none;
+			}
+		</style> -->
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
@@ -96,25 +138,55 @@
 		
 		<link href="css/printflow.css" rel="stylesheet">
     </head>
-    <body style="background-color: black;" onload="startpage();">
+    <body style="background-color: black;" onload="init();">
+		<script>
+
+			function init(){
+				startpage();
+				pagelight();
+				setInterval(updateNetworkInfo(), 5000);
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
+			}
+
+
+			function pagelight(){
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R255 U0 B0');
+			}
+
+
+			function updateNetworkInfo() {
+
+				$.getJSON('/services/machine/getNetworkHostConfiguration')
+					.done(function (data) {
+						var IPs = "";
+						$.each(data.IPs, function (key, value) {
+							IPs += ("IP: ") + value + (":9091   ");
+						});
+						document.getElementById("IPaddress").innerHTML = IPs;
+					})
+					.fail(function () {
+					});
+			}
+
+		</script>
+		
         <div class="screen">
             <div class="main">
-				<img src="images/mainmenu.png" usemap="mainmenu" class="uilayer">
-				<map name="mainmenu">
-					<area alt="" title="" href="printflowprintables.html" shape="poly" coords="411,104,384,109,362,125,346,147,341,174,346,201,362,223,384,239,411,244,438,239,460,223,476,201,481,174,476,147,460,125,438,109" style="outline:none;" target="_self" onClick="location.href='printables.html';"    />
-					<area alt="" title="" href="maintain.html" shape="poly" coords="596,25,573,30,554,43,541,62,536,85,541,108,554,127,573,140,596,145,619,140,638,127,651,108,656,85,651,62,638,43,619,30" style="outline:none;" target="_self" onClick="location.href='maintain.html';"    />
-					<area alt="" title="" href="printflowsettings.html" shape="poly" coords="598,247,575,252,556,265,543,284,538,307,543,330,556,349,575,362,598,367,621,362,640,349,653,330,658,307,653,284,640,265,621,252" style="outline:none;" target="_self" onClick="location.href='printflowsettings.html';"    />
-				</map>
+				<img src="images/mainmenu.png" usemap="mainmenu" class="uilayer"></img>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
-				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printflowprintables.html';">
-				<img name="maintain" id="maintain" class="maintain" src="images/menusubbuttonANIM.png" onClick="location.href='maintain.html';">
-				<img name="settings" id="settings" class="settings" src="images/menusubbuttonANIM.png" onClick="location.href='printflowsettings.html';">
-				<img name="maintopconnector" id="maintopconnector" class="maintopconnector" src="images/maintopconnector.png">
-				<img name="mainbotconnector" id="mainbotconnector" class="mainbotconnector" src="images/mainbotconnector.png">
-            </div>
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
+				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
+				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printflowprintables.html';"/>
+				<img name="maintain" id="maintain" class="maintain" src="images/menumainbuttonANIM.png" onClick="location.href='maintain.html';">
+				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='printflowsettings.html';">
+				<img name="network" id="network" class="network" src="images/menumainbuttonANIM.png" onClick="location.href='wifisettings.html';">
+				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
+					<div name="webinfo" id="webinfo" class="webinfo">
+						<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+					</div>
+				</div>
+			</div>
         </div>
-
-	
     </body>
 </html>

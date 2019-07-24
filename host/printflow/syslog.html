@@ -2,12 +2,15 @@
     <head>
         <title>system log</title>
         <style>	
+		*{
+				cursor: none;
+			}
 		.log {
 			position: absolute; 
-			top: 130px; 
-			left: 250px;
-			width:300px;
-			height:178px;
+			top: 80px; 
+			left: 100px;
+			width: 600px;
+			height: 250px;
 			background-color: transparent;
 			color: white;
 			font-size: 12px;
@@ -15,31 +18,107 @@
 			padding: 5px;
 			resize: none;
 		}
-        </style>
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-        <!-- jQuery library -->
-        <script src="../jquery/jquery.min.js"></script>
+		.home {
+			position: absolute; 
+			top: 360px; 
+			left: 27px;
+			height: 90px;
+			width: 80px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 3;
+		}
 
-        <!-- Latest compiled JavaScript -->
-        <script src="../bootstrap/js/bootstrap.min.js"></script>
+		.back {
+			position: absolute; 
+			top: 360px; 
+			left: 125px;
+			height: 90px;
+			width: 80px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 3;
+		}
 
-        <!-- Latest v1 Angular -->
-        <script src="../angular/js/angular.min.js"></script>
-
-        <script src="js/moment.min.js"></script>
+		.IP { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
 		
-		<script src="js/printflow.js"></script>
-		<script src="js/printerconfig.js"></script>
+		.details { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
 		
-		<script src="js/js.cookie.js"></script>
+		.visiblelabel { 
+			position: absolute; 
+			top: 65px; 
+			left: 460px;
+			width:350px;
+			color: white;
+			text-align: left;
+			padding-left: 20px;
+			padding-top: 5px;
+			font-size: 20px;
+			z-index: 2;
+		}
+
+		.wifiselect { 
+			position: absolute; 
+			top: 121px; 
+			left: 485px;
+			width: 270px;
+			height: 109px;
+			background-color: transparent;
+			color: white;
+			border: none;
+			line-height: 50px;
+			font-size: 20px;
+			overflow: hidden;
+		}
+
+		</style>
 		
-		<link href="css/printflow.css" rel="stylesheet">
+               <!-- Latest compiled and minified CSS -->
+			   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+
+			   <!-- jQuery library -->
+			   <script src="../jquery/jquery.min.js"></script>
+	   
+			   <!-- Latest compiled JavaScript -->
+			   <script src="../bootstrap/js/bootstrap.min.js"></script>
+	   
+			   <!-- Latest v1 Angular -->
+			   <script src="../angular/js/angular.min.js"></script>
+	   
+			   <script src="js/moment.min.js"></script>
+			   
+			   <script src="js/printflow.js"></script>
+			   <script src="js/printerconfig.js"></script>
+			   
+			   <script src="js/js.cookie.js"></script>
+			   
+			   <link href="css/printflow.css" rel="stylesheet">
     </head>
-    <body style="background-color: black;" onload="startpage();">
+    <body style="background-color: black;"  onload="init()">
 		
 		<script>
+			function init(){
+				startpage();
+				setInterval(updateNetworkInfo(), 10000);
+			}
+
 			function sortBy(jsonArray, key){
 				if(jsonArray){
 					var sortedArray = jsonArray.sort(function(left, right) { 
@@ -55,6 +134,7 @@
 				return sortedArray;
 				}
 			}
+
 			$.getJSON('../services/printJobs/list')
 				.done(function(data){
 					console.log(data);
@@ -63,24 +143,40 @@
 						document.getElementById("log").innerHTML+="["+moment(val.startTime).format("HH:mm:ss[ ]DD-MMM-YY")+"] Started printing: "+val.jobName+"\n&nbsp;&nbsp;&nbsp;&nbsp;Status: "+val.status+"\n";
 					});
 			});
+
+			function updateNetworkInfo() {
+
+					$.getJSON('/services/machine/getNetworkHostConfiguration')
+						.done(function (data) {
+							var IPs = "";
+							$.each(data.IPs, function (key, value) {
+								IPs += ("IP: ") + value + (":9091   ");
+							});
+							document.getElementById("IPaddress").innerHTML = IPs;
+						})
+						.fail(function () {
+						});
+				}
+
 		</script>
+		
         <div class="screen">
             <div class="main">
 				<img src="images/syslog.png" usemap="syslog" class="uilayer">
 				<map name="syslog" style="z-index: 100;">
-					<area  alt="" title="" href="printflowsettings.html" shape="poly" coords="160,40,137,45,118,58,105,77,100,100,105,123,118,142,137,155,160,160,183,155,202,142,215,123,220,100,215,77,202,58,183,45" style="outline:none;" target="_self"     />
-					<area  alt="" title="" href="printflow.html" shape="poly" coords="48,16,35,19,25,26,18,36,15,49,18,62,25,72,35,79,48,82,61,79,71,72,78,62,81,49,78,36,71,26,61,19" style="outline:none;" target="_self"     />
-					<area  alt="" title="WPS Setup" shape="rect" coords="252,268,548,324" style="outline:none;" target="_self" onClick="startPrint();"    />
 				</map>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
+				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<textarea class="log" id="log"></textarea>
-				
 				<div name="warn" id="warn" class="warn"></div>
-				
-				<img name="homehighlight" id="homehighlight" class="homehighlight" src="images/homehighlightANIM.png" onClick="location.href='printflow.html';">
-				<img name="bigbuttonhighlight" id="bigbuttonhighlight" class="bigbuttonhighlight" src="images/bigbuttonANIM.png" onClick="location.href='printflowsettings.html';">
-            </div>
+				<div name="home" class="home" id="home" onClick="location.href='printflow.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="back" class="back" id="back" onClick="location.href='printflowsettings.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="webinfo" id="webinfo" class="webinfo">
+					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+				</div>
+			</div>
         </div>
 
 	
