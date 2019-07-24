@@ -217,6 +217,7 @@ task setupRelease(dependsOn: ['setupRemote']) << {
     throw new GradleException("Please setup your gradle.properties for GitHub Releases")
   }
   def status = grgit.status();
+  println("grgit status"+ status)
   println("----------------------------------------------")
   println("Description of current commit: "+grgit.describe())
   println("UNCOMMITTED STAGED CHANGES: "+status.staged)
@@ -224,7 +225,7 @@ task setupRelease(dependsOn: ['setupRemote']) << {
   println("----------------------------------------------")
 
   def tagName = "$System.env.tagName";
-
+ 
   println("Dry-Run Git Push to ${releaseRepoRemoteName}:")
   grgit.push(dryRun: true, remote: releaseRepoRemoteName);
   println("----------------------------------------------")
