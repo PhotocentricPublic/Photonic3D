@@ -126,6 +126,15 @@ elif [ -z "${NETWORK_TAG}" ]; then
 	echo "Couldn't fetch version from GitHub, launching existing install."
 elif [ "${NETWORK_TAG}" != "${LOCAL_TAG}" -o "$2" == "force" ]; then
 	echo Installing latest version of ${downloadPrefix}: ${NETWORK_TAG}
+//New++
+	if [ -v pdpprocessid ]; then
+		kill $pdpprocessid
+	fi
+
+	showUpdateScreen "Downloading version: $NETWORK_TAG"
+	echo "["$(timestamp)"] Installing latest version of ${downloadPrefix}: ${NETWORK_TAG}"
+
+	//--new
 
 	DL_URL=$(curl -L -s https://api.github.com/repos/${repo}/releases/latest | grep 'browser_' | cut -d\" -f4 | grep -- -${NETWORK_TAG})
 	DL_FILE=${DL_URL##*/}
@@ -133,8 +142,16 @@ elif [ "${NETWORK_TAG}" != "${LOCAL_TAG}" -o "$2" == "force" ]; then
 	wget -P /tmp "${DL_URL}"
   if [ $? -ne 0 ]; then
 		echo "wget of ${DL_FILE} failed. Aborting update."
+		echo "["$(timestamp)"] FAIL: wget of ${DL_FILE} failed. Exiting." >&2  //New
 		exit 1
 	fi
+//New++
+	if [ -v pdpprocessid ]; then
+		kill $pdpprocessid
+	fi
+
+	showUpdateScreen "Installing version: $NETWORK_TAG"
+//--new
 
 	rm -r ${installDirectory}
 	mkdir -p ${installDirectory}
@@ -150,8 +167,17 @@ elif [ "${NETWORK_TAG}" != "${LOCAL_TAG}" -o "$2" == "force" ]; then
 	grep -lU $'\x0D' /etc/init.d/cwhservice | xargs dos2unix
 	chmod +x /etc/init.d/cwhservice
 	rm ${DL_FILE}
+
+//New++
+	//Orig wget https://raw.githubusercontent.com/Photocentric3D/Photonic3D/master/host/bin/run_on_update.sh
+	
+	wget https://github.com/PhotocentricPublic/Photonic3D/raw/kxg_incorporate_magna/host/bin/run_on_update.sh
+	chmod 777 run_on_update.sh
+	./run_on_update.sh
+//--new
 else
 	echo No install required
+	echo "["$(timestamp)"] INFO: Photonic up-to-date" >&2
 
 fi
 
