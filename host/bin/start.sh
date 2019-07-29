@@ -12,10 +12,13 @@ if [ -z "$HOME" ] || [ "$HOME" == "/" ]; then
   HOME=~root
 fi
 
-DEFAULT_REPO="area515/Creation-Workshop-Host"
+//DEFAULT_REPO="area515/Creation-Workshop-Host"  //PXR29/07/2019
+DEFAULT_REPO="PhotocentricPublic/Photonic3D"
 CONFIG_PROPS="${HOME}/3dPrinters/config.properties"
 
 echo "Local Config: $CONFIG_PROPS"
+
+
 
 if [ -f ${CONFIG_PROPS} ]; then
   CONFIG_REPO=$(grep '^updateRepo' "${CONFIG_PROPS}" | cut -d= -f 2 | awk '$1=$1')
@@ -33,6 +36,11 @@ else
 		repo="$1/Creation-Workshop-Host"
 	fi;
 fi;
+
+echo "Default repro : $DEFAULT_REPO"
+
+
+
 
 if [ "$2" == "TestKit" ]; then
 	downloadPrefix=cwh$2-
