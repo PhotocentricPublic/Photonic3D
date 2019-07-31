@@ -219,42 +219,30 @@ public class PrintableService {
 					File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
 					String extension = getFileExtension(fullPath);
 
-					logger.info("PXR ios Zip extension: {}", extension);
+					String fileNameNoExtension =fileName.substring(0,fileName.lastIndexOf("."));
+
+					logger.info("PXR fileNameNoExtension  : {}", fileNameNoExtension);
+
+					//String fileNameNoExtension=fileName.split(".")..;
+
+
 					if (extension.equals(".zip"))
 					{
-						logger.info("PXR ios Zip extension2: {}", extension);
+						logger.info("PXR ios Zip extension: {}", extension);
 
-						String destDir = "C:/Users/paulr/Documents/rubbish/unzipped/";
+						String destDir = "./unzippedPreview/";
+						String previewFileName=fileNameNoExtension+".png";
 
-						//saveFile
+						File previewFile= new File(destDir, previewFileName);
+						logger.info("PXR previewFile name: {}", previewFile.getName());
 
-						String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
-						logger.info("PXR =============================filePath: {}", filePath);
-						unzip(filePath, destDir);
-
-						// String imagePath =HostProperties.Instance().getUploadDir()+"/preview.png"; //zip only
-						// //InputStream streamImg = new FileInputStream(new File(destDir, "preview.png"));
-
-						// //FileInputStream fin=new FileInputStream(new File(imagePath));
-						// FileInputStream fin=new FileInputStream(new File(destDir, "preview.png"));
-						// int i;
-						// while((i=fin.read())!=-1)
-						// {
-
-						// 	//logger.info("fin: {}", i);
-						// 	output.write(i);
-						// 	output.flush();
-						// }
-						// System.out.println("File readed Succesfully");
-						// System.out.println("File Written Succesfully");
-						// output.close();
-						// fin.close();
-
-
-                    
-						InputStream streamImg = new FileInputStream(new File(destDir, "preview.png"));
-						logger.info("PXR  streamImg: {}", extension);
-						ByteStreams.copy(streamImg, output);
+						if (!previewFile.exists())
+						{
+							String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
+							unzip("preview.png",previewFileName, filePath, destDir);
+						}
+						InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));
+						ByteStreams.copy(streamImg, output);	
 
 						streamImg.close();
 						
@@ -283,7 +271,7 @@ public class PrintableService {
  
     }
 	
-	private static void unzip(String zipFilePath, String destDir) {
+	private static void unzip(String fileNametoUzip, String nametoUse, String zipFilePath, String destDir) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
         if(!dir.exists()) dir.mkdirs();
@@ -293,19 +281,26 @@ public class PrintableService {
         try {
             fis = new FileInputStream(zipFilePath);
             ZipInputStream zis = new ZipInputStream(fis);
-            ZipEntry ze = zis.getNextEntry();
-            while(ze != null){
-                String fileName = ze.getName();
-                File newFile = new File(destDir + File.separator + fileName);
-                System.out.println("Unzipping to "+newFile.getAbsolutePath());
-                //create directories for sub directories in zip
-                new File(newFile.getParent()).mkdirs();
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-                }
-                fos.close();
+			ZipEntry ze = zis.getNextEntry();
+			boolean isFound=false;
+            while(ze != null && isFound!=true){
+				String fileName = ze.getName();
+				if (fileName.equals(fileNametoUzip))
+				{
+					System.out.println("PXR found file  {} & upzipping "+fileName);
+					isFound=true;
+					File newFile = new File(destDir + File.separator + nametoUse);
+					
+					//create directories for sub directories in zip
+					FileOutputStream fos = new FileOutputStream(newFile);
+					int len;
+					while ((len = zis.read(buffer)) > 0) {
+						fos.write(buffer, 0, len);
+					}
+					fos.close();
+				}
+				
+				
                 //close this ZipEntry
                 zis.closeEntry();
                 ze = zis.getNextEntry();
