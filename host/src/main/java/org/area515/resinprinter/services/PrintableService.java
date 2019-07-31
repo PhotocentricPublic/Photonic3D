@@ -19,6 +19,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -191,7 +193,133 @@ public class PrintableService {
 	public Response uploadPrintableFile(InputStream istream, @PathParam("filename")String fileName) {
 		return uploadFile(fileName, istream, HostProperties.Instance().getUploadDir());
 	}
-    
+
+	@ApiOperation(value="Download a preview image of printable file using application/octet-stream. "
+	+ "No conversion of the stream is performed; instead, it is streamed directly from the source file.")
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
+		@ApiResponse(code = 400, message = SwaggerMetadata.USER_UNDERSTANDABLE_ERROR),
+		@ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
+	@GET
+	@Path("/downloadprintableimagefile/{filename}")
+	@Produces("image/png")
+	public StreamingOutput downloadPrintableImageFile(@PathParam("filename")String fileName) {
+	return new StreamingOutput() {
+		@Override
+		//public void write(OutputStream output) throws IOException, WebApplicationException {
+		public void write(OutputStream  output) throws IOException, WebApplicationException {
+		//String testPathString = "C:/Users/paulr/Documents/rubbish/SliceJob_LiquidCrystalMagna_30-07-2019.zip";
+
+			InputStream stream = new FileInputStream(new File(HostProperties.Instance().getUploadDir(), fileName));
+			try {
+				//ByteStreams.copy(stream, output);
+			} finally {
+				try {
+					stream.close();
+					File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
+					String extension = getFileExtension(fullPath);
+
+					logger.info("PXR ios Zip extension: {}", extension);
+					if (extension.equals(".zip"))
+					{
+						logger.info("PXR ios Zip extension2: {}", extension);
+
+						String destDir = "C:/Users/paulr/Documents/rubbish/unzipped/";
+
+						//saveFile
+
+						String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
+						logger.info("PXR =============================filePath: {}", filePath);
+						unzip(filePath, destDir);
+
+						// String imagePath =HostProperties.Instance().getUploadDir()+"/preview.png"; //zip only
+						// //InputStream streamImg = new FileInputStream(new File(destDir, "preview.png"));
+
+						// //FileInputStream fin=new FileInputStream(new File(imagePath));
+						// FileInputStream fin=new FileInputStream(new File(destDir, "preview.png"));
+						// int i;
+						// while((i=fin.read())!=-1)
+						// {
+
+						// 	//logger.info("fin: {}", i);
+						// 	output.write(i);
+						// 	output.flush();
+						// }
+						// System.out.println("File readed Succesfully");
+						// System.out.println("File Written Succesfully");
+						// output.close();
+						// fin.close();
+
+
+                    
+						InputStream streamImg = new FileInputStream(new File(destDir, "preview.png"));
+						logger.info("PXR  streamImg: {}", extension);
+						ByteStreams.copy(streamImg, output);
+
+						streamImg.close();
+						
+					}
+
+
+				} catch (IOException e) {}
+			}
+		}
+	};
+	}
+
+	private static String getFileExtension(File file) {
+		String extension = "";
+ 
+        try {
+            if (file != null && file.exists()) {
+                String name = file.getName();
+                extension = name.substring(name.lastIndexOf("."));
+            }
+        } catch (Exception e) {
+            extension = "isErr";
+        }
+ 
+        return extension;
+ 
+    }
+	
+	private static void unzip(String zipFilePath, String destDir) {
+        File dir = new File(destDir);
+        // create output directory if it doesn't exist
+        if(!dir.exists()) dir.mkdirs();
+        FileInputStream fis;
+        //buffer for read and write data to file
+        byte[] buffer = new byte[1024];
+        try {
+            fis = new FileInputStream(zipFilePath);
+            ZipInputStream zis = new ZipInputStream(fis);
+            ZipEntry ze = zis.getNextEntry();
+            while(ze != null){
+                String fileName = ze.getName();
+                File newFile = new File(destDir + File.separator + fileName);
+                System.out.println("Unzipping to "+newFile.getAbsolutePath());
+                //create directories for sub directories in zip
+                new File(newFile.getParent()).mkdirs();
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+                }
+                fos.close();
+                //close this ZipEntry
+                zis.closeEntry();
+                ze = zis.getNextEntry();
+            }
+            //close last ZipEntry
+            zis.closeEntry();
+            zis.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+	}
+	
     @ApiOperation(value="Download a printable file using application/octet-stream. "
     		+ "No conversion of the stream is performed; instead, it is streamed directly from the source file.")
     @ApiResponses(value = {

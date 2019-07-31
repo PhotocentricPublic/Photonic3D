@@ -110,6 +110,20 @@ background-color:transparent;
 
 		}
 
+		.previewmodelimage{
+			position: absolute; 
+			top: 50px; 
+			left: 600px;
+			height: 200px;
+			width: 200px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
+
 		.homebutton{
 			position: absolute; 
 			top: 365px; 
@@ -305,9 +319,106 @@ background-color:transparent;
 				});
 			}
 
+			function displayPreviewImage(){
+
+				//$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+                //var text = JSON.stringify(result);
+				console.log ("pV: "+$("#printables").val());
+				console.log ("../services/printables/downloadprintableimagefile/"+$("#printables").val());
+			   ///
+			   //
+			   var img=document.getElementById('previewmodelimage');
+			   
+			   //
+			   var url  = "http://localhost:9091/services/printables/downloadprintableimagefile/"+$("#printables").val();
+			   img.src=url;
+
+				var xhr = new XMLHttpRequest();
+				var data={
+					"name": "display_test_to_be_hidden.zip.Photocentric Magna",
+					
+				}
+				xhr.open("GET",url, true);
+				//Send the proper header information along with the request
+				//xhr.setRequestHeader("Content-Type", "image/png");
+				xhr.setRequestHeader("Accept", "image/png");
+				xhr.onreadystatechange = function(data) { // Call a function when the state changes.
+					if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+						// Request finished. Do processing here.
+						
+						 var resp=this.response;
+
+						 var view = new Uint8Array(resp); 
+
+						 	var blob = new Blob([view], {type: "image/png"});
+					var url = URL.createObjectURL(blob);
+					var img = new Image;
+					img.src = url;
+					document.body.appendChild(img);
+
+						 //var data= JSON.parse(resp)
+						//var blob= this.response.blob();
+//var bin = atob(this.response)
+						//var img = URL.createObjectURL(resp);
+						// Do whatever with the img
+						document.getElementById('previewmodelimage').setAttribute('src', img);
+
+						//document.getElementById("previewmodelimage").src=this.response;
+					}
+				}
+				xhr.send();
+				///
+				try{
+				$.getJSON("../services/printables/downloadprintableimagefile/"+$("#printables").val(),function(err,res){
+   			var x=0;
+
+				});
+			}
+			catch(e)
+			{
+var x=0;
+
+			}
+				// 	.done(function(data){
+				// 		var x=document.getElementById("previewmodelimage").src="images/previewModelImage.png"
+					
+
+				// 		//var options = $("#printables option");                    // Collect options         
+				// 		//options.detach();
+				// 		//fillList();
+				// })
+				// .fail(function(resp){
+				// 	//var binary = atob(resp.responseText);
+					
+				// 	var view = new Uint8Array(resp.responseText);                  // access bytes through a view
+	
+				// 	console.log("Content:", view[0], view[1], view[2], view[3], ".. etc..");
+  
+				// 	// convert to blob and show
+				// 	var blob = new Blob([view], {type: "image/png"});
+				// 	var url = URL.createObjectURL(blob);
+				// 	var img = new Image;
+				// 	img.src = url;
+				// 	document.body.appendChild(img);
+
+				// 	// document.getElementById("previewmodelimage").src=binary;
+				// 	// $('#warning').html("<strong>Error</strong><br>Could not dsiplay item "+$("#printables").val());
+				// 	// $('#warning').show();
+				// 	// setTimeout(function() {
+				// 	// $('#warning').hide();
+				// 	// }, 5000);
+				// });
+			}
+
 			function showcontrol(){
+
 				$('#deletecontainer').show();
 				$('#deletewarn').hide();
+				var printableFiles = document.getElementById("printables");
+				if (printableFiles.value == "zone1"){
+					alert("You clicked Zone 1.");
+				}
+				displayPreviewImage();
 			}
 
 			function updateNetworkInfo(){ 
@@ -363,6 +474,7 @@ background-color:transparent;
 						</div>
 					<img id="overlay" class="overlay hide" src="images/34.gif"/>
 				<img src="images/printables.png" usemap="printables" class="uilayer">
+				<img class="previewmodelimage" id="previewmodelimage">
 				<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onClick="location.href='printflow.html';"/>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
