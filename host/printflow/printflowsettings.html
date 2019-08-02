@@ -17,6 +17,7 @@
 			border: none;
 			padding: 5px;
 			resize: none;
+			z-index: 3;
 
 		}
 
@@ -123,7 +124,8 @@
 						.then(
 							function (response) {
 								response.text().then(function (data) {
-									$("#version").text(data);
+									//$("#version").text(data);
+									document.getElementById("version").innerHTML = data;
 								});
 							}
 						)
