@@ -7,7 +7,7 @@
 			}
 		.version {
 			position: absolute; 
-			top: 300px; 
+			top: 310px; 
 			left: 105px;
 			width: 160px;
 			height: 30px;
@@ -18,7 +18,6 @@
 			padding: 5px;
 			resize: none;
 			z-index: 3;
-
 		}
 
 		.homebutton{
@@ -110,7 +109,8 @@
 			  <script src="js/js.cookie.js"></script>
 			  
 			  <link href="css/printflow.css" rel="stylesheet">
-    </head>
+	
+			</head>
 <body style="background-color: black;"  onload="init()">
 	<script>
 			function init(){
@@ -120,15 +120,7 @@
 			}
 			
 			function getversion() {
-					fetch('version.txt')
-						.then(
-							function (response) {
-								response.text().then(function (data) {
-									//$("#version").text(data);
-									document.getElementById("version").innerHTML = data;
-								});
-							}
-						)
+					$(version).load('version.txt')
 				}
 
 			function updateNetworkInfo() {
