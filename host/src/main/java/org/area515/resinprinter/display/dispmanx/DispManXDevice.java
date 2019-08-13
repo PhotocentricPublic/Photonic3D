@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.display.GraphicsOutputInterface;
 import org.area515.resinprinter.display.InappropriateDeviceException;
-import org.area515.resinprinter.printer.PrinterConfiguration;
 import org.area515.util.Log4jUtil;
 
 import com.sun.jna.Memory;
@@ -33,14 +32,20 @@ public class DispManXDevice implements GraphicsOutputInterface {
     //For dispmanx
     private int imageResourceHandle;
     private int imageElementHandle;
-    
-    //For Calibration and Grid
-    private NativeMemoryBackedBufferedImage calibrationAndGridImage;
-    
-    //This is a cache for when callers use this class without a NativeMemoryBackedBufferedImage
+    //For Image
     private Memory imagePixels;
     private int imageWidth;
     private int imageHeight;
+    //For Calibration and Grid
+    private Memory calibrationAndGridPixels;
+    private BufferedImage calibrationAndGridImage;
+    
+    // Robin for correcting delays
+    private long startingTimeForCurrentSlice;
+    private long timeAfterShowingTheSlice;
+    public static long timeWaitedForPreviousSliceToShow;
+    private long oldTimeWaitedForPreviousSliceToShow;
+    private long delayTimingOffBy;
     
     public DispManXDevice(String displayName, SCREEN screen) throws InappropriateDeviceException {
 		this.displayName = displayName;
@@ -51,6 +56,11 @@ public class DispManXDevice implements GraphicsOutputInterface {
         DispManX.INSTANCE.vc_dispmanx_rect_set(sourceRect, 0, 0, 0, 0);
 	}
     
+    public static int gettingLastDelay(){
+    	int lastDelay = (int) timeWaitedForPreviousSliceToShow;
+    	return lastDelay;
+    }
+   
     private static void bcmHostInit() {
     	if (BCM_INIT) {
     		return;
@@ -116,6 +126,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 			logger.info("dispose screen");
 			removeAllElementsFromScreen();
 	    	logger.info("vc_dispmanx_display_close result:" + DispManX.INSTANCE.vc_dispmanx_display_close(displayHandle));
+	    	calibrationAndGridPixels = null;
 	    	imagePixels = null;
 	    	calibrationAndGridImage = null;
 	    	imageWidth = 0;
@@ -193,7 +204,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 			return;
 		}
 		
-		calibrationAndGridImage = NativeMemoryBackedBufferedImage.newInstance(bounds.width, bounds.height);
+		calibrationAndGridImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
 	}
 	
 	@Override
@@ -204,7 +215,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		Graphics2D graphics = (Graphics2D)calibrationAndGridImage.createGraphics();
 		GraphicsOutputInterface.showCalibration(graphics, bounds, xPixels, yPixels);
 		graphics.dispose();
-		showImage(null, calibrationAndGridImage);
+		calibrationAndGridPixels = showImage(calibrationAndGridPixels, calibrationAndGridImage);
 		logger.debug("Calibration realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
@@ -217,30 +228,20 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		GraphicsOutputInterface.showGrid(graphics, bounds, pixels);
 		graphics.dispose();
 		
-		showImage(null, calibrationAndGridImage);		
+		calibrationAndGridPixels = showImage(calibrationAndGridPixels, calibrationAndGridImage);		
 		logger.debug("Grid realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
 	private Memory showImage(Memory memory, BufferedImage image) {
 		activityLock.lock();
 		try {
-			showBlankImage();//delete the old resources, this is lightning fast...
+			showBlankImage();//delete the old resources because we are creating new ones...
 			
 	        IntByReference imageWidth = new IntByReference();
 	        IntByReference imageHeight = new IntByReference();
 	        IntByReference imagePitch = new IntByReference();
 	        
-	        if (!(image instanceof NativeMemoryBackedBufferedImage)) {
-	        	memory = loadBitmapARGB8888(image, memory, imageWidth, imageHeight, imagePitch);
-	        } else {
-	        	memory = ((NativeMemoryBackedBufferedImage)image).getMemory();
-	    		int bytesPerPixel = 4;
-	    		int pitch = getPitch(bytesPerPixel * image.getWidth(), 32);
-	    		imagePitch.setValue(pitch);
-	    		imageWidth.setValue(image.getWidth());
-	    		imageHeight.setValue(image.getHeight());
-	        }
-	        
+	        memory = loadBitmapARGB8888(image, memory, imageWidth, imageHeight, imagePitch);
 	        VC_RECT_T.ByReference sourceRect = new VC_RECT_T.ByReference();
 	        DispManX.INSTANCE.vc_dispmanx_rect_set(sourceRect, 0, 0, imageWidth.getValue()<<16, imageHeight.getValue()<<16);//Shifting by 16 is a zoom factor of zero
 	        
@@ -253,8 +254,6 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	        if (imageResourceHandle == 0) {
 	        	throw new IllegalArgumentException("Couldn't create resourceHandle for dispmanx");
 	        }
-	        
-	        logger.debug("ScreenWidth:" + bounds.getWidth() + " ScreenHeight:" + bounds.getHeight() + " ImageWidth:"+ imageWidth.getValue() + " ImageHeight:" + imageHeight.getValue());
 	        
 	        VC_RECT_T.ByReference sizeRect = new VC_RECT_T.ByReference();
 	        DispManX.INSTANCE.vc_dispmanx_rect_set(sizeRect, 0, 0, imageWidth.getValue(), imageHeight.getValue());
@@ -309,6 +308,8 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	@Override
 	public void showImage(BufferedImage image, boolean performFullUpdate) {
 		logger.debug("Image assigned:{}", () -> Log4jUtil.startTimer(IMAGE_REALIZE_TIMER));
+		startingTimeForCurrentSlice = System.currentTimeMillis();
+
 		if (image.getWidth() == imageWidth && image.getHeight() == imageHeight) {
 			imagePixels = showImage(imagePixels, image);
 		} else {
@@ -316,6 +317,15 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		imageWidth = image.getWidth();
 		imageHeight = image.getHeight();
+		logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
+		
+		timeAfterShowingTheSlice = System.currentTimeMillis();
+		timeWaitedForPreviousSliceToShow = timeAfterShowingTheSlice - startingTimeForCurrentSlice;
+		delayTimingOffBy = timeWaitedForPreviousSliceToShow - oldTimeWaitedForPreviousSliceToShow;
+		oldTimeWaitedForPreviousSliceToShow = timeWaitedForPreviousSliceToShow;
+		logger.info("time waited " + timeWaitedForPreviousSliceToShow);
+		logger.info("The timing was wrong by " + delayTimingOffBy + "ms");
+
 		logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
@@ -346,12 +356,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	}
 
 	@Override
-	public GraphicsOutputInterface initializeDisplay(String displayId, PrinterConfiguration configuration) {
+	public GraphicsOutputInterface initializeDisplay(String displayId) {
 		return this;
-	}
-
-	@Override
-	public BufferedImage buildBufferedImage(int x, int y) {
-		return NativeMemoryBackedBufferedImage.newInstance(x,  y);
 	}
 }
