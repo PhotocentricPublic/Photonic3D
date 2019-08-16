@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import static org.mockito.Mockito.doThrow;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -203,17 +205,12 @@ public class PrintableService {
 	@GET
 	@Path("/downloadprintableimagefile/{filename}")
 	@Produces("image/png")
-	public StreamingOutput downloadPrintableImageFile(@PathParam("filename")String fileName) {
-	return new StreamingOutput() {
-		@Override
-		//public void write(OutputStream output) throws IOException, WebApplicationException {
-		public void write(OutputStream  output) throws IOException, WebApplicationException {
-		//String testPathString = "C:/Users/paulr/Documents/rubbish/SliceJob_LiquidCrystalMagna_30-07-2019.zip";
+	public Response downloadPrintableImageFile(@PathParam("filename")String fileName) {
 
+		StreamingOutput stream = new StreamingOutput() {
+		@Override
+		public void write(OutputStream  output) throws IOException, WebApplicationException {
 			InputStream stream = new FileInputStream(new File(HostProperties.Instance().getUploadDir(), fileName));
-			try {
-				//ByteStreams.copy(stream, output);
-			} finally {
 				try {
 					stream.close();
 					File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
@@ -221,38 +218,41 @@ public class PrintableService {
 
 					String fileNameNoExtension =fileName.substring(0,fileName.lastIndexOf("."));
 
-					logger.info("PXR fileNameNoExtension  : {}", fileNameNoExtension);
-
-					//String fileNameNoExtension=fileName.split(".")..;
-
-
 					if (extension.equals(".zip"))
 					{
-						logger.info("PXR ios Zip extension: {}", extension);
 
 						String destDir = "./unzippedPreview/";
 						String previewFileName=fileNameNoExtension+".png";
 
 						File previewFile= new File(destDir, previewFileName);
-						logger.info("PXR previewFile name: {}", previewFile.getName());
-
-						if (!previewFile.exists())
+                        boolean havePreviewImage = previewFile.exists() ? true:false;
+						if (!havePreviewImage)
 						{
 							String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
-							unzip("preview.png",previewFileName, filePath, destDir);
+							logger.info("PXR going into Unzip  :=================");
+
+							havePreviewImage = unzip("preview.png",previewFileName, filePath, destDir);
 						}
-						InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));
-						ByteStreams.copy(streamImg, output);	
-
-						streamImg.close();
 						
+						if (havePreviewImage){
+							InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));
+							ByteStreams.copy(streamImg, output);	
+							streamImg.close();
+						}
+						else{
+							logger.info("No preview image in file {}", extension);
+							//Response.status(Response.Status.BAD_REQUEST).header("content-disposition","inline").build();
+							throw new WebApplicationException("No preview image in file");
+						}				
 					}
-
-
 				} catch (IOException e) {}
 			}
-		}
 	};
+	
+	logger.info("PXR at end {}" );
+	return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
+		.header("content-disposition","inline")
+		.build();
 	}
 
 	private static String getFileExtension(File file) {
@@ -271,18 +271,19 @@ public class PrintableService {
  
     }
 	
-	private static void unzip(String fileNametoUzip, String nametoUse, String zipFilePath, String destDir) {
+	private static boolean unzip(String fileNametoUzip, String nametoUse, String zipFilePath, String destDir) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
         if(!dir.exists()) dir.mkdirs();
         FileInputStream fis;
         //buffer for read and write data to file
-        byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[1024];
+		boolean isFound=false;
         try {
             fis = new FileInputStream(zipFilePath);
             ZipInputStream zis = new ZipInputStream(fis);
 			ZipEntry ze = zis.getNextEntry();
-			boolean isFound=false;
+			
             while(ze != null && isFound!=true){
 				String fileName = ze.getName();
 				if (fileName.equals(fileNametoUzip))
@@ -298,8 +299,11 @@ public class PrintableService {
 						fos.write(buffer, 0, len);
 					}
 					fos.close();
+					zis.closeEntry();
+					isFound=true;
+					logger.info("PXR unzip=========================  : {}", isFound);
+					break;// found file - no need to search further
 				}
-				
 				
                 //close this ZipEntry
                 zis.closeEntry();
@@ -310,8 +314,11 @@ public class PrintableService {
             zis.close();
             fis.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+			e.printStackTrace();
+			isFound=false;
+		}
+		
+		return isFound;
         
 	}
 	

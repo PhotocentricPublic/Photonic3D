@@ -8,6 +8,8 @@ var starttime=0;
 var averageslicetime=0;
 var PRINTERONIMAGE = "images/printer-on.png";
 var PRINTEROFFIMAGE = "images/printer-off.png";
+
+var debugmode=true;
             
 function startpage(){
         setInterval(function() {
@@ -68,6 +70,8 @@ function doorupdate() {
 }
 
 function interruptcheck() {
+
+        if (debugmode) return;
         $.getJSON('../services/printers/executeGCode/' + printerName + '/M408 S0', function (result) {
                 var tem = result["message"];
                 var messtripped = tem.substr(0, tem.length - 3); // to strip off end chars "msgBox.mode\":-1}\n\nok\n"

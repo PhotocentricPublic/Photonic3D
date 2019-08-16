@@ -41,17 +41,19 @@
 			line-height: 50px;
 			border: 0;
 			background-attachment: fixed;
-			font-size: x-large;
-			overflow-y: auto;
-			overflow-x: hidden;
+			font-size: large;
+			overflow-y: auto ;
+			overflow-x: auto;
 			-webkit-user-drag: none;
 			-khtml-user-drag: none;
 			-moz-user-drag: none;
 			-o-user-drag: none;
-			-webkit-overflow-scrolling: touch;
+		
 		}
 
-		::-webkit-scrollbar {
+//	-webkit-overflow-scrolling: touch;
+
+::-webkit-scrollbar {
 width: 50px;
 height: 50px;
 }
@@ -70,7 +72,7 @@ border-bottom: 1px solid;
 }
 ::-webkit-scrollbar-track-piece{
 background-color:transparent;
-}
+} 
 
 		.deletecontainer { 
 			position: absolute; 
@@ -110,13 +112,42 @@ background-color:transparent;
 
 		}
 
+		.scrollprints_up{
+			position: absolute; 
+			top: 368px;
+			left: 340px;
+			width:76px;
+			height:76px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 5;
+		}
+
+		.scrollprints_down{
+			position: absolute; 
+			top: 368px;
+			left: 420px;
+			width:76px;
+			height:76px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 5;
+		}
+
 		.previewmodelimage{
 			position: absolute; 
 			top: 80px; 
 			left: 590px;
 			height: 200px;
 			width: 200px;
-			user-drag: none; 
 			user-select: none;
 			-moz-user-select: none;
 			-webkit-user-drag: none;
@@ -125,8 +156,11 @@ background-color:transparent;
 			border: none;
 			border-style: solid;
 			border-color: black;
-			z-index: 5;
+			color: cyan;
+			z-index: 1;
+			
 		}
+
 
 		.homebutton{
 			position: absolute; 
@@ -145,7 +179,7 @@ background-color:transparent;
 		.deletecheck {
 			position: absolute; 
 			top: 110px; 
-			left: 500px;
+			left: 300px;
 			width:200px;
 			height: 210px;
 		}
@@ -166,7 +200,14 @@ background-color:transparent;
 			white-space: -moz-pre-wrap; /* Firefox */   
 			white-space: -o-pre-wrap;   /* Opera 7 */    
 			word-wrap: break-word;      /* IE */
+			z-index: 5;
 		}
+		.deletewarn{
+			position: absolute;
+			top: 350px; 
+			left: 242px;
+			z-index: 5;
+		}	
 		
 		.IP { 
 			font-size: 15px;
@@ -232,6 +273,16 @@ background-color:transparent;
     			location.reload(true);
 			}
 		</script> 
+
+<script>
+	function scrollUp() {
+		//location.reload(true);
+	}
+	function scrollDown() {
+		//location.reload(true);
+	}
+</script> 
+
 		
 		<link href="css/printflow.css" rel="stylesheet" >
     </head>
@@ -269,22 +320,34 @@ background-color:transparent;
 							$.each(data, function (key, val) {
 								option = document.createElement('option');
 								option.text = option.value = val.name + "." + val.extension;
+								option.modifiedDate= val.modifiedDate;//2019-07-31 15:07
 								if ("display_test_to_be_hidden" !== val.name) {
 									select.add(option);
 								}
 							});
-							var options = $("#printables option");                    // Collect options         
+							var options = $("#printables option");                    // Collect options   
 							options.detach().sort(function (a, b) {               // Detach from select, then Sort
-								var at = $(a).text().toLowerCase();
-								var bt = $(b).text().toLowerCase();
-								return (at > bt) ? 1 : ((at < bt) ? -1 : 0);            // Tell the sort function how to order
-							});
+								var aModifiedDate = a.modifiedDate;
+								var aSecs = new Date(aModifiedDate).getTime();//ms from epoch
+
+								var bModifiedDate = b.modifiedDate;
+								var bSecs = new Date(bModifiedDate).getTime();
+
+								return (aSecs > bSecs) ? 1 : ((aSecs < bSecs) ? -1 : 0);            // Tell the sort function how to order
+							});      
+							// options.detach().sort(function (a, b) {               // Detach from select, then Sort
+							// 	var at = $(a).text().toLowerCase();
+							// 	var bt = $(b).text().toLowerCase();
+							// 	return (at > bt) ? 1 : ((at < bt) ? -1 : 0);            // Tell the sort function how to order
+							// });
 							options.appendTo("#printables");
 						})
 						.fail(function () {
 
 						});
 				}
+
+		 
 
 			function dodeletecheck() {
 					if ($("#printables").val() !== null) {
@@ -335,7 +398,12 @@ background-color:transparent;
 					img.src="images/previewModelImage.png";
 					return;
 				}
-				img.src="../services/printables/downloadprintableimagefile/"+$("#printables").val();;
+
+				//var xx="../services/printables/downloadprintableimagefile/"+$("#printables").val();
+
+				img.src="../services/printables/downloadprintableimagefile/"+$("#printables").val();
+				//img.alt="No image is available for this print file"
+				
 			}
 
 			function showcontrol(){
@@ -402,7 +470,7 @@ background-color:transparent;
 						</div>
 					<img id="overlay" class="overlay hide" src="images/34.gif"/>
 				<img src="images/printables.png" usemap="printables" class="uilayer">
-				<img class="previewmodelimage" id="previewmodelimage">
+				<img class="previewmodelimage" id="previewmodelimage" alt="No preview image is available for this print file">
 				<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onClick="location.href='printflow.html';"/>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
@@ -410,6 +478,8 @@ background-color:transparent;
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<img name="printbutton" id="printbutton" class="printbutton" src="images/pixel.png" onClick="startPrint();"/>
 				<img name="refresh_prints" id="refresh_prints" class="refresh_prints" src="images/menumainbuttonANIM.png" onClick="refreshFunction();"/> 
+				<img name="scrollprints_up" id="scrollprints_up" class="scrollprints_up" src="images/open.png" onClick="scrollUp();"/> 
+				<img name="scrollprints_down" id="scrollprints_down" class="scrollprints_down" src="images/pause.png" onClick="scrollDown();"/> 
 				<div class="deletecontainer collapse" id="deletecontainer"><img name="delete" id="delete" class="delete" src="images/delete.png" onclick="dodeletecheck();"></div>
 				<select size="9" class="printables" id="printables" onClick="showcontrol();" onChange="showcontrol();"></select>
 				<div name="printwarn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ></div></div>
