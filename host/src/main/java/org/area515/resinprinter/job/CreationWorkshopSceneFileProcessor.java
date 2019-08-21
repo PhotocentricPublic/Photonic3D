@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.UnaryOperator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -26,6 +27,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
+import com.jcraft.jsch.Buffer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -45,6 +47,8 @@ import se.sawano.java.text.AlphanumericComparator;
 
 public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcessor<Object,Object> implements Previewable {
 	private static final Logger logger = LogManager.getLogger();
+
+	private CreationWorkshopImageCache imageCache = null;
 	
 	@Override
 	public String[] getFileExtensions() {
@@ -140,7 +144,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		long startOfLastImageDisplay = -1;
 		try {
 			logger.info("Parsing file:{}", gCodeFile);
-			int padLength = determinePadLength(gCodeFile);
+			//PXR int padLength = determinePadLength(gCodeFile);
 			File imageFileToRender = buildImageFile(gCodeFile, padLength, 0);
 			Future<RenderingContext> nextConFuture = startImageRendering(aid, imageFileToRender);
 			aid.cache.setCurrentRenderingPointer(imageFileToRender);
@@ -159,6 +163,27 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			//data.printJob.setExposureTime(data.inkConfiguration.getExposureTime());
 			//data.printJob.setZLiftDistance(data.slicingProfile.getLiftFeedRate());
 			//data.printJob.setZLiftSpeed(data.slicingProfile.getLiftDistance());
+
+			// Transform unary operator on buffered image, to pass to cache thread.
+			UnaryOperator<BufferedImage> imageTransformOp = image -> {
+				BufferedImage transformedImage = null;
+				try {
+					//RenderedData data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);	// ? PXR
+					RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);	// ?
+					transformedImage = applyImageTransforms(aid, data.getScriptEngine(), image);
+				} catch(Exception e) {
+					transformedImage = null;
+				}
+				return transformedImage;
+			};
+			// Image cache object, automatically pre-loading and transforming images.
+			String baseFilename = FilenameUtils.removeExtension(gCodeFile.getName());
+			int padLength = determinePadLength(gCodeFile);
+			imageCache = new CreationWorkshopImageCache(gCodeFile.getParentFile(), baseFilename, padLength, imageTransformOp);
+			// Start image caching thread.
+			imageCache.start();
+
+			ImageIO.setUseCache(false);
 
 			while ((currentLine = stream.readLine()) != null && printer.isPrintActive()) {
 					Matcher matcher = slicePattern.matcher(currentLine);

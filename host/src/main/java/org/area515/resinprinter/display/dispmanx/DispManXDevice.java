@@ -3,6 +3,7 @@ package org.area515.resinprinter.display.dispmanx;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
@@ -158,10 +159,11 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		
 		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
+        // Get raw pixels data buffer.
+        byte[] raw_image = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        // Copy image to buffer, row by row (much more efficient than by individual pixel).
         for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-        		destPixels.setInt((y*(pitch / bytesPerPixel) + x) * bytesPerPixel, image.getRGB(x, y));
-            }
+			destPixels.write(y * pitch, raw_image, y * image.getWidth() * bytesPerPixel, image.getWidth() * bytesPerPixel);
         }
 		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
 
