@@ -611,8 +611,8 @@ public class HostProperties {
 	public HostInformation loadHostInformation() {
 		Properties configurationProperties = getMergedProperties();
 		HostInformation settings = new HostInformation(
-				configurationProperties.getProperty("deviceName", "Photocentric LC Magna"),
-				configurationProperties.getProperty("manufacturer", "Photocentric"));
+				configurationProperties.getProperty("deviceName", "Photonic 3D Multiprint Host"),
+				configurationProperties.getProperty("manufacturer", "Wes Gilster"));
 		return settings;
 	}
 	
