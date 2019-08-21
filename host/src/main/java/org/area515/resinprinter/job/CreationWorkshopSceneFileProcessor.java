@@ -144,7 +144,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		long startOfLastImageDisplay = -1;
 		try {
 			logger.info("Parsing file:{}", gCodeFile);
-			//PXR int padLength = determinePadLength(gCodeFile);
+			int padLength = determinePadLength(gCodeFile);
 			File imageFileToRender = buildImageFile(gCodeFile, padLength, 0);
 			Future<RenderingContext> nextConFuture = startImageRendering(aid, imageFileToRender);
 			aid.cache.setCurrentRenderingPointer(imageFileToRender);
@@ -178,7 +178,8 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			};
 			// Image cache object, automatically pre-loading and transforming images.
 			String baseFilename = FilenameUtils.removeExtension(gCodeFile.getName());
-			int padLength = determinePadLength(gCodeFile);
+			//int padLength = determinePadLength(gCodeFile);
+			padLength = determinePadLength(gCodeFile);
 			imageCache = new CreationWorkshopImageCache(gCodeFile.getParentFile(), baseFilename, padLength, imageTransformOp);
 			// Start image caching thread.
 			imageCache.start();
