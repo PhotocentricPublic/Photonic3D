@@ -3,6 +3,7 @@ package org.area515.resinprinter.display.dispmanx;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte; //PXB++
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
@@ -33,7 +34,8 @@ public class DispManXDevice implements GraphicsOutputInterface {
     //For dispmanx
     private int imageResourceHandle;
     private int imageElementHandle;
-    
+	//For Image
+	
     //For Calibration and Grid
     private NativeMemoryBackedBufferedImage calibrationAndGridImage;
     
@@ -41,7 +43,18 @@ public class DispManXDevice implements GraphicsOutputInterface {
     private Memory imagePixels;
     private int imageWidth;
     private int imageHeight;
-    
+	//PXB++
+	//For Calibration and Grid
+    private Memory calibrationAndGridPixels;
+
+    // Robin for correcting delays
+    private long startingTimeForCurrentSlice;
+    private long timeAfterShowingTheSlice;
+    public static long timeWaitedForPreviousSliceToShow;
+    private long oldTimeWaitedForPreviousSliceToShow;
+	private long delayTimingOffBy;
+	//PXB--
+
     public DispManXDevice(String displayName, SCREEN screen) throws InappropriateDeviceException {
 		this.displayName = displayName;
 		this.screen = screen;
@@ -50,6 +63,12 @@ public class DispManXDevice implements GraphicsOutputInterface {
         VC_RECT_T.ByReference sourceRect = new VC_RECT_T.ByReference();
         DispManX.INSTANCE.vc_dispmanx_rect_set(sourceRect, 0, 0, 0, 0);
 	}
+
+	public static int gettingLastDelay(){
+        int lastDelay = (int) timeWaitedForPreviousSliceToShow;
+		return lastDelay;
+	};
+    
     
     private static void bcmHostInit() {
     	if (BCM_INIT) {
@@ -115,7 +134,8 @@ public class DispManXDevice implements GraphicsOutputInterface {
     	try {
 			logger.info("dispose screen");
 			removeAllElementsFromScreen();
-	    	logger.info("vc_dispmanx_display_close result:" + DispManX.INSTANCE.vc_dispmanx_display_close(displayHandle));
+			logger.info("vc_dispmanx_display_close result:" + DispManX.INSTANCE.vc_dispmanx_display_close(displayHandle));
+			calibrationAndGridPixels = null;
 	    	imagePixels = null;
 	    	calibrationAndGridImage = null;
 	    	imageWidth = 0;
@@ -158,10 +178,13 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		
 		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
+		 // Get raw pixels data buffer. PXB++
+		 // Get raw pixels data buffer.
+		 byte[] raw_image = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		 // Copy image to buffer, row by row (much more efficient than by individual pixel).
+		 
         for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-        		destPixels.setInt((y*(pitch / bytesPerPixel) + x) * bytesPerPixel, image.getRGB(x, y));
-            }
+			destPixels.write(y * pitch, raw_image, y * image.getWidth() * bytesPerPixel, image.getWidth() * bytesPerPixel);
         }
 		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
 
@@ -204,7 +227,10 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		Graphics2D graphics = (Graphics2D)calibrationAndGridImage.createGraphics();
 		GraphicsOutputInterface.showCalibration(graphics, bounds, xPixels, yPixels);
 		graphics.dispose();
-		showImage(null, calibrationAndGridImage);
+
+		calibrationAndGridPixels = showImage(calibrationAndGridPixels, calibrationAndGridImage);//PXB++
+		//PXB--showImage(null, calibrationAndGridImage);
+
 		logger.debug("Calibration realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
@@ -216,8 +242,8 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		Graphics2D graphics = (Graphics2D)calibrationAndGridImage.createGraphics();
 		GraphicsOutputInterface.showGrid(graphics, bounds, pixels);
 		graphics.dispose();
-		
-		showImage(null, calibrationAndGridImage);		
+		calibrationAndGridPixels = showImage(calibrationAndGridPixels, calibrationAndGridImage);//PXB++
+		//PXB--showImage(null, calibrationAndGridImage);		
 		logger.debug("Grid realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
@@ -309,6 +335,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	@Override
 	public void showImage(BufferedImage image, boolean performFullUpdate) {
 		logger.debug("Image assigned:{}", () -> Log4jUtil.startTimer(IMAGE_REALIZE_TIMER));
+		startingTimeForCurrentSlice = System.currentTimeMillis();
 		if (image.getWidth() == imageWidth && image.getHeight() == imageHeight) {
 			imagePixels = showImage(imagePixels, image);
 		} else {
@@ -317,6 +344,14 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		imageWidth = image.getWidth();
 		imageHeight = image.getHeight();
 		logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
+		timeAfterShowingTheSlice = System.currentTimeMillis();
+        timeWaitedForPreviousSliceToShow = timeAfterShowingTheSlice - startingTimeForCurrentSlice;
+        delayTimingOffBy = timeWaitedForPreviousSliceToShow - oldTimeWaitedForPreviousSliceToShow;
+        oldTimeWaitedForPreviousSliceToShow = timeWaitedForPreviousSliceToShow;
+        logger.info("time waited " + timeWaitedForPreviousSliceToShow);
+        logger.info("The timing was wrong by " + delayTimingOffBy + "ms");
+
+        logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	
 	@Override
