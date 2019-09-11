@@ -74,9 +74,9 @@
 		      		}, 1)
 			      	// $(".progress-bar").css('width', percent);
 			      	$(".progress-bar").html(percent + "%");
-			      	// if (percent == 100) {
-			     		// $uibModalInstance.close();
-			      	// }
+			      	 if (percent == 100) {
+			     		$uibModalInstance.close();
+			      	}
 		      	}
 		    });
 		}

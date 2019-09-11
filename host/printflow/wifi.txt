@@ -1,0 +1,1 @@
+wlan0     ESSID:"Photocentric MO 2.4G"

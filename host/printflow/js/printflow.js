@@ -30,14 +30,6 @@ function startpage(){
         interruptcheck();
 }
 
-
-function setTime() {
-	var timeElement = document.getElementById("time");
-	if (timeElement != null) {
-		timeElement.innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-	}	
-}
-
 function printerStatus(){
     if (printerName == null || document.getElementById("printerstatus").src.indexOf("midchange") != -1){
     	return;
@@ -168,7 +160,7 @@ function printredirect(){
                         if ((typeof Cookies.get('lastfailedjob') === 'undefined')||(Cookies.get('lastfailedjob')!=jobId)){
                                 Cookies.set('lastfailedjob',jobId);
                                 setTimeout(function() {
-                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photonic3d.com</b>");
+                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photocentricgroup.com</b>");
                                 }, 100);  
                         }
 		}
@@ -182,7 +174,7 @@ function printredirect(){
                                 Cookies.set('lastcancelledjob',jobId);
                                 setTimeout(function() {
                                         window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> [Job ID: "+jobId+"] was cancelled.");
-                                }, 100);                        
+                                }, 100);
                         }
 		}
     }				

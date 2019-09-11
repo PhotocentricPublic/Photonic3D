@@ -42,7 +42,7 @@
 			color: white;
 			font-size: large;
 		}
-		.pass { 
+		.password { 
 			position: absolute; 
 			top: 200px; 
 			left: 240px;
@@ -64,7 +64,14 @@
 			font-size: large;
 			overflow-y: auto;
 		}
-		
+		.toggle {
+			position: absolute; 
+			top: 199px; 
+			left: 550px;
+			background-color: transparent;
+			color: white;
+			font-size: large;
+		}
 		.savelabel { 
 			position: absolute; 
 			top: 120; 
@@ -149,7 +156,7 @@
 		<script>
 		$(function(){
 			$('#SSID').keyboard({  usePreview : false, autoAccept : true,});
-			$('#pass').keyboard({  usePreview : false, autoAccept : true,});
+			$('#password').keyboard({  usePreview : false, autoAccept : true,});
 		});
 		</script>
 		<style type="text/css">
@@ -248,7 +255,9 @@
 				<div name="SSIDlabel" class="SSIDlabel" id="SSIDlabel">Network</div>
 				<input name="SSID" class="SSID" id="SSID" value=""></input>
 				<div name="passlabel" class="passlabel" id="passlabel">Password</div>
-				<input name="pass" class="pass" id="pass" type="password" value=""></input>
+				<input name="password" class="password" id="password" type="password" value=""></input>
+				<img class="toggle" src="images/toggle_pswd.png" name="toggle" id="toggle" onclick="if (password.type == 'text') password.type = 'password'; else password.type = 'text';">
+	
 				<div name="savebutton" class="savebutton" id="savebutton" onClick="saveWifi();"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ><strong>Error</strong><br>Could not save settings</div></div>
 				<div name="home" class="home" id="home" onClick="location.href='printflow.html';"><img src="images/menumainbuttonANIM.png"></div>

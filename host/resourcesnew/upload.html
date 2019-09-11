@@ -2,7 +2,7 @@
 <div class="modal-header">
 		<div class="btn-group pull-left">
 			<a class="btn btn-danger" data-dismiss="modal" ng-click="cancel()">
-				Cancel
+				Close
 			</a>
 		</div>
 		
@@ -11,32 +11,11 @@
 				Upload File
 			</button>
 		</div>
-		<div class="btn-group pull-right">
-			<button class="btn btn-primary" data-dismiss="modal" ng-show="getRestfulURLUploadURL != null" ng-disabled="urlToUpload == null || urlToUpload.trim() == '' || filenameToUpload == null || filenameToUpload == ''" ng-click="uploadURLClicked()">
-				Upload URL
-			</button>
-		</div>
 		<h4 class="modal-title">
 				{{title}}
 		</h4>
 </div>
 <div class="modal-body">
-		<div class="form-group" ng-show="getRestfulURLUploadURL != null">
-			<label class="col-xs-4 control-label">URL</label>
-			<div class="col-xs-8">
-				<input type="text" class="form-control" placeholder="URL" ng-model="urlToUpload" ng-required="urlToUpload != null || filenameToUpload != null">
-			</div>
-		</div>
-		<div class="form-group" ng-show="getRestfulURLUploadURL != null">
-			<label class="col-xs-4 control-label">Filename</label>
-			<div class="col-xs-8">
-				<input type="text" class="form-control" placeholder="filename.filetype" ng-model="filenameToUpload" ng-required="urlToUpload != null || filenameToUpload != null">
-			</div>
-		</div>
-		<div class="form-group" ng-show="getRestfulURLUploadURL != null">
-			<label class="col-xs-4 control-label"></label>
-			<div class="col-xs-8">OR</div>
-		</div>
 		<div class="form-group">
 			<label class="col-xs-4 control-label"></label>
 			<div class="col-md-8">
