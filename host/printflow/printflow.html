@@ -112,11 +112,6 @@
 		}
 		
 		</style>
-		<!-- <style type="text/css">
-			* {
-				cursor: none;
-			}
-		</style> -->
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
@@ -129,9 +124,13 @@
         <!-- Latest v1 Angular -->
         <script src="../angular/js/angular.min.js"></script>
 
+		<!-- Time, formating library -->
         <script src="js/moment.min.js"></script>
 		
+		<!-- Printflow main javascript file -->
 		<script src="js/printflow.js"></script>
+
+		<!-- Printflow main printer name file -->
 		<script src="js/printerconfig.js"></script>
 		
 		<script src="js/js.cookie.js"></script>
@@ -148,11 +147,9 @@
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 			}
 
-
 			function pagelight(){
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R255 U0 B0');
 			}
-
 
 			function updateNetworkInfo() {
 
@@ -177,9 +174,9 @@
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
-				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printables.html';"/>
+				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printflowprintables.html';"/>
 				<img name="maintain" id="maintain" class="maintain" src="images/menumainbuttonANIM.png" onClick="location.href='maintain.html';">
-				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='settings.html';">
+				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='printflowsettings.html';">
 				<img name="network" id="network" class="network" src="images/menumainbuttonANIM.png" onClick="location.href='wifisettings.html';">
 				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
 					<div name="webinfo" id="webinfo" class="webinfo">

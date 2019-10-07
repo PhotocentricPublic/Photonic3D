@@ -4,7 +4,7 @@
 	<title>Print Dialogue</title>
 	<style>
 		*{
-			cursor: none;
+				cursor: none;
 			}
 		.pause {
 			position: absolute;
@@ -200,32 +200,6 @@
 			z-index: 2;
 		}
 
-		.pause_question {
-			position: absolute;
-			top: 300px;
-			left: 380px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
-		.resume_question {
-			position: absolute;
-			top: 300px;
-			left: 380px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
 		.cancel_approve {
 			position: absolute;
 			top: 330px;
@@ -238,33 +212,6 @@
 			-ms-user-select: none;
 			z-index: 2;
 		}
-
-		.resume_approve {
-			position: absolute;
-			top: 330px;
-			left: 445px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
-		.pause_approve {
-			position: absolute;
-			top: 330px;
-			left: 445px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
 
 		.cancel_decline {
 			position: absolute;
@@ -279,59 +226,7 @@
 			z-index: 2;
 		}
 
-		.resume_decline {
-			position: absolute;
-			top: 330px;
-			left: 525px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
-		.pause_decline {
-			position: absolute;
-			top: 330px;
-			left: 525px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-
 		.cancelling {
-			position: absolute;
-			top: 300px;
-			left: 380px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-		
-		.resuming {
-			position: absolute;
-			top: 300px;
-			left: 380px;
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 2;
-		}
-		
-		.pausing {
 			position: absolute;
 			top: 300px;
 			left: 380px;
@@ -357,6 +252,7 @@
 			font-size: 20px;
 			overflow: hidden;
 		}
+
 
 		@keyframes pauseglyph {
 			0% {
@@ -438,8 +334,8 @@
 			$('#pause').hide();
 			$('#cancellabel').hide();
 			setTimeout(function () {
-					$('#pause').fadeIn();
-					$('#cancellabel').fadeIn();
+					$('#pause').show();
+					$('#cancellabel').show();
 				}, 8000);
 			setInterval(updateNetworkInfo(), 10000);
 			$.getJSON('../services/printJobs/getByPrinterName/' + printerName)
@@ -529,67 +425,33 @@
 				}
 			}, 2500);
 		}
-		
 		window.ondragstart = function () { return false; }
 
 		function pauseit() {
 			if (document.getElementById("pause").innerHTML == '<img src=\"images/pause.png\">') {
-				pause_query();
+				document.getElementById("pause").innerHTML = '<img src=\"images/resume.png\">';
+				document.getElementById("pauseglyph").innerHTML = '<span class="glyphicon glyphicon-pause"></span>';
+				$('#pause').hide();
+				$('#cancellabel').hide();
+				$('#warning').html("Pausing print. Please wait for the door to unlock.");
+				$('#warning').show();
+				$.getJSON("../services/printJobs/togglePause/" + jobId);
+				setTimeout(function () {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
+					$('#pause').show();
+					$('#warning').hide();
+					$('#cancellabel').show();
+				}, 20000);
 			}
 			else if (document.getElementById("pause").innerHTML == '<img src=\"images/resume.png\">') {
-				resume_query();
+				DoEndstop();
 			}
 			else {
-				$('#cancellabel').fadeIn();
-				$('#pause').fadeIn();
+				$('#cancel_question').hide();
+				$('#cancel_decline').hide();
+				$('#cancel_approve').hide();
+				$('#cancellabel').show();
 			}
-		}
-		
-		function resume_query() {
-			$('#pause').fadeOut();
-			$('#cancellabel').fadeOut();
-			$('#resume_question').fadeIn();
-			$('#resume_decline').fadeIn();
-			$('#resume_approve').fadeIn();
-		}
-		
-		function pause_query() {
-			$('#pause').fadeOut();
-			$('#cancellabel').fadeOut();
-			$('#pause_question').fadeIn();
-			$('#pause_decline').fadeIn();
-			$('#pause_approve').fadeIn();
-		}
-		
-		function decline() {
-			$('#cancel_decline').fadeOut();
-			$('#cancel_approve').fadeOut();
-			$('#cancel_question').fadeOut();
-			$('#pause_decline').fadeOut();
-			$('#pause_approve').fadeOut();
-			$('#pause_question').fadeOut();
-			$('#resume_decline').fadeOut();
-			$('#resume_approve').fadeOut();
-			$('#resume_question').fadeOut();
-			$('#cancellabel').fadeIn();
-			$('#pause').fadeIn();
-			clearTimeout(canceltimer);
-		}
-
-		function do_Pause() {
-			$('#pause_question').fadeOut();
-			$('#pause_decline').fadeOut();
-			$('#pause_approve').fadeOut();
-			$.getJSON("../services/printJobs/togglePause/" + jobId);
-			document.getElementById("pauseglyph").innerHTML = '<span class="glyphicon glyphicon-pause"></span>';
-			$('#pausing').fadeIn();
-			setTimeout(function () {
-				$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
-				$('#pause').fadeIn();
-				$('#cancellabel').fadeIn();
-				$('#pausing').fadeOut();
-			}, 25000);
-			document.getElementById("pause").innerHTML = '<img src=\"images/resume.png\">';
 		}
 
 		function DoEndstop() {
@@ -599,14 +461,14 @@
 				if (axisPos > -1) {
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400');
-					$('#cancellabel').fadeOut();
+					$('#cancellabel').hide();
 					doResume();
 				}
 				else {
 					$('#warning').html("Please close the door and try again");
 					$('#warning').show();
 					setTimeout(function () {
-						$('#warning').fadeOut();
+						$('#warning').hide();
 					}, 5000);
 				}
 			});
@@ -631,14 +493,14 @@
 		}
 
 		function doResume() {
-			$('#resume_question').fadeOut();
-			$('#resume_approve').fadeOut();
-			$('#resume_decline').fadeOut();
-			$('#resuming').fadeIn();
+			$('#warning').html("Resuming print...");
+			$('#warning').show();
+			$('#pause').hide();
+			$('#cancellabel').hide();
 			setTimeout(function () {
-				$('#pause').fadeIn();
-				$('#cancellabel').fadeIn();
-				$('#resuming').fadeOut();
+				$('#warning').hide();
+				$('#pause').show();
+				$('#cancellabel').show();
 			}, 5000);
 			$.getJSON("../services/printJobs/togglePause/" + jobId);
 			document.getElementById("pause").innerHTML = '<img src=\"images/pause.png\">';
@@ -649,33 +511,42 @@
 		}
 
 		function cancelshow() {
-				$('#pause').fadeOut();
-				$('#cancellabel').fadeOut();
-				$('#cancel_question').fadeIn();
-				$('#cancel_decline').fadeIn();
-				$('#cancel_approve').fadeIn();
+				$('#pause').hide();
+				$('#cancellabel').hide();
+				$('#cancel_question').show();
+				$('#cancel_decline').show();
+				$('#cancel_approve').show();
 				canceltimer = setTimeout(function () {
-					$('#warning').fadeOut();
-					$('#cancellabel').fadeIn();
-					$('#pause').fadeIn();
-					$('#cancel_question').fadeOut();
-					$('#cancel_decline').fadeOut();
-					$('#cancel_approve').fadeOut();
+					$('#warning').hide();
+					$('#cancellabel').show();
+					$('#pause').show();
+					$('#cancel_question').hide();
+					$('#cancel_decline').hide();
+					$('#cancel_approve').hide();
 				}, 10000);
 			}
 
 		function cancel() {
-			$('#cancel_question').fadeOut();
-			$('#cancel_decline').fadeOut();
-			$('#cancel_approve').fadeOut();
-			clearTimeout(canceltimer);
-			$('#cancelling').fadeIn();
 			$.getJSON("../services/printJobs/stopJob/" + jobId);
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Pcancel.g')
 				.done(function (data) {
-					location.href = "index.html";
+					location.href = "printflow.html";
 				});
+			$('#cancel_question').hide();
+			$('#cancel_decline').hide();
+			$('#cancel_approve').hide();
+			$('#cancelling').show();
+			clearTimeout(canceltimer);
 		}
+
+		function cancelhide() {
+				$('#cancel_question').hide();
+				$('#cancel_decline').hide();
+				$('#cancel_approve').hide();
+				$('#cancellabel').show();
+				$('#pause').show();
+				clearTimeout(canceltimer);
+			}
 
 		function updateNetworkInfo() {
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
@@ -689,7 +560,6 @@
 					.fail(function () {
 					});
 			}
-
 	</script>
 	<div class="screen">
 		<div class="main">
@@ -705,19 +575,8 @@
 			</div>
 			<img name="cancel_question" id="cancel_question" class="cancel_question collapse" src="images/cancel_q.png">
 			<img name="cancel_approve" id="cancel_approve" class="cancel_approve collapse" src="images/cancel_a.png" onclick="Dodoorcheck();">
-			<img name="cancel_decline" id="cancel_decline" class="cancel_decline collapse" src="images/cancel_d.png" onclick="decline();">
+			<img name="cancel_decline" id="cancel_decline" class="cancel_decline collapse" src="images/cancel_d.png" onclick="cancelhide();">
 			<img name="cancelling" id="cancelling" class="cancelling collapse" src="images/cancelling.png">
-			
-			<img name="pause_question" id="pause_question" class="pause_question collapse" src="images/pause_q.png">
-			<img name="pause_approve" id="pause_approve" class="pause_approve collapse" src="images/cancel_a.png" onclick="do_Pause();">
-			<img name="pause_decline" id="pause_decline" class="pause_decline collapse" src="images/cancel_d.png" onclick="decline();">
-			<img name="pausing" id="pausing" class="pausing collapse" src="images/pausing.png">
-
-			<img name="resume_question" id="resume_question" class="resume_question collapse" src="images/resume_q.png">
-			<img name="resume_approve" id="resume_approve" class="resume_approve collapse" src="images/cancel_a.png" onclick="DoEndstop();">
-			<img name="resume_decline" id="resume_decline" class="resume_decline collapse" src="images/cancel_d.png" onclick="decline();">
-			<img name="resuming" id="resuming" class="resuming collapse" src="images/resuming.png">
-
 			<div name="pause" class="pause" id="pause" onClick="pauseit();"><img src="images/pause.png"></div>
 			<div name="info" id="info" class="info">
 				<div name="filename" id="filename" class="filename">
@@ -748,4 +607,4 @@
 	</div>
 </body>
 
-</h
+</html>

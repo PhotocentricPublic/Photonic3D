@@ -6,74 +6,42 @@ var currentslice=0;
 var elapsedtime=0;
 var starttime=0;
 var averageslicetime=0;
-var signalstrength = -100;
 var PRINTERONIMAGE = "images/printer-on.png";
 var PRINTEROFFIMAGE = "images/printer-off.png";
             
 function startpage(){
-        doorupdate();
-        interruptcheck();
-        if (typeof Cookies.get('lastwifi') !== 'undefined'){
-                signalstrength = Cookies.get('lastwifi');
-                if (signalstrength > -45) {
-                        document.getElementById("wifi").src="images/wifi-3.png";
-                }
-                else if (signalstrength > -67) {
-                        document.getElementById("wifi").src="images/wifi-2.png";
-                }
-                else if (signalstrength > -72) {
-                        document.getElementById("wifi").src="images/wifi-1.png";
-                }
-                else if (signalstrength > -80) {
-                        document.getElementById("wifi").src="images/wifi-0.png";
-                }
-                else document.getElementById("wifi").src="images/wifi-nc.png";
-        }
-        else{
-                wifiupdate();
-        }
-        //handles page setup and the common things across all pages:
-        
-        if (typeof Cookies.get('printerstatus') !== 'undefined'){
-                document.getElementById("printerstatus").src = Cookies.get('printerstatus');
-        }
-        else{
-                printerStatus(); 
-        }
-        
-        // do the first updates
-        //document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-        printredirect(); 
-       
         setInterval(function() {
-                //time handling/updating
-		//document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-                //redirect to print dialogue on user initiating a print
-                printredirect();
-                printerStatus();
+	        printredirect();
+	        printerStatus();
         }, 1000);
         
         setInterval(function() {
-                //wifi updating
-                wifiupdate();
-                doorupdate();
-                interruptcheck();
-	}, 3000);
+            wifiupdate();
+            doorupdate();
+            interruptcheck();    
+        }, 3000);
+        
+        wifiupdate();
+        printredirect();
+        printerStatus();
+        doorupdate();
+        interruptcheck();
 }
 
-function printerStatus() {
-        if (document.getElementById("printerstatus").src.indexOf("midchange") == -1) {
-                $.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
-                        if (data.started) {
-                                Cookies.set('printerstatus', PRINTERONIMAGE);
-                                document.getElementById("printerstatus").src = PRINTERONIMAGE;
-                        }
-                        else {
-                                Cookies.set('printerstatus', PRINTEROFFIMAGE);
-                                document.getElementById("printerstatus").src = PRINTEROFFIMAGE;
-                        }
-                });
+function printerStatus(){
+    if (printerName == null || document.getElementById("printerstatus").src.indexOf("midchange") != -1){
+    	return;
+    }
+    
+    $.getJSON("/services/printers/get/"+encodeURI(printerName)).done(function (data){
+        if (data.started) {
+                Cookies.set('printerstatus',PRINTERONIMAGE);
+                document.getElementById("printerstatus").src = PRINTERONIMAGE;
+        } else {
+                Cookies.set('printerstatus',PRINTEROFFIMAGE);
+                document.getElementById("printerstatus").src = PRINTEROFFIMAGE;
         }
+    });
 }
 
 function doorupdate() {
@@ -105,40 +73,42 @@ function interruptcheck() {
 
         });
 }
-        
+
+function updateWifiURL(signalstrength) {
+    //using this as a guide for decent signal strengths in dBm: https://support.metageek.com/hc/en-us/articles/201955754-Understanding-WiFi-Signal-Strength
+    if (signalstrength > -45) {
+    	wifiurl="images/wifi-3.png";
+    } else if (signalstrength > -67) {
+    	wifiurl="images/wifi-2.png";
+    } else if (signalstrength > -72) {
+    	wifiurl="images/wifi-1.png";
+    } else if (signalstrength > -80) {
+    	wifiurl="images/wifi-0.png";
+    } else {
+    	wifiurl="images/wifi-nc.png";
+    }
+
+    document.getElementById("wifi").src = wifiurl;
+}
+
 function wifiupdate(){
 	//TODO: JSON to query the server's wifi status and display it
-        
-        $.getJSON("../services/machine/wirelessNetworks/getWirelessStrength")
-        .done(function (data){
-		if ((typeof data !== 'undefined')&&(data !== null)){
-			signalstrength = parseInt(data);
-		}
-                else{
-                        signalstrength = -100;
-                }
-	});
-        Cookies.set('lastwifi',signalstrength);
-        
-	// in the meantime for testing purposes, choose a random number.
-	// signalstrength = Math.floor(Math.random() * -60)-30; //signal strength in dBm
-        
-        //using this as a guide for decent signal strengths in dBm: https://support.metageek.com/hc/en-us/articles/201955754-Understanding-WiFi-Signal-Strength
-        if (signalstrength > -45) {
-		wifiurl="images/wifi-3.png";
-        }
-        else if (signalstrength > -67) {
-                wifiurl="images/wifi-2.png";
-        }
-        else if (signalstrength > -72) {
-                wifiurl="images/wifi-1.png";
-        }
-        else if (signalstrength > -80) {
-                wifiurl="images/wifi-0.png";
-        }
-        else wifiurl="images/wifi-nc.png"; 
-
-	document.getElementById("wifi").src = wifiurl;
+    $.getJSON("../services/machine/wirelessNetworks/list")
+	    .done(function (data){
+	    	var signalStrength = Cookies.get('signalStrength');
+			if ((typeof data !== 'undefined') && (data !== null)) {
+				for (var t = 0; t < data.length; t++) {
+					if (data[t].associated) {
+						signalStrength = parseInt(data[t].signalStrength);
+					}
+				}
+			}
+				
+			updateWifiURL(signalStrength);
+	    })
+	    .error(function () {
+	    	updateWifiURL(0);
+	    })
 }
             
 function printredirect(){
@@ -188,7 +158,7 @@ function printredirect(){
                         if ((typeof Cookies.get('lastfailedjob') === 'undefined')||(Cookies.get('lastfailedjob')!=jobId)){
                                 Cookies.set('lastfailedjob',jobId);
                                 setTimeout(function() {
-                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photocentricgroup.com/support/</b>");
+                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photocentricgroup.com</b>");
                                 }, 100);  
                         }
 		}
@@ -201,8 +171,8 @@ function printredirect(){
                         if ((typeof Cookies.get('lastcancelledjob') === 'undefined')||(Cookies.get('lastcancelledjob')!=jobId)){
                                 Cookies.set('lastcancelledjob',jobId);
                                 setTimeout(function() {
-                                        window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> was cancelled. Please wait for platform to home and press OK.");
-                                }, 100);                                 
+                                        window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> [Job ID: "+jobId+"] was cancelled.");
+                                }, 100);
                         }
 		}
     }				
