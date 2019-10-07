@@ -245,7 +245,7 @@
 						// Request finished. Do processing here.
 					}
 				}
-				xhr.send(JSON.stringify(data));
+				xhr.send(JSON.stringify(data));;
 			}
 			
 			function changez(height) {
@@ -310,7 +310,7 @@
 
 			function lighton() {
 					$("#togglebutton").hide();
-					$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+					$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
@@ -322,33 +322,34 @@
 
 			function lightoff(){
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
 				$("#LedOn").show();
 				$("#togglebutton").show();
 				 clearTimeout(lighttimer);
 				 clearTimeout(lighttimer2);
+				 clearTimeout(lightonbtntime);
 			}
 	
 			function pbutton(){
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna')
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna')
 				.done(function(data){
 					location.href='pump.html';
 				});
 			}
 
 			function hbutton(){
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+				$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0')
 				.done(function(data){
-					location.href="printflow.html";
+					location.href="index.html";
 				});
 			}
 
 			function calibutton() {
-					$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+					$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0')
 				.done(function (data) {
@@ -357,7 +358,7 @@
 				}
 			
 			function testdisplay() {
-					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.Photocentric Magna')
+					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.Photocentric%20Magna')
 						.done(function (data) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
@@ -366,7 +367,7 @@
 						});
 					lighttimer2 = setTimeout(function () { 
 						$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
-						$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+						$.getJSON('../services/printers/showBlankScreen/Photocentric%20Magna');
 						$("#togglebutton").show();
 					}, 20000);
 			}
@@ -437,12 +438,12 @@
 				<img class="uilayer" src="images/maintain.png" usemap="maintain" class="uilayer">
 				<map name="maintain">
 					<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onclick="hbutton();"/>
-					<img name="LedOn" id="LedOn" class="LedOn" src="images/menumainbuttonANIM.png" onClick="lighton();"/>
+					<img name="LedOn" id="LedOn" class="LedOn" src="images/menumainbuttonANIM.png" onClick="lighton();lightonbtntimer();"/>
 					<img name="LedOff" id="LedOff" class="LedOff" src="images/menumainbuttonANIM.png" onclick="lightoff();"/>
 					<img name="calibrate" id="calibrate" class="calibrate" src="images/menumainbuttonANIM.png" onClick="calibutton();"/>
 					<img name="homeZ" id="homeZ" class="homeZ" src="images/menumainbuttonANIM.png" onclick="Doliftcheck();"/>
 					<img name="pump" id="pump" class="pump" src="images/menumainbuttonANIM.png" onClick="pbutton();"/>
-					<img name="testdisplaybtn" id="testdisplaybtn" class="testdisplaybtn" src="images/menumainbuttonANIM.png" onClick="testdisplay();"/>
+					<img name="testdisplaybtn" id="testdisplaybtn" class="testdisplaybtn" onClick="testdisplay();" src="images/menumainbuttonANIM.png"/>
 				</map>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
@@ -456,5 +457,7 @@
 				</div>
 				</div>
         </div>
+
+	
     </body>
 </html>

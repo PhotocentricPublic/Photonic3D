@@ -1,12 +1,11 @@
 <html>
-
     <head>
         <title>Printables page</title>
         <style>
 			*{
 				cursor: none;
 			}
-		.printbutton {
+		.printbutton { 
 			position: absolute; 
 			top: 360px; 
 			left: 570px;
@@ -17,7 +16,7 @@
 			font-size: 30px;
 			z-index: 2;
 		}
-		.printlabel {
+		.printlabel { 
 			position: absolute; 
 			top: 123; 
 			left: 130;
@@ -49,31 +48,30 @@
 			-moz-user-drag: none;
 			-o-user-drag: none;
 			-webkit-overflow-scrolling: touch;
-			z-index: 3;
 		}
 
 		::-webkit-scrollbar {
-			width: 50px;
-			height: 50px;
-		}
+width: 50px;
+height: 50px;
+}
 
-		::-webkit-scrollbar-thumb {
-			background:  #ffffff;  
-		}
+::-webkit-scrollbar-thumb {
+background:  #ffffff;  
+}
 
-		::-webkit-scrollbar-thumb:hover {
-			background:#8d8d8d;  
-		}
+::-webkit-scrollbar-thumb:hover {
+background:#8d8d8d;  
+}
 
-		::-webkit-scrollbar-corner {
-			border-right: 1px solid;
-			border-bottom: 1px solid;
-		}
-		::-webkit-scrollbar-track-piece{
-			background-color:transparent;
-		}
+::-webkit-scrollbar-corner {
+border-right: 1px solid;
+border-bottom: 1px solid;
+}
+::-webkit-scrollbar-track-piece{
+background-color:transparent;
+}
 
-		.deletecontainer {
+		.deletecontainer { 
 			position: absolute; 
 			top: 368px; 
 			left: 176px;
@@ -82,7 +80,7 @@
 			color: white;
 			text-align: center;
 			font-size: 30px;
-			z-index: 3;
+			z-index: 2;
 		}
 
 		.refresh_prints{
@@ -108,7 +106,6 @@
 			-webkit-user-drag: none;
 			-webkit-user-select: none;
 			-ms-user-select: none;
-
 		}
 
 		.homebutton{
@@ -145,10 +142,10 @@
 		}
 
 		.deletequery{
-			white-space: pre-wrap;      /* CSS3 */   
-			white-space: -moz-pre-wrap; /* Firefox */   
-			white-space: -o-pre-wrap;   /* Opera 7 */    
-			word-wrap: break-word;      /* IE */
+			white-space: pre-wrap;      / CSS3 /   
+			white-space: -moz-pre-wrap; / Firefox /   
+			white-space: -o-pre-wrap;   / Opera 7 /    
+			word-wrap: break-word;      / IE /
 		}
 		
 		.IP { 
@@ -189,23 +186,8 @@
 			font-size: 20px;
 			overflow: hidden;
 		}
-		
-		.diskspace {
-			position: absolute; 
-			top: 55px; 
-			left: 33px;
-			width: 260px;
-			height: 15px;
-			background-color: transparent;
-			color: white;
-			font-size: 15px;
-			border: none;
-			padding: 5px;
-			resize: none;
-			z-index: 100;
-		}
-		
-		.sortprintables{
+				
+		.sortprintables {
 			position: absolute; 
 			top: 48px; 
 			left: 735px;
@@ -214,7 +196,7 @@
 			font-size: large;			
 		}
 
-		.refreshlist{
+		.refreshlist {
 			position: absolute; 
 			top: 48px; 
 			left: 735px;
@@ -223,36 +205,8 @@
 			font-size: large;			
 		}
 
-		.printquery{
-			white-space: pre-wrap;      /* CSS3 */   
-			white-space: -moz-pre-wrap; /* Firefox */   
-			white-space: -o-pre-wrap;   /* Opera 7 */    
-			word-wrap: break-word;      /* IE */
-		}
-
-		.printcheck {
-			position: absolute;
-			top: 78px; 
-			left: 34px;
-			width: 736px;
-			height: 300px;
-		}
-
-		.printwarn {
-			height: 365px;
-		}
-		
-		.print_button_yes {
-			width: 70px;
-		}
-
-		.print_button_no {
-			width: 70px;
-		}
 
 		</style>
-
-		<script type="text/javascript" src="js/zip.js"></script>
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
@@ -290,31 +244,22 @@
 					startpage();
 					fillList();
 					setInterval(updateNetworkInfo(), 10000);
-					getdiskspace();
-			}
 
-			function fillList() {
-					select = document.getElementById("printables");
-					$.getJSON('../services/printables/list')
-						.done(function (data) {
-							$.each(data, function (key, val) {
-								option = document.createElement('option');
-								option.text = option.value = val.name + "." + val.extension;
-								if ("display_test_to_be_hidden" !== val.name) {
-									select.add(option);
-								}
-							});
-							var options = $("#printables option");                    // Collect options         
-							options.detach().sort(function (a, b) {               // Detach from select, then Sort
-								var at = $(a).text().toLowerCase();
-								var bt = $(b).text().toLowerCase();
-								return (at > bt) ? 1 : ((at < bt) ? -1 : 0);            // Tell the sort function how to order
-							});
-							options.appendTo("#printables");
-						})
-						.fail(function () {
-						});
+			}
+			
+			function startPrint(){
+				if (document.getElementById("printables").selectedIndex <0){
+					//do nothing
+					$('#warning').html("Please select file to print");
+					$('#warning').show();
+					setTimeout(function() {
+						$('#warning').hide();
+					}, 5000);
 				}
+				else{
+					DoPrecheck();
+				}
+			}
 
 			function dodeletecheck() {
 					if ($("#printables").val() !== null) {
@@ -323,39 +268,46 @@
 						var extension = smallfname.split(".")[smallfname.split(".").length - 1];
 						if ($("#printables").val().length > maxlength) {
 							smallfname = smallfname.substring(0, smallfname.length - 1 - extension.length).match(/[A-Z,a-z]+\w{0,12}/g).join('&#8203;') + "&#8203;." + extension + "";
+
 						}
+
 						document.getElementById("deletequery").innerHTML = "Are you sure you want to delete " + smallfname + "?<br><br><br>";
-						$('#deletecheck').css('z-index',50);
-						$('#deletewarn').show();
+						$('#deletewarn').fadeIn();
 						$('#deletewarn').css('z-index', 50);
-						$('#deletecontainer').hide();
+						$('#deletecontainer').fadeOut();
 					}
 				}
 				
-			function deletefile(){
-				$.getJSON("../services/printables/delete/"+$("#printables").val())
-					.done(function(){
-						document.getElementById("deletequery").innerHTML = "";
-						$('#deletecheck').css('z-index',-50);
-						$('#deletewarn').css('z-index',-50);
-						$('#deletewarn').hide();
-						$('#deletecontainer').hide();
-						var options = $("#printables option");                    // Collect options         
-						options.detach();
-						fillList();
-				})
-				.fail(function(){
-					$('#warning').html("<strong>Error</strong><br>Could not delete item "+$("#printables").val());
-					$('#warning').show();
-					setTimeout(function() {
-					$('#warning').hide();
-					}, 5000);
-				});
-			}
+				function deletefile() {
+					$.getJSON("../services/printables/delete/" + encodeURIComponent($("#printables").val()))
+						.done(function () {
+							document.getElementById("deletequery").innerHTML = "";
+							$('#deletewarn').css('z-index', -50);
+							$('#deletewarn').hide();
+							$('#deletecontainer').hide();
+							var options = $("#printables option"); // Collect options         
+							options.detach();
+							if ($("#sortprintables").is(':hidden')) {
+								fillListbyName();
+							}
+							else if ($("#refreshlist").is(':hidden')) {
+								fillList();
+							}
+							else {
+							}
+						})
+						.fail(function () {
+							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						});
+				}
 
 			function showcontrol(){
-				$('#deletecontainer').show();
-				$('#deletewarn').hide();
+				$('#deletecontainer').fadeIn();
+				$('#deletewarn').fadeOut();
 			}
 
 			function updateNetworkInfo(){ 
@@ -371,8 +323,25 @@
 				});
 			}
 
+			function DoPrecheck() {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+						var text = JSON.stringify(result);
+						axisPos = text.indexOf("Y: not stopped");
+						if (axisPos > -1) {
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
+							$.getJSON("../services/printers/startJob/" + $("#printables").val() + "/" + printerName);
+						}
+						else {
+							$('#warning').html("Please close the door and try again");
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						}
+					});
+			}
+			
 			function updateNetworkInfo() {
-
 					$.getJSON('/services/machine/getNetworkHostConfiguration')
 						.done(function (data) {
 							var IPs = "";
@@ -384,19 +353,11 @@
 						.fail(function () {
 						});
 				}
-				function getdiskspace() {
-					$.get('df.txt', function (result) {
-						var split = result.split(' ');
-						var filtered = split.filter(Boolean);
-						var freespace = filtered[9];
-						document.getElementById("diskspace").innerHTML = "Free Space: " + freespace +"b";
-					});
-				}
 
 			function fillList() {
 					empty();
 					select = document.getElementById("printables");
-					$.getJSON('../services/printables/list')											//requests list of printable files from server
+					$.getJSON('../services/printables/list')	//requests list of printable files from server
 						.done(function (data) {
 							$.each(data, function (key, val) {
 								option = document.createElement('option');
@@ -409,7 +370,7 @@
 							var options = $("#printables option"); 
 							options.detach().sort(function (a, b) {  
 							var dateA = a.date;
-							var dateB = b.date;	             			// Detach from select, then Sort
+							var dateB = b.date;	             			
 							return dateB - dateA;
 							});
 							options.appendTo("#printables");
@@ -451,61 +412,9 @@
 							});
 					}
 
-			function print_check_1() {
-					if (document.getElementById("printables").selectedIndex < 0) {
-						//do nothing
-						$('#warning').html("Please select file to print");
-						$('#warning').show();
-						setTimeout(function () {
-							$('#warning').hide();
-						}, 5000);
-					}
-					else {
-						print_check_2();
-					}
-				}
-
-			function print_check_2() {
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
-						var text = JSON.stringify(result);
-						axisPos = text.indexOf("Y: not stopped");
-						if (axisPos > -1) {
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
-						}
-						else if ($("#printables").val() !== null) {
-								var file_name = $("#printables").val();	
-								JSZip.loadAsync(binaryContent).then(function (zip) {
-  									return zip.file($("#printables").val()).async("text");
-									}).then(function (txt) {
- 									console.log("the content is", txt);
-									});
-
-								$('#printables').css('z-index', -50);
-								$('#deletecontainer').css('z-index', -50);
-								$('#diskspace').css('z-index', -50);
-								$('#sortprintables').css('z-index', -50);
-								$('#printwarn').show();
-								$('#printwarn').css('z-index', 50);
-							}
-
-						else {
-								$('#warning').html("Please close the door and try again");
-								$('#warning').show();
-								setTimeout(function () {
-									$('#warning').hide();
-								}, 5000);
-							}
-						});
-				}
-
-			function startprint() {
-				$.getJSON("../services/printers/startJob/" + $("#printables").val() + "/" + printerName);
-			}
-
 		</script>
         <div class="screen">
             <div class="main">
-					<div name="diskspace" class="diskspace" id="diskspace"></div>
 					<div name="webinfo" id="webinfo" class="webinfo">
 							<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 						</div>
@@ -513,40 +422,26 @@
 				<img src="images/printables.png" usemap="printables" class="uilayer">
 				<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onClick="location.href='index.html';"/>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
-				<img name="refreshlist" id="refreshlist" class="refreshlist collapse" src="images/refreshlist.png" onClick="fillList();">
 				<img name="sortprintables" id="sortprintables" class="sortprintables" src="images/sort.png" onClick="fillListbyName();">
+				<img name="refreshlist" id="refreshlist" class="refreshlist collapse" src="images/refreshlist.png" onClick="fillList();">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
-				<img name="printbutton" id="printbutton" class="printbutton" src="images/pixel.png" onClick="print_check_1();"/>
+				<img name="printbutton" id="printbutton" class="printbutton" src="images/pixel.png" onClick="startPrint();"/>
 				<img name="refresh_prints" id="refresh_prints" class="refresh_prints" src="images/menumainbuttonANIM.png" onClick="refreshFunction();"/> 
 				<div class="deletecontainer collapse" id="deletecontainer"><img name="delete" id="delete" class="delete" src="images/delete.png" onclick="dodeletecheck();"></div>
 				<select size="9" class="printables" id="printables" onClick="showcontrol();" onChange="showcontrol();"></select>
+				<div name="printwarn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ></div></div>
 				<div name="deletecheck" id="deletecheck" class="deletecheck">
 					<div id="deletewarn" role="alert" class="alert alert-warning collapse" >
 						<div id="deletequery"></div>
 							<button type="button" class="btn btn-danger btn-block btn-lg" onclick="deletefile();">Yes</button>
-							<button type="button" class="btn btn-default btn-block btn-lg" onclick="$('#deletewarn').hide();$('#deletecheck').css('z-index',-50);">No</button>
+							<button type="button" class="btn btn-default btn-block btn-lg" onclick="$('#deletewarn').hide();">No</button>
 					</div>
 				</div>
-
-				<div name="printcheck" id="printcheck" class="printcheck">
-					<div id="printwarn" role="alert" class="printwarn alert alert-warning collapse" >
-						<div id="printquery"></div>
-							<button id="print_button_no" type="print_button_no" class="btn btn-danger btn-lg" onclick="
-							$('#printwarn').hide();
-							$('#printables').css('z-index', 3);
-							$('#diskspace').css('z-index', 3);
-							$('#deletecontainer').css('z-index', 3);
-							$('#sortprintables').css('z-index', 3);">No</button>
-							<button id="print_button_yes" type="print_bustton_yes" class="btn btn-success btn-lg" onclick="startprint();">Yes</button>
-					</div>
-				</div>
-
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>
             </div>
         </div>
     </body>
-</html>
