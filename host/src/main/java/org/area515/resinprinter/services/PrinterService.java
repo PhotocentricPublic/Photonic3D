@@ -643,6 +643,10 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse executeCode(@PathParam("printername") String printerName, @PathParam("gcode") String code) {
 		Printer printer = PrinterManager.Instance().getPrinter(printerName);
+		
+		MonEventLogger monEvtLogr=MonEventLogger.Instance();
+		monEvtLogr.addCmdEvt(code);
+
 		if (printer == null) {
 			return new MachineResponse("gcode", false, "Printer:" + printerName + " not started");
 		}
