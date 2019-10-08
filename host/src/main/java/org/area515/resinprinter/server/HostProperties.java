@@ -182,6 +182,7 @@ public class HostProperties {
 	private HostProperties() {
 		String printDirString = null;
 		String uploadDirString = null;
+		String monitoringDirString = null;
 		
 		if (!PROFILES_DIR.exists() && !PROFILES_DIR.mkdirs()) {
 			logger.info("Couldn't make profiles directory. No write access or disk full?" );
