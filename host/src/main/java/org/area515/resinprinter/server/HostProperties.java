@@ -490,6 +490,10 @@ public class HostProperties {
 	public File getUploadDir(){
 		return uploadDir;
 	}
+
+	public File getMonitoringDir(){
+		return monitoringDir;
+	}
 	
 	public File getUpgradeDir(){
 		return new File("");
