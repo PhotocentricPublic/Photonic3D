@@ -362,6 +362,14 @@ public class HostProperties {
 				throw new IllegalArgumentException("Couldn't create upload directory", e);
 			}
 		}
+
+		if(!monitoringDir.exists()) {
+			try {
+				FileUtils.forceMkdir(monitoringDir);
+			} catch (IOException e) {
+				throw new IllegalArgumentException("Couldn't create monitoring directory", e);
+			}
+		}
 		
 		this.sharedScriptEngine = this.buildScriptEngine();
 	}
