@@ -45,6 +45,7 @@ import org.area515.resinprinter.job.InkDetector;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.job.PrintJob;
 import org.area515.resinprinter.job.PrintJobManager;
+import org.area515.resinprinter.monitoring.MonEventLogger;
 import org.area515.resinprinter.printer.BuildDirection;
 import org.area515.resinprinter.printer.ComPortSettings;
 import org.area515.resinprinter.printer.MachineConfig;
