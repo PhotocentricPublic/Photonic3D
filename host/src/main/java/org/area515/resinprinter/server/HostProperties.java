@@ -334,6 +334,12 @@ public class HostProperties {
 		} else {
 			uploadDir = new File(uploadDirString);
 		}
+
+		if (monitoringDirString == null) {
+			monitoringDir = new File(System.getProperty("user.home"), "monitoringdir");
+		} else {
+			monitoringDir = new File(monitoringDirString);
+		}
 		
 		File versionFile = new File("build.number");
 		if (versionFile.exists()) {
