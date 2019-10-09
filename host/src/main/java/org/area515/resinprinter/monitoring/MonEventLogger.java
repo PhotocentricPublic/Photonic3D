@@ -92,8 +92,8 @@ public class MonEventLogger {
         double durationS = durationMs*1.0/1000.0;
         logger.info("processLedOn secs {}",durationS);
 
-       MonDataStore MonDS=MonDataStore.Instance();
+        MonDataStore MonDS=MonDataStore.Instance();
 
-        //MonDS.incrementLifeCounter(durationS);
+        MonDS.incrementLifeCounter(durationS);
     }
 }

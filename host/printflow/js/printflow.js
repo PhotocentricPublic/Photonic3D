@@ -117,7 +117,9 @@ function wifiupdate(){
                 else{
                         signalstrength = -100;
                 }
-	});
+        })
+        .fail(function () {
+        });
         Cookies.set('lastwifi',signalstrength);
         
 	// in the meantime for testing purposes, choose a random number.

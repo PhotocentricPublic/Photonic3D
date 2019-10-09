@@ -91,6 +91,15 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import com.sun.mail.smtp.SMTPSendFailedException;
 
+//For monitoring
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+//--
+
 @Api(value="machine")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
 @Path("machine")
@@ -542,6 +551,51 @@ public class MachineService {
 			logger.error("Error connecting to WifiSSID:" + network.getSsid(), e);
 		}
 	 }
+
+	 @ApiOperation(value = "Gets updated monitoring data.")
+	 @ApiResponses(value = {
+			 @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
+			 @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
+	  @GET
+	  @Path("getUpdatedMonitoringData")
+	  @Produces(MediaType.APPLICATION_JSON)
+	  public JSONObject getUpdatedMonitoringData() {
+		 //Class<NetworkManager> managerClass = HostProperties.Instance().getNetworkManagerClass();
+		String MONDATAFILE ="mondata.json";
+		//String path=HostProperties.Instance().getMonitoringDir()+"\\"+MONDATAFILE;
+
+		File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
+
+		double totalTimeUsedSoFar=-1.0;
+		logger.info("getUpdatedMonitoringData: path {}",monFile);
+		 JSONParser jsonParser = new JSONParser();
+		 JSONObject monDataIn = new JSONObject();
+		 
+		try (FileReader reader = new FileReader(monFile)){
+			Object obj = jsonParser.parse(reader);
+				monDataIn = (JSONObject) obj;
+				totalTimeUsedSoFar = (double)monDataIn.get("ledlifespent");
+				System.out.println(totalTimeUsedSoFar);
+	
+				logger.info("getUpdatedMonitoringData::monDataIn {}",monDataIn);
+
+				reader.close();
+				return monDataIn;
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				logger.error("Errorfile not found", e);
+				return null;
+			} catch (IOException e) {
+				e.printStackTrace();
+				logger.error("Error printStackTrace", e);
+				return null;
+			} catch (ParseException e) {
+				e.printStackTrace();
+				logger.error("Error Json Parse Exception", e);
+				return null;
+			}
+		
+	  }
 
     @ApiOperation(value = "Enumerates Printer interfaces' IPs, MACs and HostName.")
     @ApiResponses(value = {

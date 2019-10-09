@@ -198,7 +198,7 @@ public class HostProperties {
 		Properties configurationProperties = getMergedProperties();
 		printDirString = configurationProperties.getProperty("printdir");
 		uploadDirString = configurationProperties.getProperty("uploaddir");
-		monitoringDirString= configurationProperties.getProperty("uploaddir");
+		monitoringDirString= configurationProperties.getProperty("monitoringdir");
 		
 		fakeSerial = new Boolean(configurationProperties.getProperty("fakeserial", "false"));
 		visibleCards = Arrays.asList(configurationProperties.getProperty("visibleCards", "printers,printJobs,printables,users,settings").split(","));

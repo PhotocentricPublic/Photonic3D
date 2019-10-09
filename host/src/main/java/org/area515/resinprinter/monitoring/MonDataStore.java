@@ -1,6 +1,6 @@
 package org.area515.resinprinter.monitoring;
 
-import org.area515.resinprinter.server.HostProperties; 
+import org.area515.resinprinter.server.HostProperties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,13 +9,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-//import org.json.JSONObject;
-
-
+import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+//Path stuff
+
+import java.io.File;
 
 
 
@@ -36,14 +37,17 @@ public class MonDataStore {
 
     public void incrementLifeCounter(double deltaTime){
 
-       
 
-        String path=HostProperties.Instance().getMonitoringDir()+MONDATAFILE;
-        logger.info("processLedOn: pathj {}",path);
+        //String path=HostProperties.Instance().getMonitoringDir()+"\\"+MONDATAFILE;
+        //Path ppath = FileSystems.getDefault().getPath("path", MONDATAFILE);
+
+        File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
+
+        logger.info("incrementLifeCounter: pathj {}",monFile);
         
         JSONParser jsonParser = new JSONParser();
         double totalTimeUsedSoFar=-1.0;
-        try (FileReader reader = new FileReader(path))
+        try (FileReader reader = new FileReader(monFile))
         {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
@@ -65,13 +69,13 @@ public class MonDataStore {
 
         JSONObject monData = new JSONObject();
 
-        logger.info("incrementLifeCounter monData :{}", monData);
-
         double newTotalTime=totalTimeUsedSoFar+deltaTime;
 
         monData.put("ledlifespent", newTotalTime);
+
+        logger.info("incrementLifeCounter monData :{}", monData);
         
-        try (FileWriter file = new FileWriter(path)) {
+        try (FileWriter file = new FileWriter(monFile)) {
  
             file.append(monData.toJSONString());
             file.flush();
@@ -84,19 +88,3 @@ public class MonDataStore {
     }
 
 }
-
-// public StreamingOutput downloadPrintableFile(@PathParam("filename")String fileName) {
-//     return new StreamingOutput() {
-//         @Override
-//         public void write(OutputStream output) throws IOException, WebApplicationException {
-//             InputStream stream = new FileInputStream(new File(HostProperties.Instance().getUploadDir(), fileName));
-//             try {
-//                 ByteStreams.copy(stream, output);
-//             } finally {
-//                 try {
-//                     stream.close();
-//                 } catch (IOException e) {}
-//             }
-//         }
-//     };
-// }

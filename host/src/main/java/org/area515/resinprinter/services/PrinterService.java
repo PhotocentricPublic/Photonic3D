@@ -178,7 +178,9 @@ public class PrinterService {
 		if (printer == null) {
 			PrinterConfiguration currentConfiguration = HostProperties.Instance().getPrinterConfiguration(printerName);
 			if (currentConfiguration == null) {
-				throw new InappropriateDeviceException("No printer with that name:" + printerName);
+				logger.error("No printer with that name:" + printerName);
+				return null;
+				//throw new InappropriateDeviceException("No printer with that name:" + printerName);
 			}
 				
 				printer = new Printer(currentConfiguration);
