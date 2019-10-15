@@ -45,6 +45,8 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.area515.resinprinter.monitoring.MonEventLogger;
+
 @Api(value="printJobs")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
 @Path("printJobs")
@@ -155,6 +157,9 @@ public class PrintJobService {
 	@Path("stopJob/{jobId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse stopJob(@PathParam("jobId") String jobId) {
+		MonEventLogger monEvtLogr=MonEventLogger.Instance();
+		monEvtLogr.cancelJob();
+		
 		UUID uuid = null;
 		PrintJob job = null;
 		try {
@@ -172,6 +177,7 @@ public class PrintJobService {
 			return new MachineResponse("stop", false, "There isn't a printer assigned to job:" + jobId);
 		}
 		job.getPrinter().setStatus(JobStatus.Cancelling);//This properly closes the printJob by setting status, removing job assignments and stubbing the printjobprocessor
+		
 		return new MachineResponse("stop", true, "Stopped:" + jobId);
 	}
 	

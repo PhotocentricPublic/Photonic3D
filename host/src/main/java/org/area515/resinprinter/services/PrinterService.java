@@ -282,6 +282,9 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse stopPrinter(@PathParam("printername") String printerName) {
 		try {
+			MonEventLogger monEvtLogr=MonEventLogger.Instance();
+			monEvtLogr.cancelJob();
+
 			Printer printer = PrinterManager.Instance().getPrinter(printerName);
 			if (printer == null) {
 				throw new InappropriateDeviceException("This printer isn't started:" + printerName);
@@ -293,6 +296,9 @@ public class PrinterService {
 			PrinterManager.Instance().stopPrinter(printer);
 			DisplayManager.Instance().removeAssignment(printer);
 			SerialManager.Instance().removeAssignments(printer);
+			
+			
+
 			return new MachineResponse("stopPrinter", true, "Stopped:" + printerName);
 		} catch (InappropriateDeviceException e) {
 		    logger.error("Error stop printer:" + printerName, e);

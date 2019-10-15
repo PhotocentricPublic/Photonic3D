@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 enum GCodeCmdType {
+    JobStart,
+    JobFinish,
     LedOn,
     LedOff,
     NotSet
@@ -26,6 +28,11 @@ public class MonEventLogger {
         logger.info("MonEventLogger constructor:");
     }
 
+    public void cancelJob(){
+        this.processCancelJob();
+
+    }
+
     public void addCmdEvt(String cmd)  {
        
         
@@ -46,7 +53,13 @@ public class MonEventLogger {
 
         logger.info("MonEventLogger getCommandType isTrue :{}", isTrue);
 
-        if       (cmd.equals("M42 P0 S1")) {
+        if       (cmd.equals("; -------job start--------")){
+            gcodeType=GCodeCmdType.JobStart;
+        }
+        if       (cmd.equals(";********** Footer End ********")){
+            gcodeType=GCodeCmdType.JobFinish;
+        }
+        else if (cmd.equals("M42 P0 S1")) {
             gcodeType=GCodeCmdType.LedOn;
             logger.info("MonEventLogger gcodeType..LedOn.:{}", gcodeType);
         }
@@ -67,14 +80,38 @@ public class MonEventLogger {
     
     public void interpretCommand(GCodeCmdType cmdType, String cmd)  {
 
-        if (cmdType.equals(GCodeCmdType.LedOn))
+        switch (cmdType)
         {
-            this.processLEDOn();
-        } else if (cmdType.equals(GCodeCmdType.LedOff)){
-            this.processLEDOff();
+            case JobStart : this.processJobStart(); break;
+            case LedOn : this.processLEDOn(); break;
+            case LedOff: this.processLEDOff(); break;
+            case JobFinish: this.processJobFinish(); break;
+
+
         }
+        // if (cmdType.equals(GCodeCmdType.JobStart))
+        // {
+        // }
+        // else if (cmdType.equals(GCodeCmdType.LedOn))
+        // {
+        //     this.processLEDOn();
+        // } 
+        // else if (cmdType.equals(GCodeCmdType.LedOff)){
+        //     this.processLEDOff();
+        // }
+        // else if (cmdType.equals(GCodeCmdType.JobStart)){
+
+        // }
+        // else{
+        //     //error
+        // }
 
         
+    }
+    private void processJobStart(){
+    // write to file - 
+        s_startTime = System.currentTimeMillis();
+        logger.info("processJobStart {}: ", s_startTime);
     }
     private void processLEDOn(){
   // write to file - 
@@ -95,5 +132,16 @@ public class MonEventLogger {
         MonDataStore MonDS=MonDataStore.Instance();
 
         MonDS.incrementLifeCounter(durationS);
+    }
+    private void processJobFinish(){
+        // write to file - 
+            s_startTime = System.currentTimeMillis();
+            logger.info("processJobFinish {}: ", s_startTime);
+        }
+
+    private void processCancelJob()
+    {
+        MonDataStore MonDS=MonDataStore.Instance();
+        MonDS.incrCancelledCount();
     }
 }
