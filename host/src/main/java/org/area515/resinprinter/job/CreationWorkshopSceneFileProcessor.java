@@ -27,6 +27,8 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+import java.util.function.UnaryOperator;
+import com.jcraft.jsch.Buffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +47,8 @@ import se.sawano.java.text.AlphanumericComparator;
 
 public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcessor<Object,Object> implements Previewable {
 	private static final Logger logger = LogManager.getLogger();
-	
+	private CreationWorkshopImageCache imageCache = null;
+
 	@Override
 	public String[] getFileExtensions() {
 		return new String[]{"cws", "zip"};
@@ -155,10 +158,28 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			Pattern liftDistancePattern = Pattern.compile("\\s*;\\s*\\(?\\s*Lift\\s*Distance\\s*=\\s*([\\d\\.]+)\\s*(?:[Mm]{2})?\\s*\\)?\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern sliceCountPattern = Pattern.compile("\\s*;\\s*Number\\s*of\\s*Slices\\s*=\\s*(\\d+)\\s*", Pattern.CASE_INSENSITIVE);
 			
+			// Transform unary operator on buffered image, to pass to cache thread.
+			UnaryOperator<BufferedImage> imageTransformOp = image -> {
+				BufferedImage transformedImage = null;
+				try {
+					RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);	// ?
+					transformedImage = applyImageTransforms(aid, data.getScriptEngine(), image);
+				} catch(Exception e) {
+					transformedImage = null;
+				}
+				return transformedImage;
+			};
+			// Image cache object, automatically pre-loading and transforming images.
+			String baseFilename = FilenameUtils.removeExtension(gCodeFile.getName());
+			imageCache = new CreationWorkshopImageCache(gCodeFile.getParentFile(), baseFilename, padLength, imageTransformOp);
+			// Start image caching thread.
+			imageCache.start();
+
 			//We can't set these values, that means they aren't set to helpful values when this job starts
 			//data.printJob.setExposureTime(data.inkConfiguration.getExposureTime());
 			//data.printJob.setZLiftDistance(data.slicingProfile.getLiftFeedRate());
 			//data.printJob.setZLiftSpeed(data.slicingProfile.getLiftDistance());
+			ImageIO.setUseCache(false);
 
 			while ((currentLine = stream.readLine()) != null && printer.isPrintActive()) {
 					Matcher matcher = slicePattern.matcher(currentLine);
@@ -180,29 +201,27 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							}
 							startOfLastImageDisplay = System.currentTimeMillis();
 							RenderingContext context = nextConFuture.get();
-							int incoming = Integer.parseInt(matcher.group(1));
-							File currentImage = buildImageFile(gCodeFile, padLength, incoming);
+							int sliceIndex = Integer.parseInt(matcher.group(1));
+							File currentImage = buildImageFile(gCodeFile, padLength, sliceIndex);
 							aid.cache.setCurrentRenderingPointer(currentImage);
-							
+				// ADDITION HERE FROM p.b. BufferedImage newImage = imageCache.getCachedOrLoadImage(sliceIndex);
 							//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-							if (incoming != imageIndexCached) {
+							if (sliceIndex != imageIndexCached) {
 								nextConFuture = startImageRendering(aid, currentImage);
 							}
-							imageIndexCached = incoming + 1;
+							imageIndexCached = sliceIndex + 1;
 							
-							imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
+							imageFileToRender = buildImageFile(gCodeFile, padLength, sliceIndex + 1);
 							nextConFuture = startImageRendering(aid, imageFileToRender);
 							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
-							logger.info("Show picture: {}", incoming);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
-
+							// Call display driver.
 							printer.showImage(context.getPrintableImage(), true);
 						}
 						continue;
 					}
-					
 					/*matcher = delayPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						try {
@@ -289,6 +308,9 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					stream.close();
 				} catch (IOException e) {
 				}
+			}
+			if (imageCache != null) {
+				imageCache.close();
 			}
 			aid.cache.clearCache(Boolean.TRUE);
 			clearDataAid(printJob);
