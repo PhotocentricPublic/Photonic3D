@@ -13,6 +13,7 @@ enum GCodeCmdType {
 public class MonEventLogger {
     private static final Logger logger = LogManager.getLogger();
     private static MonEventLogger INSTANCE= null;
+    private static MonDataStore MONDATASTORE=MonDataStore.Instance();
     
     private static long s_startTime;
 	
@@ -49,14 +50,11 @@ public class MonEventLogger {
 
         logger.info("MonEventLogger getCommandType in:{}", cmd);
 
-        boolean isTrue=(cmd.equals("M42 P0 S1"));
-
-        logger.info("MonEventLogger getCommandType isTrue :{}", isTrue);
-
-        if       (cmd.equals("; -------job start--------")){
+        if       (cmd.contains("job start")){//"; -------job start--------")){
             gcodeType=GCodeCmdType.JobStart;
         }
-        if       (cmd.equals(";********** Footer End ********")){
+        if       (cmd.contains("Footer End")){//";********** Footer End ********")
+            logger.info("MonEventLogger getCommandType is Footer End");
             gcodeType=GCodeCmdType.JobFinish;
         }
         else if (cmd.equals("M42 P0 S1")) {
@@ -82,35 +80,20 @@ public class MonEventLogger {
 
         switch (cmdType)
         {
-            case JobStart : this.processJobStart(); break;
+            case JobStart : {
+                this.processJobStart(); break;
+            }
             case LedOn : this.processLEDOn(); break;
             case LedOff: this.processLEDOff(); break;
             case JobFinish: this.processJobFinish(); break;
-
-
+            default:  logger.info("interpretCommand : default ie error ");
         }
-        // if (cmdType.equals(GCodeCmdType.JobStart))
-        // {
-        // }
-        // else if (cmdType.equals(GCodeCmdType.LedOn))
-        // {
-        //     this.processLEDOn();
-        // } 
-        // else if (cmdType.equals(GCodeCmdType.LedOff)){
-        //     this.processLEDOff();
-        // }
-        // else if (cmdType.equals(GCodeCmdType.JobStart)){
-
-        // }
-        // else{
-        //     //error
-        // }
-
         
     }
     private void processJobStart(){
     // write to file - 
         s_startTime = System.currentTimeMillis();
+        MONDATASTORE.StartedPrint();
         logger.info("processJobStart {}: ", s_startTime);
     }
     private void processLEDOn(){
@@ -126,22 +109,19 @@ public class MonEventLogger {
         logger.info("processLedOn  timenow {}",timenow);
         long durationMs= timenow-s_startTime;
         logger.info("processLedOn {}",durationMs);
-        double durationS = durationMs*1.0/1000.0;
+        long durationS = (long)(durationMs*1.0/1000.0);
         logger.info("processLedOn secs {}",durationS);
 
-        MonDataStore MonDS=MonDataStore.Instance();
-
-        MonDS.incrementLifeCounter(durationS);
+        MONDATASTORE.incrementLifeCounter(durationS);
     }
     private void processJobFinish(){
-        // write to file - 
-            s_startTime = System.currentTimeMillis();
-            logger.info("processJobFinish {}: ", s_startTime);
-        }
+    // write to file - 
+        s_startTime = System.currentTimeMillis();
+        logger.info("processJobFinish {}: ", s_startTime);
+        MONDATASTORE.writeOutData();
+    }
 
-    private void processCancelJob()
-    {
-        MonDataStore MonDS=MonDataStore.Instance();
-        MonDS.incrCancelledCount();
+    private void processCancelJob(){
+        MONDATASTORE.CancelledPrint();
     }
 }

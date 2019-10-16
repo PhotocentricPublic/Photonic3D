@@ -566,7 +566,7 @@ public class MachineService {
 
 		File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
 
-		double totalTimeUsedSoFar=-1.0;
+		long totalTimeUsedSoFar=0;
 		logger.info("getUpdatedMonitoringData: path {}",monFile);
 		 JSONParser jsonParser = new JSONParser();
 		 JSONObject monDataIn = new JSONObject();
@@ -574,7 +574,7 @@ public class MachineService {
 		try (FileReader reader = new FileReader(monFile)){
 			Object obj = jsonParser.parse(reader);
 				monDataIn = (JSONObject) obj;
-				totalTimeUsedSoFar = (double)monDataIn.get("ledlifespent");
+				totalTimeUsedSoFar = (long)monDataIn.get("ledlifespent");
 				System.out.println(totalTimeUsedSoFar);
 	
 				logger.info("getUpdatedMonitoringData::monDataIn {}",monDataIn);

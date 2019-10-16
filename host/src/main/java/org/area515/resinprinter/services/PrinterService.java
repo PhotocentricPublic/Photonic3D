@@ -282,8 +282,8 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse stopPrinter(@PathParam("printername") String printerName) {
 		try {
-			MonEventLogger monEvtLogr=MonEventLogger.Instance();
-			monEvtLogr.cancelJob();
+			//MonEventLogger monEvtLogr=MonEventLogger.Instance();
+			//TODOmonEvtLogr.cancelJob();
 
 			Printer printer = PrinterManager.Instance().getPrinter(printerName);
 			if (printer == null) {

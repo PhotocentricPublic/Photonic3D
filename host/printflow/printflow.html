@@ -182,9 +182,12 @@
 
 			function updateMonitoringInfo() {
 				var moddata="Life Spent: "
+				var ncancels="-Prints cancelled: "
 				$.getJSON('/services/machine/getUpdatedMonitoringData')
 					.done(function (data) {
 						moddata+=data.ledlifespent;
+						moddata+=ncancels;
+						moddata+=data.cancelled_count;
 						document.getElementById("mondata").innerHTML =moddata;	
 					})
 					.fail(function () {

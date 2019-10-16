@@ -29,6 +29,7 @@ public class MonDataStore {
     private static int startedPrintCount=0;
 
     private static JSONObject mJsonMonData=null;
+    private static long mStartPrintTime=0;
 	
 	public static MonDataStore Instance() {
 		if (INSTANCE == null) {
@@ -41,6 +42,7 @@ public class MonDataStore {
         JSONObject errObj = new JSONObject();
 
         mJsonMonData= this.readInData();
+        logger.info("MonDataStore: {}", mJsonMonData.toJSONString());
 
         if (mJsonMonData==null){
             mJsonMonData=new JSONObject();
@@ -48,72 +50,71 @@ public class MonDataStore {
         }
     } 
     public void StartedPrint(){
-
+        mStartPrintTime=0;
+        mStartPrintTime = System.currentTimeMillis();
 
     }
     public void FinishedPrint(){
-
-        
+        long printTimeEnd = System.currentTimeMillis();
+        long totalprinttime=printTimeEnd-mStartPrintTime;
+        mStartPrintTime=0;
+        //mJsonMonData.put("totalprinttime", newTotalTime);//TODO - how many to keep
     }
     public void CancelledPrint(){
-
+        logger.info("CancelledPrint IN: ");
         this.incrCancelledCount();
+        logger.info("CancelledPrint 2: ");
         //Save the monitoring data
         this.writeOutData();
-    }
-    public void incrCancelledCount(){
-        if ((String)mJsonMonData.get("err")!="err"){
-            int cancelledCount= (int)mJsonMonData.get("cancelled_count");
-            cancelledCount++;
-            logger.info("cancelledCount: {}", cancelledCount);
-
-            mJsonMonData.put("cancelled_count",cancelledCount);
-        }
+        logger.info("after writeOutData 2: ");
     }
 
-    public void incrementLifeCounter(double deltaTime){
-
+    public void writeOutData(){
+        logger.info("MonDataStore::writeOutData  in  ");
         File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
-
-        logger.info("incrementLifeCounter: pathj {}",monFile);
-        
-        JSONParser jsonParser = new JSONParser();
-        double totalTimeUsedSoFar=-1.0;
-        try (FileReader reader = new FileReader(monFile))
-        {
-            //Read JSON file
-            Object obj = jsonParser.parse(reader);
-            JSONObject monDataIn = (JSONObject) obj;
-            totalTimeUsedSoFar = (double)monDataIn.get("ledlifespent");
-            System.out.println(totalTimeUsedSoFar);
-
-            reader.close();
- 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        //Write JSON file
-
-        JSONObject monData = new JSONObject();
-
-        double newTotalTime=totalTimeUsedSoFar+deltaTime;
-
-        monData.put("ledlifespent", newTotalTime);
-
-        logger.info("incrementLifeCounter monData :{}", monData);
-        
+      
         try (FileWriter file = new FileWriter(monFile)) {
  
-            file.append(monData.toJSONString());
+            file.append(mJsonMonData.toJSONString());
             file.flush();
             file.close();
  
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public void incrCancelledCount(){
+        if ((String)mJsonMonData.get("err")!="err"){
+            long cancelledCount= (long)mJsonMonData.get("cancelled_count");
+            //Integer totalTimeUsedSoFar=(Integer)mJsonMonData.get("ledlifespent");
+            ++cancelledCount;
+            logger.info("incrCancelledCount -cancelledCount: {}", cancelledCount);
+
+            mJsonMonData.put("cancelled_count",cancelledCount);
+            logger.info("cancelledCount 2: {}", cancelledCount);
+        }
+    }
+
+    public void incrementLifeCounter(long deltaTime){
+
+        logger.info("incrementLifeCounter: mJsonMonData {}",mJsonMonData);
+    
+        try{
+            logger.info("incrementLifeCounter A");
+            //int xx=mJsonMonData.get("ledlifespent");
+            logger.info("incrementLifeCounter deltaTime: {}",deltaTime);
+            long totalTimeUsedSoFar=(long)mJsonMonData.get("ledlifespent");
+
+            logger.info("incrementLifeCounter object: {}",0);
+            logger.info("incrementLifeCounter totalTimeUsedSoFar: {}",totalTimeUsedSoFar);
+    
+            long newTotalTime=totalTimeUsedSoFar+deltaTime;
+
+            mJsonMonData.put("ledlifespent", newTotalTime);
+        }
+        catch( Exception e){
+            logger.info("Error=============================={}",e.getMessage());
             e.printStackTrace();
         }
 
@@ -123,21 +124,17 @@ public class MonDataStore {
     {
         File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
         JSONParser jsonParser = new JSONParser();
-        double totalTimeUsedSoFar=-1.0;
         JSONObject monDataIn=null;
         try (FileReader reader = new FileReader(monFile))
         {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
             monDataIn = (JSONObject) obj;
-            //totalTimeUsedSoFar = (double)monDataIn.get("ledlifespent");
-           // System.out.println(totalTimeUsedSoFar);
-
             reader.close();
  
         } catch (FileNotFoundException e) {
             logger.info("MonDataStore::readInData  FileNotFoundException ");
-            e.printStackTrace();
+            //e.printStackTrace();
             monDataIn=this.CreateDataSchmema();// Important - create new schema
         } catch (IOException e) {
             logger.info("MonDataStore::readInData  IOException ");
@@ -150,27 +147,15 @@ public class MonDataStore {
         return monDataIn;
     }
 
-    private void writeOutData(){
-        File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
-
-        try (FileWriter file = new FileWriter(monFile)) {
- 
-            file.append(mJsonMonData.toJSONString());
-            file.flush();
-            file.close();
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
+    
 
     private JSONObject CreateDataSchmema()
     {
-       
+        logger.info("MonDataStore::CreateDataSchmema  in  ");
         JSONObject jsonSchemaobj = new JSONObject();
-        jsonSchemaobj.put("ledlifespent", -1);
-        jsonSchemaobj.put("cancelled_count", -1);
+        long initZero=0;
+        jsonSchemaobj.put("ledlifespent", initZero);
+        jsonSchemaobj.put("cancelled_count", initZero);
         logger.info("CreateDataSchmema::  successful ");
         return jsonSchemaobj;
     }
