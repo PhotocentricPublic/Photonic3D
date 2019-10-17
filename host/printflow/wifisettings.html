@@ -85,7 +85,6 @@
 			-ms-user-select: none;
 			z-index: 3;
 		}
-
 		.connect{
 			position: absolute; 
 			top: 360px; 
@@ -100,23 +99,7 @@
 			-ms-user-select: none;
 			z-index: 3;
 		}
-
-		.wifiname {
-			position: absolute; 
-			top: 260px; 
-			left: 0px;
-			width: 300px;
-			height: 15px;
-			background-color: transparent;
-			color: white;
-			font-size: 15;
-			font-weight: bold;
-			border: none;
-			padding: 5px;
-			resize: none;
-			z-index: 100;
-			
-		}	
+				
 
 		</style>
 		
@@ -146,15 +129,17 @@
 			function init(){
 				startpage();
 				setInterval(updateNetworkInfo(), 10000);
-				getwifiname()
 			}
 
 			function updateNetworkInfo(){
+
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 				.done(function(data){
+					
 					 document.getElementById("hostvar").innerHTML=data.Hostname;
 					 var MACs ="";
 					 $.each(data.MACs, function(key,value){
+						console.log(key+", "+value);
 						MACs += key + ": "+value+"<BR/> ";
 					 });
 					 document.getElementById("MACaddress").innerHTML  = MACs;
@@ -176,8 +161,10 @@
 				}
 				$.getJSON('/services/machine/wirelessNetworks/list')
 				.done(function(data){
+					console.log(data);
 					var i = 0;
 					$.each(data, function (key, val) {
+						console.log(i + ": "+key+" "+val);
 						option = document.createElement('option');
 						option.id = option.text = option.value = val.ssid;
 						option.style = "background: url(images/wifi-tiny.png) no-repeat; padding-top: 2px; padding-right: 10px;";
@@ -194,18 +181,12 @@
 				location.href="wifisetup.html?SSID="+$("#wifiselect").val();
 			}
 		
-			function getwifiname() {
-					$.get('wifi.txt', function (result) {
-						var split = result.split('"');
-						document.getElementById("wifiname").innerHTML = "Wifi Name: "+split[1];
-					});
-				}
 		</script>
 		
         <div class="screen">
             <div class="main">
 				<img src="images/wifisettings.png" usemap="wifisettings" class="uilayer"></img>
-				<div name="visiblelabel" class="visiblelabel" id="visiblelabel" >VISIBLE Wi-Fi NETWORKS</div>
+				<div name="visiblelabel" class="visiblelabel" id="visiblelabel" >AVAILABLE Wi-Fi NETWORKS</div>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
@@ -213,8 +194,7 @@
 				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
 					<div name="info" id="info" class="info">
 						<div name="nettitle" id="nettitle" class="nettitle">NETWORK DETAILS</div>
-						<div name="hostname" id="hostname" class="hostname">Hostname:<span id="hostvar" class="hostname"></span>.local</div>
-						<div name="wifiname" id="wifiname" class="wifiname"><span id="wifivar" class="wifiname"></span></div>
+						<div name="hostname" id="hostname" class="hostname">Hostname:<br/><span id="hostvar" class="hostname"></span>.local</div>
 						<div name="IP" id="IP" class="IP">IP address:<br/><span id="IPaddress" class="details"></span></div>
 						<div name="MAC" id="MAC" class="MAC">MAC Address:<br/><span id="MACaddress" class="details"></span></div>
 					</div>

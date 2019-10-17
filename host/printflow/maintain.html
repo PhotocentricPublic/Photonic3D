@@ -7,8 +7,8 @@
 			}
 		.homebutton{
 			position: absolute; 
-			top: 100px; 
-			left: 72px;
+			top: 185px; 
+			left: 85px;
 			height: 110px;
 			width: 110px; 
 			user-select: none;
@@ -74,20 +74,6 @@
 			position: absolute; 
 			top: 270px;
 			left: 250px;
-			height: 110px;
-			width: 110px;
-			user-drag: none; 
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-		}
-
-		.pump{
-			position: absolute; 
-			top: 270px;
-			left: 72px;
 			height: 110px;
 			width: 110px;
 			user-drag: none; 
@@ -212,8 +198,8 @@
 				var url  = "http://localhost:9091/services/customizers/upsert";
 				var xhr = new XMLHttpRequest();
 				var data={
-					"name": "display_test_to_be_hidden.zip.Photocentric Magna",
-					"printerName": "Photocentric Magna",
+					"name": "display_test_to_be_hidden.zip.GC Dental",
+					"printerName": "GC Dental",
 					"printableName": "display_test_to_be_hidden",
 					"printableExtension": "zip",
 					"supportsAffineTransformSettings": true,
@@ -296,7 +282,6 @@
 				var Ink = {};
 				var layerdata = 0;
 				$.getJSON('/services/printers/get/'+printerName).done(function(data){
-				
 				var Ink = data.configuration.slicingProfile.InkConfig;
 				var selected = data.configuration.slicingProfile.SelectedInk;
 					Ink.forEach(function(el){
@@ -310,7 +295,7 @@
 
 			function lighton() {
 					$("#togglebutton").hide();
-					$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+					$.getJSON('../services/printers/showBlankScreen/GC Dental');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
@@ -322,24 +307,15 @@
 
 			function lightoff(){
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+				$.getJSON('../services/printers/showBlankScreen/GC Dental');
 				$("#LedOn").show();
 				$("#togglebutton").show();
 				 clearTimeout(lighttimer);
 				 clearTimeout(lighttimer2);
 			}
-	
-			function pbutton(){
-				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0');
-				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna')
-				.done(function(data){
-					location.href='pump.html';
-				});
-			}
 
 			function hbutton(){
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+				$.getJSON('../services/printers/showBlankScreen/GC Dental');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0')
 				.done(function(data){
@@ -348,7 +324,7 @@
 			}
 
 			function calibutton() {
-					$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+					$.getJSON('../services/printers/showBlankScreen/GC Dental');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0')
 				.done(function (data) {
@@ -357,7 +333,7 @@
 				}
 			
 			function testdisplay() {
-					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.Photocentric Magna')
+					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.GC Dental')
 						.done(function (data) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
@@ -366,7 +342,7 @@
 						});
 					lighttimer2 = setTimeout(function () { 
 						$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
-						$.getJSON('../services/printers/showBlankScreen/Photocentric Magna');
+						$.getJSON('../services/printers/showBlankScreen/GC Dental');
 						$("#togglebutton").show();
 					}, 20000);
 			}
@@ -383,7 +359,6 @@
 					.done(function (data) {
 						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 						$("#homeZ").show();
-						$("#pump").show();
 						$("#calibrate").show();
 						$("#homebutton").show();
 					});
@@ -393,7 +368,6 @@
 			function hidezelements() {
 				$("#homebutton").hide();
 				$("#homeZ").hide();
-				$("#pump").hide();
 				$("#calibrate").hide();
 			}
 			
@@ -433,7 +407,7 @@
 
 			</script>
         <div class="screen">
-      	<div class="main">
+      		<div class="main">
 				<img class="uilayer" src="images/maintain.png" usemap="maintain" class="uilayer">
 				<map name="maintain">
 					<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onclick="hbutton();"/>
@@ -441,7 +415,6 @@
 					<img name="LedOff" id="LedOff" class="LedOff" src="images/menumainbuttonANIM.png" onclick="lightoff();"/>
 					<img name="calibrate" id="calibrate" class="calibrate" src="images/menumainbuttonANIM.png" onClick="calibutton();"/>
 					<img name="homeZ" id="homeZ" class="homeZ" src="images/menumainbuttonANIM.png" onclick="Doliftcheck();"/>
-					<img name="pump" id="pump" class="pump" src="images/menumainbuttonANIM.png" onClick="pbutton();"/>
 					<img name="testdisplaybtn" id="testdisplaybtn" class="testdisplaybtn" src="images/menumainbuttonANIM.png" onClick="testdisplay();"/>
 				</map>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">

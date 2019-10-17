@@ -1,1 +1,1 @@
-var printerName = "Photocentric Magna";
+var printerName = "GC Dental";

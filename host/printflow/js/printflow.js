@@ -11,21 +11,29 @@ var PRINTEROFFIMAGE = "images/printer-off.png";
             
 function startpage(){
         setInterval(function() {
+        	setTime();
 	        printredirect();
 	        printerStatus();
         }, 1000);
         
         setInterval(function() {
             wifiupdate();
-            doorupdate();
-            interruptcheck();    
+            doorupdate();   
         }, 3000);
         
+        setTime();
         wifiupdate();
         printredirect();
         printerStatus();
         doorupdate();
-        interruptcheck();
+}
+
+
+function setTime() {
+	var timeElement = document.getElementById("time");
+	if (timeElement != null) {
+		timeElement.innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
+	}	
 }
 
 function printerStatus(){
@@ -54,23 +62,6 @@ function doorupdate() {
                 else {
                         document.getElementById("doorcheck").src = "images/open.png";
                 }
-        });
-}
-
-function interruptcheck() {
-        $.getJSON('../services/printers/executeGCode/' + printerName + '/M408 S0', function (result) {
-                var tem = result["message"];
-                var messtripped = tem.substr(0, tem.length - 3); // to strip off end chars "msgBox.mode\":-1}\n\nok\n"
-                var messObj = JSON.parse(messtripped);
-                var HACKinterlockFlagArr = messObj["fanPercent"];   
-                var interlockSetTrue = HACKinterlockFlagArr[2] == 100;
-                if (interlockSetTrue) {
-                        document.getElementById("interlockcheck").src = "images/locked-padlock.png";
-                }
-                else {// if gets here - invalid value - but set unlocked
-                        document.getElementById("interlockcheck").src = "images/unlocked-padlock.png";
-                }
-
         });
 }
 
@@ -172,7 +163,7 @@ function printredirect(){
                                 Cookies.set('lastcancelledjob',jobId);
                                 setTimeout(function() {
                                         window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> [Job ID: "+jobId+"] was cancelled.");
-                                }, 100);
+                                }, 100);                        
                         }
 		}
     }				
