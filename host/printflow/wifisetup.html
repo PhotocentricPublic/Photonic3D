@@ -120,15 +120,6 @@
 			-ms-user-select: none;
 			z-index: 3;
 		}
-		
-		.toggle {
-			position: absolute; 
-			top: 199px; 
-			left: 550px;
-			background-color: transparent;
-			color: white;
-			font-size: large;
-		}
 
 		</style>
 		
@@ -250,7 +241,6 @@
 				<img src="images/wifisetup.png" usemap="wifisettings" class="uilayer">
 				<map name="wifisettings">
 				</map>
-				<div class="toggle" name="toggle" id="toggle" onclick="if (pass.type == 'text') pass.type = 'password'; else pass.type = 'text';"><img src="images/toggle_pswd.png"></div>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
@@ -261,7 +251,7 @@
 				<input name="pass" class="pass" id="pass" type="password" value=""></input>
 				<div name="savebutton" class="savebutton" id="savebutton" onClick="saveWifi();"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ><strong>Error</strong><br>Could not save settings</div></div>
-				<div name="home" class="home" id="home" onClick="location.href='index.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="home" class="home" id="home" onClick="location.href='printflow.html';"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="back" class="back" id="back" onClick="location.href='wifisettings.html';"><img src="images/menumainbuttonANIM.png"></div>
             </div>
         </div>

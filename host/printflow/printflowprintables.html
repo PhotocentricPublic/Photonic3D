@@ -2,9 +2,11 @@
     <head>
         <title>Printables page</title>
         <style>
-			*{
-				cursor: none;
-			}
+
+		*{
+			cursor: none;
+		}
+
 		.printbutton { 
 			position: absolute; 
 			top: 360px; 
@@ -16,6 +18,7 @@
 			font-size: 30px;
 			z-index: 2;
 		}
+
 		.printlabel { 
 			position: absolute; 
 			top: 123; 
@@ -26,6 +29,7 @@
 			font-size: 30px;
 			z-index: 2;
 		}
+
 		.printables {
 			position: absolute; 
 			top: 80px; 
@@ -51,25 +55,26 @@
 		}
 
 		::-webkit-scrollbar {
-width: 50px;
-height: 50px;
-}
+			width: 50px;
+			height: 50px;
+		}
 
-::-webkit-scrollbar-thumb {
-background:  #ffffff;  
-}
+		::-webkit-scrollbar-thumb {
+			background:  #ffffff;  
+		}
 
-::-webkit-scrollbar-thumb:hover {
-background:#8d8d8d;  
-}
+		::-webkit-scrollbar-thumb:hover {
+			background:#8d8d8d;  
+		}
 
-::-webkit-scrollbar-corner {
-border-right: 1px solid;
-border-bottom: 1px solid;
-}
-::-webkit-scrollbar-track-piece{
-background-color:transparent;
-}
+		::-webkit-scrollbar-corner {
+			border-right: 1px solid;
+			border-bottom: 1px solid;
+		}
+
+		::-webkit-scrollbar-track-piece{
+			background-color:transparent;
+		}
 
 		.deletecontainer { 
 			position: absolute; 
@@ -142,10 +147,10 @@ background-color:transparent;
 		}
 
 		.deletequery{
-			white-space: pre-wrap;      / CSS3 /   
-			white-space: -moz-pre-wrap; / Firefox /   
-			white-space: -o-pre-wrap;   / Opera 7 /    
-			word-wrap: break-word;      / IE /
+			white-space: pre-wrap;       
+			white-space: -moz-pre-wrap;
+			white-space: -o-pre-wrap;    
+			word-wrap: break-word;
 		}
 		
 		.IP { 
@@ -226,12 +231,6 @@ background-color:transparent;
 		
 		<script src="js/js.cookie.js"></script>
 		
-		<script>
-			function refreshFunction() {
-    			location.reload(true);
-			}
-		</script> 
-		
 		<link href="css/printflow.css" rel="stylesheet" >
     </head>
     <body style="background-color: black;">
@@ -239,12 +238,15 @@ background-color:transparent;
 			test="";
 			
 			window.onload = init;
-			
+
+			function refreshFunction() {
+    			location.reload(true);
+			}
+
 			function init() {
 					startpage();
 					fillList();
 					setInterval(updateNetworkInfo(), 10000);
-
 			}
 			
 			function startPrint(){
@@ -268,9 +270,7 @@ background-color:transparent;
 						var extension = smallfname.split(".")[smallfname.split(".").length - 1];
 						if ($("#printables").val().length > maxlength) {
 							smallfname = smallfname.substring(0, smallfname.length - 1 - extension.length).match(/[A-Z,a-z]+\w{0,12}/g).join('&#8203;') + "&#8203;." + extension + "";
-
 						}
-
 						document.getElementById("deletequery").innerHTML = "Are you sure you want to delete " + smallfname + "?<br><br><br>";
 						$('#deletewarn').fadeIn();
 						$('#deletewarn').css('z-index', 50);
@@ -278,7 +278,7 @@ background-color:transparent;
 					}
 				}
 				
-				function deletefile() {
+			function deletefile() {
 					$.getJSON("../services/printables/delete/" + encodeURIComponent($("#printables").val()))
 						.done(function () {
 							document.getElementById("deletequery").innerHTML = "";
@@ -329,7 +329,7 @@ background-color:transparent;
 						axisPos = text.indexOf("Y: not stopped");
 						if (axisPos > -1) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
-							$.getJSON("../services/printers/startJob/" + $("#printables").val() + "/" + printerName);
+							$.getJSON("../services/printers/startJob/" + encodeURIComponent($("#printables").val()) + "/" + printerName);
 						}
 						else {
 							$('#warning').html("Please close the door and try again");
@@ -387,7 +387,7 @@ background-color:transparent;
 				}
 
 				function fillListbyName() {
-						empty();
+					empty();
 						select = document.getElementById("printables");
 						$.getJSON('../services/printables/list')
 							.done(function (data) {
@@ -415,10 +415,10 @@ background-color:transparent;
 		</script>
         <div class="screen">
             <div class="main">
-					<div name="webinfo" id="webinfo" class="webinfo">
-							<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
-						</div>
-					<img id="overlay" class="overlay hide" src="images/34.gif"/>
+				<div name="webinfo" id="webinfo" class="webinfo">
+					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+				</div>
+				<img id="overlay" class="overlay hide" src="images/34.gif"/>
 				<img src="images/printables.png" usemap="printables" class="uilayer">
 				<img name="homebutton" id="homebutton" class="homebutton" src="images/menumainbuttonANIM.png" onClick="location.href='index.html';"/>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
@@ -444,4 +444,5 @@ background-color:transparent;
 				</div>
             </div>
         </div>
-    </body>
+	</body>
+</html>

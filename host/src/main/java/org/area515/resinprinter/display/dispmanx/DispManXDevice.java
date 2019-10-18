@@ -1,5 +1,6 @@
 package org.area515.resinprinter.display.dispmanx;
 
+import java.awt.image.DataBufferByte;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -158,10 +159,10 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		
 		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-        		destPixels.setInt((y*(pitch / bytesPerPixel) + x) * bytesPerPixel, image.getRGB(x, y));
-            }
+		byte[] raw_image = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		for (int y = 0; y < image.getHeight(); y++) {
+			destPixels.write(y * pitch, raw_image, y * image.getWidth() * bytesPerPixel,
+					image.getWidth() * bytesPerPixel);
         }
 		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
 
@@ -253,7 +254,7 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	        if (imageResourceHandle == 0) {
 	        	throw new IllegalArgumentException("Couldn't create resourceHandle for dispmanx");
 	        }
-	        
+	        logger.debug("DISPlAY resource create.");
 	        logger.debug("ScreenWidth:" + bounds.getWidth() + " ScreenHeight:" + bounds.getHeight() + " ImageWidth:"+ imageWidth.getValue() + " ImageHeight:" + imageHeight.getValue());
 	        
 	        VC_RECT_T.ByReference sizeRect = new VC_RECT_T.ByReference();
@@ -267,7 +268,9 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	        if (returnCode != 0) {
 	        	throw new IllegalArgumentException("Couldn't vc_dispmanx_resource_write_data for dispmanx:" + returnCode);
 	        }
-	        
+			
+			logger.debug("DISPlAY resource write.");
+			
 	        int updateHandle = DispManX.INSTANCE.vc_dispmanx_update_start(0);  //This method should be called create update
 	        if (updateHandle == 0) {
 	        	throw new IllegalArgumentException("Couldn't vc_dispmanx_update_start for dispmanx");
@@ -299,7 +302,9 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	        if (returnCode != 0) {
 	        	throw new IllegalArgumentException("Couldn't vc_dispmanx_update_submit_sync for dispmanx:" + returnCode);
 	        }
-	        
+			
+			logger.debug("DISPlAY resource update wait.");
+
 	        return memory;
 		} finally {
 			activityLock.unlock();
