@@ -1,11 +1,6 @@
 
 package org.area515.resinprinter.services;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -63,6 +58,11 @@ import org.area515.resinprinter.server.HostProperties;
 import org.area515.resinprinter.services.TestingResult.ChartData;
 import org.area515.resinprinter.util.security.PhotonicUser;
 import org.area515.util.TemplateEngine;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(value="printers")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -512,7 +512,7 @@ public class PrinterService {
 			}
 			BufferedImage img = null;
 			try {
-				img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("PhotonicSplash.png"));
+				img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("display_test_to_be_hidden_GC.png"));
 			} catch (IOException e) {
 			    logger.error("Error showing logo for printer:" + printerName + " Location:" + getClass().getProtectionDomain().getCodeSource().getLocation(), e);
 				return new MachineResponse("showLogo" + this.getClass().getProtectionDomain().getCodeSource().getLocation(), false, e.getMessage());
