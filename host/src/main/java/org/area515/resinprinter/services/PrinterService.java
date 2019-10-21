@@ -1,10 +1,6 @@
 
 package org.area515.resinprinter.services;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -64,6 +60,11 @@ import org.area515.resinprinter.server.HostProperties;
 import org.area515.resinprinter.services.TestingResult.ChartData;
 import org.area515.resinprinter.util.security.PhotonicUser;
 import org.area515.util.TemplateEngine;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(value="printers")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -282,9 +283,6 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse stopPrinter(@PathParam("printername") String printerName) {
 		try {
-			//MonEventLogger monEvtLogr=MonEventLogger.Instance();
-			//TODOmonEvtLogr.cancelJob();
-
 			Printer printer = PrinterManager.Instance().getPrinter(printerName);
 			if (printer == null) {
 				throw new InappropriateDeviceException("This printer isn't started:" + printerName);
@@ -296,9 +294,6 @@ public class PrinterService {
 			PrinterManager.Instance().stopPrinter(printer);
 			DisplayManager.Instance().removeAssignment(printer);
 			SerialManager.Instance().removeAssignments(printer);
-			
-			
-
 			return new MachineResponse("stopPrinter", true, "Stopped:" + printerName);
 		} catch (InappropriateDeviceException e) {
 		    logger.error("Error stop printer:" + printerName, e);

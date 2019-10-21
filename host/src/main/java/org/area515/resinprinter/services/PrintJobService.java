@@ -176,8 +176,7 @@ public class PrintJobService {
 		if (printer == null) {
 			return new MachineResponse("stop", false, "There isn't a printer assigned to job:" + jobId);
 		}
-		job.getPrinter().setStatus(JobStatus.Cancelling);//This properly closes the printJob by setting status, removing job assignments and stubbing the printjobprocessor
-		
+		job.getPrinter().setStatus(JobStatus.Cancelling);//This properly closes the printJob by setting status, removing job assignments and stubbing the printjobprocessor		
 		return new MachineResponse("stop", true, "Stopped:" + jobId);
 	}
 	

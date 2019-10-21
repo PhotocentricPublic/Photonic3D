@@ -84,39 +84,6 @@ function updateWifiURL(signalstrength) {
 
 function wifiupdate(){
 	//TODO: JSON to query the server's wifi status and display it
-        
-        $.getJSON("../services/machine/wirelessNetworks/getWirelessStrength")
-        .done(function (data){
-		if ((typeof data !== 'undefined')&&(data !== null)){
-			signalstrength = parseInt(data);
-		}
-                else{
-                        signalstrength = -100;
-                }
-        })
-        .fail(function () {
-        });
-        Cookies.set('lastwifi',signalstrength);
-        
-	// in the meantime for testing purposes, choose a random number.
-	// signalstrength = Math.floor(Math.random() * -60)-30; //signal strength in dBm
-        
-        //using this as a guide for decent signal strengths in dBm: https://support.metageek.com/hc/en-us/articles/201955754-Understanding-WiFi-Signal-Strength
-        if (signalstrength > -45) {
-		wifiurl="images/wifi-3.png";
-        }
-        else if (signalstrength > -67) {
-                wifiurl="images/wifi-2.png";
-        }
-        else if (signalstrength > -72) {
-                wifiurl="images/wifi-1.png";
-        }
-        else if (signalstrength > -80) {
-                wifiurl="images/wifi-0.png";
-        }
-        else wifiurl="images/wifi-nc.png"; 
-
-	document.getElementById("wifi").src = wifiurl;
     $.getJSON("../services/machine/wirelessNetworks/list")
 	    .done(function (data){
 	    	var signalStrength = Cookies.get('signalStrength');
@@ -133,7 +100,7 @@ function wifiupdate(){
 	    .error(function () {
 	    	updateWifiURL(0);
 	    })
-}
+        }
             
 function printredirect(){
         if ((typeof printerName === 'undefined')||(String(window.location.href).indexOf("error.html") >= 0)) {
