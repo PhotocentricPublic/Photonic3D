@@ -4,6 +4,7 @@ echo "Getting updates and installing utilities required for Photocentric Pi4 set
     sudo apt-get update
     sudo apt-get -y upgrade
     sudo apt-get -y install xserver-xorg xinit xorg openjdk-8-jdk matchbox-window-manager dos2unix usbmount fbi
+    sudo rpi-update
 
 echo "Removing pi branding,boot messages etc"
 	echo -n "quiet loglevel=3 logo.nologo consoleblank=0" > /boot/cmdline.txt
@@ -58,6 +59,8 @@ echo "Creating auto mount rules"
     echo ACTION=="remove", ENV{dir_name}!="", RUN+="/bin/umount -l /media/%E{dir_name}", RUN+="/bin/rmdir /media/%E{dir_name}" >> /etc/udev/rules.d/11-media-by-label-auto-mount.rules
     echo LABEL="media_by_label_auto_mount_end" >> /etc/udev/rules.d/11-media-by-label-auto-mount.rules
 
-echo sudo udevadm control --reload-rules
+echo "Making auto USB mount to work"
+udevadm control --reload-rules
+
 
 rm -rf photonic_setup.sh
