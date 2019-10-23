@@ -15,7 +15,7 @@ public class MonEventLogger {
     private static MonEventLogger INSTANCE= null;
     private static MonDataStore MONDATASTORE=MonDataStore.Instance();
     
-    private static long s_startTime=0;
+    private static long s_startTime= System.currentTimeMillis();
 	
 	public static MonEventLogger Instance() {
         logger.info("MonEventLogger INSTANCE:");
@@ -164,7 +164,7 @@ public class MonEventLogger {
     private void processLEDOn(){
   // write to file - 
         s_startTime = System.currentTimeMillis();
-        logger.info("processLedOn  s_startTime{}: ", s_startTime);
+        logger.info(" processLEDOn s_startTime{}: ", s_startTime);
     }
 
     private void processLEDOff(){
