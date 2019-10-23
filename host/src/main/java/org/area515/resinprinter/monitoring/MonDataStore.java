@@ -1,20 +1,18 @@
 package org.area515.resinprinter.monitoring;
 
-import org.area515.resinprinter.server.HostProperties;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+//Path stuff
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.area515.resinprinter.server.HostProperties;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-//Path stuff
 
 //import java.io.File;
 
@@ -156,7 +154,7 @@ public class MonDataStore {
         long initZero=0;
         jsonSchemaobj.put("ledlifespent", initZero);
         jsonSchemaobj.put("cancelled_count", initZero);
-        logger.info("CreateDataSchmema::  successful ");
+        logger.info("CreateDataSchmema::  successful: ",jsonSchemaobj);
         return jsonSchemaobj;
     }
  

@@ -11,6 +11,7 @@ import org.area515.resinprinter.display.AlreadyAssignedException;
 import org.area515.resinprinter.display.InappropriateDeviceException;
 import org.area515.resinprinter.job.JobStatus;
 import org.area515.resinprinter.job.PrintJob;
+import org.area515.resinprinter.monitoring.MonEventLogger;
 import org.area515.resinprinter.notification.NotificationManager;
 import org.area515.resinprinter.printer.MachineConfig;
 import org.area515.resinprinter.printer.Printer;
@@ -182,6 +183,9 @@ public abstract class PrinterController {
 				logger.error("Interrupted while waiting for sleep to complete.", e);
 			}
 		}
+
+		MonEventLogger monEvtLogr=MonEventLogger.Instance();
+		monEvtLogr.addCmdEvt(comment);
     }
     
     public String executeCommands(PrintJob printJob, String commands, boolean stopSendingGCodeWhenPrintInactive) throws InappropriateDeviceException {

@@ -50,18 +50,19 @@ public class MonEventLogger {
 
         logger.info("MonEventLogger getCommandType in:{}", cmd);
 
-        if       (cmd.contains("job start")){//"; -------job start--------")){
+        if      (cmd.contains("!Mon##LifeCounterStart")){//";!Mon##LifeCounterStart"))
             gcodeType=GCodeCmdType.JobStart;
+            logger.info("fOUND !Mon##LifeCounterStart:", cmd);
         }
-        if       (cmd.contains("Footer End")){//";********** Footer End ********")
-            logger.info("MonEventLogger getCommandType is Footer End");
+        else if (cmd.contains("!Mon##JobEnd")){//";!Mon##JobEnd
+            logger.info("MonEventLogger getCommandType is job end");
             gcodeType=GCodeCmdType.JobFinish;
         }
-        else if (cmd.equals("M42 P0 S1")) {
+        else if (this.robustGCodeEquals(cmd,"M42 P0 S1")) {
             gcodeType=GCodeCmdType.LedOn;
             logger.info("MonEventLogger gcodeType..LedOn.:{}", gcodeType);
         }
-        else if   (cmd.equals("M42 P0 S0")) {
+        else if (this.robustGCodeEquals(cmd,"M42 P0 S0")) {
             gcodeType=GCodeCmdType.LedOff;
             logger.info("MonEventLogger gcodeType..LedOff.:{}", gcodeType);
         }
@@ -74,6 +75,70 @@ public class MonEventLogger {
         //String rtn="dd";
         return gcodeType;
         
+    }
+
+    private boolean robustGCodeEquals(String rawGcodeString, String testGcodeString)// M42 P0 S1 ; LED dim to zero=>  M42 P0 S1
+    {
+        logger.info("MonEventLogger robustGCodeEquals in:{}", rawGcodeString);
+        logger.info("MonEventLogger robustGCodeEquals in:{}", testGcodeString);
+        boolean rtn=false;
+        //Split test string into g-code elements - with no white space
+        String[] matchArray=stringArrayFromString(testGcodeString);
+
+        String[] testeeArray=stringArrayFromString(rawGcodeString);
+        testeeArray= removeCharFromFromStringArray(testeeArray, ";");
+
+        // Find each element in matchArray in testeeArray - as long as order matches - accept as equal
+        Integer iFoundCount=0;
+        Integer testeeIndex=0;
+        for (int i = 0; i < matchArray.length; i++){
+            String strToTest =matchArray[i];
+             logger.info("   strToTest :{}", strToTest);
+              logger.info("   testeeIndex :{}", testeeIndex);
+            for (int j = testeeIndex; j < testeeArray.length; j++){
+                  logger.info("   testeeArray[j] :{}", testeeArray[j]);
+                if (strToTest.equals(testeeArray[j]))
+                {
+                    iFoundCount++;
+                    logger.info("   FOUND iFoundCount++; :{}", iFoundCount);
+                    
+                    testeeIndex=j+1;
+                       logger.info("   FOUND testeeIndex; :{}", testeeIndex);
+                    break;
+                } 
+            }
+        }
+       
+        if (iFoundCount==matchArray.length){
+              logger.info("  iFoundCountout {} matchArray.length; :{}",iFoundCount,matchArray.length );
+            rtn=true;
+        }
+        logger.info("  ======out  RTN; :{}", rtn);
+        return rtn;
+    }
+    private String[] stringArrayFromString(String iString){
+        String[] tempArray;
+        String delimiter = " ";
+        tempArray = iString.split(delimiter);
+
+        for (int i = 0; i < tempArray.length; i++){
+            System.out.println(tempArray[i]);
+            tempArray[i]=tempArray[i].trim();
+        }
+
+        return tempArray;
+    }
+
+     private String[] removeCharFromFromStringArray(String[] strArray, String removeChar){
+      
+      
+        for (int i = 0; i < strArray.length; i++){
+            String elem=strArray[i];
+            elem = elem.replace(removeChar, "");
+            strArray[i] = elem;
+        }
+
+        return strArray;
     }
     
     public void interpretCommand(GCodeCmdType cmdType, String cmd)  {
