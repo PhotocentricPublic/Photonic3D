@@ -158,6 +158,7 @@ public class MonEventLogger {
     }
     private void processLEDOn(){
   // write to file - 
+        s_lightSetOn=true;
         s_startTime = System.currentTimeMillis();
         logger.info(" processLEDOn s_startTime{}: ", s_startTime);
     }
