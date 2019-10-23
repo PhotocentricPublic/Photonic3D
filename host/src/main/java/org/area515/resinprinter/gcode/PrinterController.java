@@ -170,6 +170,7 @@ public abstract class PrinterController {
     }
 
     private void parseCommentCommand(String comment) {
+
 		//If a comment was encountered, parse it to determine if something interesting was in there.
 		Pattern delayPattern = Pattern.compile(";\\s*<\\s*Delay\\s*>\\s*(\\d+).*", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = delayPattern.matcher(comment);
@@ -183,12 +184,16 @@ public abstract class PrinterController {
 				logger.error("Interrupted while waiting for sleep to complete.", e);
 			}
 		}
-
-		MonEventLogger monEvtLogr=MonEventLogger.Instance();
-		monEvtLogr.addCmdEvt(comment);
+		
     }
     
     public String executeCommands(PrintJob printJob, String commands, boolean stopSendingGCodeWhenPrintInactive) throws InappropriateDeviceException {
+		//PXR monitoring
+		logger.info("In parse executeCommands 	0.2:  {}",commands);
+		MonEventLogger monEvtLogr=MonEventLogger.Instance();
+		monEvtLogr.addCmdEvt(commands);
+		//--
+		
 		Pattern gCodePattern = Pattern.compile("\\s*([^;]*)\\s*(;.*)?", Pattern.CASE_INSENSITIVE);
 		try {
 			if (commands == null || commands.trim().isEmpty()) {

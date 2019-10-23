@@ -79,8 +79,8 @@ public class MonEventLogger {
 
     private boolean robustGCodeEquals(String rawGcodeString, String testGcodeString)// M42 P0 S1 ; LED dim to zero=>  M42 P0 S1
     {
-        logger.info("MonEventLogger robustGCodeEquals in:{}", rawGcodeString);
-        logger.info("MonEventLogger robustGCodeEquals in:{}", testGcodeString);
+        logger.info("MonEventLogger rawGcodeString in:{}", rawGcodeString);
+        logger.info("MonEventLogger testGcodeString in:{}", testGcodeString);
         boolean rtn=false;
         //Split test string into g-code elements - with no white space
         String[] matchArray=stringArrayFromString(testGcodeString);
