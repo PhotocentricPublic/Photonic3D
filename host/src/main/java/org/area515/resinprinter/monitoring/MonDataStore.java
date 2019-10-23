@@ -40,7 +40,7 @@ public class MonDataStore {
         JSONObject errObj = new JSONObject();
 
         mJsonMonData= this.readInData();
-        logger.info("MonDataStore: {}", mJsonMonData.toJSONString());
+        logger.info("MonDataStore afterreadInData : {}", mJsonMonData.toJSONString());
 
         if (mJsonMonData==null){
             mJsonMonData=new JSONObject();
@@ -68,7 +68,7 @@ public class MonDataStore {
     }
 
     public void writeOutData(){
-        logger.info("MonDataStore::writeOutData  in  ");
+        logger.info("MonDataStore::writeOutData  in : {}  ",mJsonMonData);
         File monFile = new File(HostProperties.Instance().getMonitoringDir(), MONDATAFILE);
       
         try (FileWriter file = new FileWriter(monFile)) {
@@ -132,6 +132,8 @@ public class MonDataStore {
             Object obj = jsonParser.parse(reader);
             monDataIn = (JSONObject) obj;
             reader.close();
+
+             logger.info("MonDataStore::readInData  {} ", monDataIn);
  
         } catch (FileNotFoundException e) {
             logger.info("MonDataStore::readInData  FileNotFoundException ");
