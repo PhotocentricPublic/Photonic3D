@@ -16,6 +16,7 @@ public class MonEventLogger {
     private static MonDataStore MONDATASTORE=MonDataStore.Instance();
     
     private static long s_startTime= System.currentTimeMillis();
+    private static boolean s_lightSetOn=false;//PXR - incase light set off before beingf set on
 	
 	public static MonEventLogger Instance() {
         logger.info("MonEventLogger INSTANCE:");
@@ -93,24 +94,17 @@ public class MonEventLogger {
         Integer testeeIndex=0;
         for (int i = 0; i < matchArray.length; i++){
             String strToTest =matchArray[i];
-             logger.info("   strToTest :{}", strToTest);
-              logger.info("   testeeIndex :{}", testeeIndex);
             for (int j = testeeIndex; j < testeeArray.length; j++){
-                  logger.info("   testeeArray[j] :{}", testeeArray[j]);
                 if (strToTest.equals(testeeArray[j]))
                 {
-                    iFoundCount++;
-                    logger.info("   FOUND iFoundCount++; :{}", iFoundCount);
-                    
-                    testeeIndex=j+1;
-                       logger.info("   FOUND testeeIndex; :{}", testeeIndex);
+                    iFoundCount++;     
+                    testeeIndex=j+1;             
                     break;
                 } 
             }
         }
        
         if (iFoundCount==matchArray.length){
-              logger.info("  iFoundCountout {} matchArray.length; :{}",iFoundCount,matchArray.length );
             rtn=true;
         }
         logger.info("  ======out  RTN; :{}", rtn);
@@ -130,7 +124,6 @@ public class MonEventLogger {
     }
 
      private String[] removeCharFromFromStringArray(String[] strArray, String removeChar){
-      
       
         for (int i = 0; i < strArray.length; i++){
             String elem=strArray[i];
@@ -157,8 +150,10 @@ public class MonEventLogger {
     }
     private void processJobStart(){
     // write to file - 
+        s_lightSetOn=false;
         s_startTime = System.currentTimeMillis();
         MONDATASTORE.StartedPrint();
+        
         logger.info("processJobStart {}: ", s_startTime);
     }
     private void processLEDOn(){
@@ -168,6 +163,8 @@ public class MonEventLogger {
     }
 
     private void processLEDOff(){
+        if (!s_lightSetOn) return;
+
         logger.info("processLedOff in ");
         logger.info("processLEDOff  s_startTime {}",s_startTime);
         long timenow = System.currentTimeMillis();
