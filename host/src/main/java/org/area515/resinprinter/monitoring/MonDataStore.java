@@ -85,7 +85,6 @@ public class MonDataStore {
     public void incrCancelledCount(){
         if ((String)mJsonMonData.get("err")!="err"){
             long cancelledCount= (long)mJsonMonData.get("cancelled_count");
-            //Integer totalTimeUsedSoFar=(Integer)mJsonMonData.get("ledlifespent");
             ++cancelledCount;
             logger.info("incrCancelledCount -cancelledCount: {}", cancelledCount);
 
@@ -102,6 +101,9 @@ public class MonDataStore {
             logger.info("incrementLifeCounter A");
             //int xx=mJsonMonData.get("ledlifespent");
             logger.info("incrementLifeCounter deltaTime: {}",deltaTime);
+
+            logger.info("incrementLifeCounter raw  mJsonMonData: {} ",mJsonMonData);
+
             long totalTimeUsedSoFar=(long)mJsonMonData.get("ledlifespent");
 
             logger.info("incrementLifeCounter object: {}",0);
@@ -158,7 +160,7 @@ public class MonDataStore {
         jsonSchemaobj.put("cancelled_count", initZero2);
         long version=0;
         jsonSchemaobj.put("version", version);
-        logger.info("CreateDataSchmema::  successful: {} ",jsonSchemaobj);
+        logger.info("::  successful: {} ",jsonSchemaobj);
         return jsonSchemaobj;
     }
  
