@@ -110,6 +110,7 @@ public class MonDataStore {
             long newTotalTime=totalTimeUsedSoFar+deltaTime;
 
             mJsonMonData.put("ledlifespent", newTotalTime);
+            logger.info("incrementLifeCounter newTotalTime: {}",newTotalTime);
         }
         catch( Exception e){
             logger.info("Error=============================={}",e.getMessage());
@@ -153,7 +154,10 @@ public class MonDataStore {
         JSONObject jsonSchemaobj = new JSONObject();
         long initZero=0;
         jsonSchemaobj.put("ledlifespent", initZero);
-        jsonSchemaobj.put("cancelled_count", initZero);
+         long initZero2=0;
+        jsonSchemaobj.put("cancelled_count", initZero2);
+        long version=0;
+        jsonSchemaobj.put("version", version);
         logger.info("CreateDataSchmema::  successful: ",jsonSchemaobj);
         return jsonSchemaobj;
     }
