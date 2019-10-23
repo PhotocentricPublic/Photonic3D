@@ -15,7 +15,7 @@ public class MonEventLogger {
     private static MonEventLogger INSTANCE= null;
     private static MonDataStore MONDATASTORE=MonDataStore.Instance();
     
-    private static long s_startTime;
+    private static long s_startTime=0;
 	
 	public static MonEventLogger Instance() {
         logger.info("MonEventLogger INSTANCE:");
@@ -164,18 +164,18 @@ public class MonEventLogger {
     private void processLEDOn(){
   // write to file - 
         s_startTime = System.currentTimeMillis();
-        logger.info("processLedOn {}: ", s_startTime);
+        logger.info("processLedOn  s_startTime{}: ", s_startTime);
     }
 
     private void processLEDOff(){
         logger.info("processLedOff ");
-        logger.info("processLedOn  s_startTime {}",s_startTime);
+        logger.info("processLEDOff  s_startTime {}",s_startTime);
         long timenow = System.currentTimeMillis();
-        logger.info("processLedOn  timenow {}",timenow);
+        logger.info("processLEDOff  timenow {}",timenow);
         long durationMs= timenow-s_startTime;
-        logger.info("processLedOn {}",durationMs);
+        logger.info("processLEDOff {}",durationMs);
         long durationS = (long)(durationMs*1.0/1000.0);
-        logger.info("processLedOn secs {}",durationS);
+        logger.info("processLEDOff secs {}",durationS);
 
         MONDATASTORE.incrementLifeCounter(durationS);
     }
