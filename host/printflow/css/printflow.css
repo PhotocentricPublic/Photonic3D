@@ -240,3 +240,10 @@ html, body {
 	-ms-user-select: none;
 	z-index: 50;
 }
+
+.MD { 
+	font-weight: bold;
+	position: absolute; 
+	color: white;
+	font-size: 0;
+}
