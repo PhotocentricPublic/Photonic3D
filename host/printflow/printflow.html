@@ -183,7 +183,7 @@
 				var moddata="Life Spent: "
 				$.getJSON('/services/machine/getUpdatedMonitoringData')
 					.done(function (data) {
-						var leftspend=17008001;//data.ledlifespent;///3600;//ms- hours 345,600,000
+						var leftspend=data.ledlifespent;///3600;//ms- hours 17008001
 						leftspendHrs=(leftspend/(3600));
 						leftspendHrs=Math.round(leftspendHrs*100)/100;
 						var leftspendHrsStr=leftspendHrs.toString(10)+ " hours ";
