@@ -140,27 +140,26 @@
 				cursor: none;
 			}
 		</style>
-		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="../resourcesnew/bootstrap/css/bootstrap.min.css">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-		<!-- jQuery library -->
-		<script src="../resourcesnew/jquery/jquery.min.js"></script>
+	<!-- jQuery library -->
+	<script src="../jquery/jquery.min.js"></script>
 
-		<!-- Latest compiled JavaScript -->
-		<script src="../resourcesnew/bootstrap/js/bootstrap.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+	<script src="../bootstrap/js/bootstrap.min.js"></script>
 
-		<!-- Latest v1 Angular -->
-		<script src="../resourcesnew/angular/js/angular.min.js"></script>
+	<!-- Latest v1 Angular -->
+	<script src="../angular/js/angular.min.js"></script>
 
-		<script src="js/moment.min.js"></script>
-
-		<script src="js/printflow.js"></script>
-		<script src="js/printerconfig.js"></script>
-
-		<script src="js/js.cookie.js"></script>
-
+	<script src="js/moment.min.js"></script>
 	
-		<link href="css/printflow.css" rel="stylesheet">
+	<script src="js/printflow.js"></script>
+	<script src="js/printerconfig.js"></script>
+	
+	<script src="js/js.cookie.js"></script>
+	
+	<link href="css/printflow.css" rel="stylesheet">
     </head>
     <body style="background-color: black;" onload="init()">
 		<script>
@@ -195,45 +194,6 @@
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R50 U0 B225');
 			}
 
-			function loadcustomizer(){
-				var url  = "http://localhost:9091/services/customizers/upsert";
-				var xhr = new XMLHttpRequest();
-				var data={
-					"name": "display_test_to_be_hidden.zip.GC Dental",
-					"printerName": "GC Dental",
-					"printableName": "display_test_to_be_hidden",
-					"printableExtension": "zip",
-					"supportsAffineTransformSettings": true,
-					"affineTransformSettings": {
-					"rotation": 0,
-					"affineTransformScriptCalculator": null,
-					"yflip": false,
-					"xshear": 0,
-					"yshear": 0,
-					"xflip": false,
-					"xtranslate": 0,
-					"ytranslate": 0,
-					"xscale": 1,
-					"yscale": 1
-					},
-					"externalImageAffectingState": "2019",
-					"cacheId": "ebe94f45e77b312a0e4d104e0fa925f61d82430f",
-					"nextSlice": 0,
-					"nextStep": "PerformHeader",
-					"imageManipulationCalculator": null,
-					"zscale": 1
-				}
-				xhr.open("POST",url, true);
-				//Send the proper header information along with the request
-				xhr.setRequestHeader("Content-Type", "application/json");
-				xhr.setRequestHeader("Accept", "application/json");
-				xhr.onreadystatechange = function() { // Call a function when the state changes.
-					if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-						// Request finished. Do processing here.
-					}
-				}
-				xhr.send(JSON.stringify(data));
-			}
 			
 			function changez(height) {
 				if ((parseInt(document.getElementById("zdata").innerHTML)+parseInt(height))<600) {
