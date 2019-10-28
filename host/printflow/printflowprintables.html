@@ -79,7 +79,7 @@
 		.deletecontainer { 
 			position: absolute; 
 			top: 368px; 
-			left: 176px;
+			left: 266px;
 			width: 76px;
 			height: 76px;
 			color: white;
@@ -101,6 +101,17 @@
 			-webkit-user-select: none;
 			-ms-user-select: none;
 		}
+		.deleteallcontainer { 
+			position: absolute; 
+			top: 368px; 
+			left: 176px;
+			width: 76px;
+			height: 76px;
+			color: white;
+			text-align: center;
+			font-size: 30px;
+			z-index: 2;
+		}
 		
 		.delete {
 			position: absolute;
@@ -112,7 +123,16 @@
 			-webkit-user-select: none;
 			-ms-user-select: none;
 		}
-
+		.deleteall {
+			position: absolute;
+			z-index: 5;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
 		.homebutton{
 			position: absolute; 
 			top: 365px; 
@@ -134,7 +154,14 @@
 			width:200px;
 			height: 210px;
 		}
-		
+
+		.deleteallcheck {
+			position: absolute; 
+			top: 110px; 
+			left: 700px;
+			width:200px;
+			height: 210px;
+		}
 		.show{
 			position: absolute;
 			top: 350px; 
@@ -153,6 +180,13 @@
 			word-wrap: break-word;
 		}
 		
+		.deleteallquery{
+			white-space: pre-wrap;       
+			white-space: -moz-pre-wrap;
+			white-space: -o-pre-wrap;    
+			word-wrap: break-word;
+		}
+
 		.IP { 
 			font-size: 15px;
 			padding-bottom: 2.5px;
@@ -304,10 +338,62 @@
 							}, 5000);
 						});
 				}
+				function deletefile(fileName) {
+					$.getJSON("../services/printables/delete/" + encodeURIComponent(fileName))
+						.done(function () {
+							//DO nothing - yet
+						})
+						.fail(function () {
+							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						});
+				}
 
 			function showcontrol(){
 				$('#deletecontainer').fadeIn();
 				$('#deletewarn').fadeOut();
+			}
+
+			function dodeleteallcheck() {
+				     var xx=$("#printables");
+					 var length=xx[0].length;
+
+					 if (length>0){
+						document.getElementById("deleteallquery").innerHTML = "Are you sure you want to delete all the print files?<br><br><br>";
+						$('#deleteallwarn').fadeIn();
+						$('#deleteallwarn').css('z-index', 50);
+						//$('#deleteallcontainer').fadeOut();
+						
+					 }
+				}
+
+			function deleteAllfiles() {
+				
+				var printfilelist=$("#printables");
+
+				var opts=printfilelist[0];
+				//empty();
+				for (var i=0; i<opts.length;i++){
+					var fname = opts[i].innerText;
+					deletefile(fname);
+				}
+				$('#deleteallwarn').css('z-index', -50);
+				$('#deleteallwarn').hide();
+				//$('#deleteallcontainer').hide();
+				var options = $("#printables option"); // Collect options         
+				options.detach();
+				if ($("#sortprintables").is(':hidden')) {
+					fillListbyName();
+				}
+				else if ($("#refreshlist").is(':hidden')) {
+					fillList();
+				}
+				else {
+				}
+
 			}
 
 			function updateNetworkInfo(){ 
@@ -428,7 +514,20 @@
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<img name="printbutton" id="printbutton" class="printbutton" src="images/pixel.png" onClick="startPrint();"/>
-				<img name="refresh_prints" id="refresh_prints" class="refresh_prints" src="images/menumainbuttonANIM.png" onClick="refreshFunction();"/> 
+				<img name="refresh_prints" id="refresh_prints" class="refresh_prints" src="images/menumainbuttonANIM.png" onClick="refreshFunction();"/> 		
+				
+				<div class="deleteallcontainer" id="deleteallcontainer"><img name="deleteall" id="deleteall" class="deleteall" src="images/delete_all.png" onclick="dodeleteallcheck();"></div>
+				<div name="printallwarn" id="allwarn" class="allwarn"><div id="allwarning" role="alert" class="alert alert-danger collapse" ></div></div>
+				<div name="deleteallcheck" id="deleteallcheck" class="deleteallcheck">
+					<div id="deleteallwarn" role="alert" class="alert alert-warning collapse" >
+						<div id="deleteallquery"></div>
+							<button type="button" class="btn btn-danger btn-block btn-lg" onclick="deleteAllfiles();">Yes</button>
+							<button type="button" class="btn btn-default btn-block btn-lg" onclick="$('#deleteallwarn').hide();">No</button>
+					</div>
+				</div>
+
+
+
 				<div class="deletecontainer collapse" id="deletecontainer"><img name="delete" id="delete" class="delete" src="images/delete.png" onclick="dodeletecheck();"></div>
 				<select size="9" class="printables" id="printables" onClick="showcontrol();" onChange="showcontrol();"></select>
 				<div name="printwarn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ></div></div>
