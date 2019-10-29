@@ -136,6 +136,6 @@
 <JvmOptions>
 </JvmOptions>
 <!-- IMPORTANT place custom content BELOW this comment for compatibility with JW App -->
-
+<File classpath='yes'>libs/mp4parser/json-simple-1.1.1.jar</File>
 
 </jwrapper>
