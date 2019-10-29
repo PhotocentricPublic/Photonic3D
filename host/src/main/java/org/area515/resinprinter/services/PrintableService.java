@@ -400,12 +400,12 @@ public class PrintableService {
 					stream.close();
 					File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
 					String extension = getFileExtension(fullPath);
+					//extension=extension.toLowerCase();
 
 					String fileNameNoExtension =fileName.substring(0,fileName.lastIndexOf("."));
 
-					if (extension.equals(".zip"))
+					if (extension.equals(".zip") || extension.equals(".cws"))
 					{
-
 						String destDir = "./unzippedPreview/";
 						String previewFileName=fileNameNoExtension+".png";
 
@@ -459,7 +459,8 @@ public class PrintableService {
     }
 	
 	private static boolean unzip(String fileNametoUzip, String nametoUse, String zipFilePath, String destDir) {
-        File dir = new File(destDir);
+		logger.info("PXR in unzip  fileNametoUzip : {} zipFilePath: {} ", fileNametoUzip,zipFilePath);
+		File dir = new File(destDir);
         // create output directory if it doesn't exist
         if(!dir.exists()) dir.mkdirs();
         FileInputStream fis;
@@ -473,7 +474,11 @@ public class PrintableService {
 			
             while(ze != null && isFound!=true){
 				String fileName = ze.getName();
-				if (fileName.equals(fileNametoUzip))
+
+				logger.info("fileName : {}", fileName);
+
+				//if (fileName.equals(fileNametoUzip))
+				if (fileName.contains(fileNametoUzip))
 				{
 					System.out.println("PXR found file  {} & upzipping "+fileName);
 					isFound=true;
