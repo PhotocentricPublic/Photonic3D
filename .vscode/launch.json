@@ -1,0 +1,119 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.client.Main",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-DispManXDirectMemory<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.display.DispManXDirectMemory",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-DispManXLoadImage<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.display.DispManXLoadImage",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-DispManXTestSelfContained<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.display.DispManXTestSelfContained",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ConvertCWMaskToTransparencyMask<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.image.ConvertCWMaskToTransparencyMask",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ServerTimeJPEG<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.image.ServerTimeJPEG",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-LinuxManualWifiConnect<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.network.LinuxManualWifiConnect",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ProjectorOutput<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.projector.ProjectorOutput",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<photonic3d>(1)",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.server.Main",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-PrinterTools<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.slice.PrinterTools",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-SliceBrowser<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.slice.SliceBrowser",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-SliceTester<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.slice.SliceTester",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-AlertAPITest<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.sms.AlertAPITest",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ImpossiblePerformance<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.supports.ImpossiblePerformance",
+            "projectName": "photonic3d"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JMEStruts<photonic3d>",
+            "request": "launch",
+            "mainClass": "org.area515.resinprinter.supports.JMEStruts",
+            "projectName": "photonic3d"
+        }
+    ]
+}

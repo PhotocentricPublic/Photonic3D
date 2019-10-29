@@ -253,7 +253,6 @@
 			overflow: hidden;
 		}
 
-
 		@keyframes pauseglyph {
 			0% {color: rgba(128, 128, 0, 128);}
 			25% {color: rgba(128, 96, 0, 112);}
@@ -269,28 +268,41 @@
 			75% {color: rgba(128, 32, 0, 32);}
 			100% {color: rgba(128, 0, 0, 0);}
 		}
+
+		.progressbar {
+			position: absolute;
+			top: 285px;
+			left: 304px;
+  			width: 350px;
+ 			height: 20px;
+		}
+
 	</style>
+
+		<link rel="stylesheet" type="text/css" href="css/loading-bar.css"/>
+		<script type="text/javascript" src="js/loading-bar.js"></script>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="../resourcesnew/bootstrap/css/bootstrap.min.css">
+
+		<!-- jQuery library -->
+		<script src="../resourcesnew/jquery/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="../resourcesnew/bootstrap/js/bootstrap.min.js"></script>
+
+		<!-- Latest v1 Angular -->
+		<script src="../resourcesnew/angular/js/angular.min.js"></script>
+
+		<script src="js/moment.min.js"></script>
+
+		<script src="js/printflow.js"></script>
+		<script src="js/printerconfig.js"></script>
+
+		<script src="js/js.cookie.js"></script>
+
 	
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
-
-	<!-- jQuery library -->
-	<script src="../jquery/jquery.min.js"></script>
-
-	<!-- Latest compiled JavaScript -->
-	<script src="../bootstrap/js/bootstrap.min.js"></script>
-
-	<!-- Latest v1 Angular -->
-	<script src="../angular/js/angular.min.js"></script>
-
-	<script src="js/moment.min.js"></script>
-
-	<script src="js/printflow.js"></script>
-	<script src="js/printerconfig.js"></script>
-
-	<script src="js/js.cookie.js"></script>
-
-	<link href="css/printflow.css" rel="stylesheet">
+		<link href="css/printflow.css" rel="stylesheet">
 </head>
 
 <body style="background-color: black;" onload="init();">
@@ -518,7 +530,7 @@
 				$('#cancellabel').show();
 				$('#pause').show();
 				clearTimeout(canceltimer);
-			}
+		}
 
 		function updateNetworkInfo() {
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
@@ -531,7 +543,12 @@
 					})
 					.fail(function () {
 					});
-			}
+		}
+
+		function progressbar() {
+			var bar1 = new ldBar("#myItem1");
+ 			var bar2 = document.getElementById('myItem1').ldBar;
+		}
 	</script>
 	<div class="screen">
 		<div class="main">
@@ -561,17 +578,16 @@
 			</div>
 			<div name="jobid" id="jobid" class="jobid">
 			</div>
-
 			<div class="printlayer" id="printlayer">
 				<img id="layerslice" class="layerslice" src=""></img>
 			</div>
 			<img name="windowframe" id="windowframe" class="windowframe">
 			<div name="pauseglyph" class="pauseglyph" id="pauseglyph"></div>
-			<div name="progressbardiv" class="progressbardiv">
-				<div id="progress" class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width:0%">
-					<span class="sr-only">70% Complete</span>
-				</div>
+			
+			<div name="progressbar" id="progressbar" class="progressbar">
+				<div class="ldBar" style="width:100%;height:60px", data-preset="line" data-value="90"></div>
 			</div>
+
 			<div name="webinfo" id="webinfo" class="webinfo">
 				<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 			</div>

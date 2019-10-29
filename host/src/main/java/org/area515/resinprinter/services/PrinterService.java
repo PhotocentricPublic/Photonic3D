@@ -1,7 +1,6 @@
 
 package org.area515.resinprinter.services;
 
-
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -516,7 +515,7 @@ public class PrinterService {
 			}
 			BufferedImage img = null;
 			try {
-				img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("PhotonicSplash.png"));
+				img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("display_test_to_be_hidden_GC.png"));
 			} catch (IOException e) {
 			    logger.error("Error showing logo for printer:" + printerName + " Location:" + getClass().getProtectionDomain().getCodeSource().getLocation(), e);
 				return new MachineResponse("showLogo" + this.getClass().getProtectionDomain().getCodeSource().getLocation(), false, e.getMessage());
