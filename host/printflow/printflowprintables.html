@@ -210,7 +210,26 @@
 			font-size: large;			
 		}
 
-
+		.previewmodelimage{
+			position: absolute; 
+			top: 368px; 
+			left: 400px;
+			height: 100px;
+			width: 100px;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			border: none;
+			border-style: solid;
+			border-color:#007e52;
+			color: black;
+			z-index: 1;
+			background-color: #007e57;
+		}
+	
+		
 		</style>
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="../resourcesnew/bootstrap/css/bootstrap.min.css">
@@ -306,9 +325,33 @@
 						});
 				}
 
+			function displayPreviewImage(){
+				var printfileName=$("#printables").val();
+				var ext = printfileName.split('.').pop();
+				ext = ext ? ext.toLowerCase() :"noimage";
+
+				var img=document.getElementById('previewmodelimage');	
+				img.src=undefined;
+				if (!ext || (ext!=="zip" && ext!=="cws" && ext=== "noimage") ) 
+				{
+					console.log ("no cursor 1");
+					img.src="images/brokenImage.png";
+					
+					return;
+				}
+
+				//var xx="../services/printables/downloadprintableimagefile/"+$("#printables").val();
+			
+				img.src="../services/printables/downloadprintableimagefile/"+$("#printables").val();
+				console.log ("cursor 2");
+				//img.alt="No image is available for this print file"
+				
+			}
+
 			function showcontrol(){
 				$('#deletecontainer').fadeIn();
 				$('#deletewarn').fadeOut();
+				displayPreviewImage();
 			}
 
 			function updateNetworkInfo(){ 
@@ -442,6 +485,9 @@
 				</div>
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+				</div>
+				<div>
+				<img class="previewmodelimage" src="images/brokenImage.png" id="previewmodelimage" alt="No preview image is available for this print file">
 				</div>
             </div>
         </div>
