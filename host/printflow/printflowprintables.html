@@ -6,14 +6,6 @@
 		*{
 			cursor: none;
 		}
-		/* img:before {
-		content: ' ';
-		position: absolute;
-		height: 100px;
-		width: 100px;
-		background-image: url(images/brokenImage.png);
-		background-color: #007e57;
-		} */
 
 		.printbutton { 
 			position: absolute; 
@@ -341,13 +333,16 @@
 				img.src=undefined;
 				if (!ext || ext!=="zip" /*|| ext==-"cws" TODO*/ || ext=== "noimage" ) 
 				{
+					console.log ("no cursor 1");
 					img.src="images/brokenImage.png";
+					
 					return;
 				}
 
 				//var xx="../services/printables/downloadprintableimagefile/"+$("#printables").val();
-
+			
 				img.src="../services/printables/downloadprintableimagefile/"+$("#printables").val();
+				console.log ("cursor 2");
 				//img.alt="No image is available for this print file"
 				
 			}
@@ -491,7 +486,7 @@
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>
 				<div>
-				<img class="previewmodelimage" id="previewmodelimage" alt="No preview image is available for this print file">
+				<img class="previewmodelimage" src="images/brokenImage.png"" id="previewmodelimage" alt="No preview image is available for this print file">
 				</div>
             </div>
         </div>

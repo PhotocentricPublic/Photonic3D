@@ -418,17 +418,19 @@ public class PrintableService {
 
 							havePreviewImage = unzip("preview.png",previewFileName, filePath, destDir);
 						}
-						
-						if (havePreviewImage){
-							InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));
-							ByteStreams.copy(streamImg, output);	
-							streamImg.close();
+						if (!havePreviewImage){
+							previewFileName= "brokenImage.png";
+							destDir= "./printflow/images/";
+							File previewFile2= new File(destDir, previewFileName);
+							boolean havePreviewImage2 = previewFile2.exists() ? true:false;
+							if (havePreviewImage2){
+								logger.info("Have brokenImage: ");
+							}
+							logger.info("PXR at brokenImage: ",havePreviewImage2 );
 						}
-						else{
-							logger.info("No preview image in file {}", extension);
-							Response.status(Response.Status.BAD_REQUEST).header("content-disposition","inline").build();
-							throw new WebApplicationException("No preview image in file");
-						}				
+						InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));	
+						ByteStreams.copy(streamImg, output);	
+						streamImg.close();		
 					}
 				} catch (IOException e) {}
 			}
