@@ -6,6 +6,14 @@
 		*{
 			cursor: none;
 		}
+		/* img:before {
+		content: ' ';
+		position: absolute;
+		height: 100px;
+		width: 100px;
+		background-image: url(images/brokenImage.png);
+		background-color: #007e57;
+		} */
 
 		.printbutton { 
 			position: absolute; 
@@ -333,7 +341,7 @@
 				img.src=undefined;
 				if (!ext || ext!=="zip" /*|| ext==-"cws" TODO*/ || ext=== "noimage" ) 
 				{
-					img.src="images/previewModelImage.png";
+					img.src="images/brokenImage.png";
 					return;
 				}
 

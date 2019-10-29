@@ -426,7 +426,7 @@ public class PrintableService {
 						}
 						else{
 							logger.info("No preview image in file {}", extension);
-							//Response.status(Response.Status.BAD_REQUEST).header("content-disposition","inline").build();
+							Response.status(Response.Status.BAD_REQUEST).header("content-disposition","inline").build();
 							throw new WebApplicationException("No preview image in file");
 						}				
 					}
