@@ -159,7 +159,6 @@
 				function goback() {
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z163 F600');
 					setTimeout(function () {
-						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 						$("#test").show();
 						$("#finish").show();
 						location.href = 'calibration_2.html';
@@ -180,10 +179,7 @@
 							$("#test").hide();
 							$("#finish").hide();
 							$("#back").hide();
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-								.done(function (data) {
-									goback();
-								});
+							goback();
 						}
 						else {
 							$('#warning').html("Please close the door and try again");
@@ -199,7 +195,6 @@
 				setTimeout(function () {
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/G28 Z0')
 					.done(function (data) {
-						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 						$("#test").show();
 						$("#back").show();
 						location.href = 'printflow.html';
@@ -220,10 +215,7 @@
 							$("#test").hide();
 							$("#finish").hide();
 							$("#back").hide();
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-								.done(function (data) {
-									moveup();
-								});
+							moveup();
 						}
 						else {
 							$('#warning').html("Please close the door and try again");
@@ -246,8 +238,7 @@
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z5 F300');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z-5 F300');
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400');
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g')
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400')
 						.done(function (data) {
 							$("#test").show();
 							$("#back").show();
@@ -264,10 +255,7 @@
 							$("#test").hide();
 							$("#back").hide();
 							$("#finish").hide();
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-								.done(function (data) {
-									moveupdown();
-								});
+							moveupdown();
 						}
 						else {
 							$('#warning').html("Please close the door and try again");

@@ -148,7 +148,6 @@
 						.done(function (data) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z-250 F600')
 							setTimeout(function () {
-								$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 								location.href = 'calibration_2.html';
 							}, 26000)
 						});
@@ -167,10 +166,7 @@
 						if (axisPos > -1) {
 							$("#start").hide();
 							$("#home").hide();
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-								.done(function (data) {
-									movedown();
-								});
+							movedown();
 						}
 						else {
 							$('#warning').html("Please close the door and try again");

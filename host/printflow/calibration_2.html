@@ -139,7 +139,6 @@
 				setTimeout(function () {
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/G28 Z0')
 						.done(function (data) {
-							$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 							location.href = 'calibration_1.html';
 						});
 				}, 3000);
@@ -157,10 +156,7 @@
 					if (axisPos > -1) {
 						$("#next").hide();
 						$("#back").hide();
-						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-							.done(function (data) {
-								goback();
-							});
+						goback();
 					}
 
 					else {
@@ -176,7 +172,6 @@
 			function movedown() {
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z-163 F500');
 				setTimeout(function () {
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 					location.href = 'calibration_3.html';
 				}, 20000);
 				$('#warning').html("Platform moving down. Please wait.");
@@ -193,10 +188,7 @@
 					if (axisPos > -1) {
 						$("#next").hide();
 						$("#back").hide();
-						$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g')
-							.done(function (data) {
-								movedown();
-							});
+						movedown();
 					}
 					else {
 						$('#warning').html("Please close the door and try again");

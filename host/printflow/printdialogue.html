@@ -416,7 +416,6 @@
 				$('#warning').show();
 				$.getJSON("../services/printJobs/togglePause/" + jobId);
 				setTimeout(function () {
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
 					$('#pause').show();
 					$('#warning').hide();
 					$('#cancellabel').show();
@@ -438,7 +437,6 @@
 				var text = JSON.stringify(result);
 				axisPos = text.indexOf("Y: not stopped");
 				if (axisPos > -1) {
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400');
 					$('#cancellabel').hide();
 					doResume();
@@ -458,7 +456,6 @@
 				var text = JSON.stringify(result);
 				axisPos = text.indexOf("Y: not stopped");
 				if (axisPos > -1) {
-					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
 					cancel();
 				}
 				else {
@@ -506,8 +503,7 @@
 			}
 
 		function cancel() {
-			$.getJSON("../services/printJobs/stopJob/" + jobId);
-			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Pcancel.g')
+			$.getJSON("../services/printJobs/stopJob/" + jobId)
 				.done(function (data) {
 					location.href = "printflow.html";
 				});
