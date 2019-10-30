@@ -83,6 +83,7 @@ public class HostProperties {
 	private static HostProperties INSTANCE = null;
 	private File uploadDir;
 	private File printDir;
+	private File monitoringDir;
 	private boolean fakeSerial = false;
 	private boolean removeJobOnCompletion = true;
 	private boolean forceCalibrationOnFirstUse = false;
@@ -182,6 +183,7 @@ public class HostProperties {
 	private HostProperties() {
 		String printDirString = null;
 		String uploadDirString = null;
+		String monitoringDirString = null;
 		
 		if (!PROFILES_DIR.exists() && !PROFILES_DIR.mkdirs()) {
 			logger.info("Couldn't make profiles directory. No write access or disk full?" );
@@ -196,6 +198,7 @@ public class HostProperties {
 		Properties configurationProperties = getMergedProperties();
 		printDirString = configurationProperties.getProperty("printdir");
 		uploadDirString = configurationProperties.getProperty("uploaddir");
+		monitoringDirString= configurationProperties.getProperty("monitoringdir");
 		
 		fakeSerial = new Boolean(configurationProperties.getProperty("fakeserial", "false"));
 		visibleCards = Arrays.asList(configurationProperties.getProperty("visibleCards", "printers,printJobs,printables,users,settings").split(","));
@@ -334,6 +337,12 @@ public class HostProperties {
 		} else {
 			uploadDir = new File(uploadDirString);
 		}
+
+		if (monitoringDirString == null) {
+			monitoringDir = new File(System.getProperty("user.home"), "monitoringdir");
+		} else {
+			monitoringDir = new File(monitoringDirString);
+		}
 		
 		File versionFile = new File("build.number");
 		if (versionFile.exists()) {
@@ -360,6 +369,14 @@ public class HostProperties {
 				FileUtils.forceMkdir(uploadDir);
 			} catch (IOException e) {
 				throw new IllegalArgumentException("Couldn't create upload directory", e);
+			}
+		}
+
+		if(!monitoringDir.exists()) {
+			try {
+				FileUtils.forceMkdir(monitoringDir);
+			} catch (IOException e) {
+				throw new IllegalArgumentException("Couldn't create monitoring directory", e);
 			}
 		}
 		
@@ -489,6 +506,10 @@ public class HostProperties {
 	
 	public File getUploadDir(){
 		return uploadDir;
+	}
+
+	public File getMonitoringDir(){
+		return monitoringDir;
 	}
 	
 	public File getUpgradeDir(){

@@ -83,6 +83,16 @@
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
+		.MD { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		.details { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
 		
 		.visiblelabel { 
 			position: absolute; 
@@ -144,7 +154,7 @@
 			function init(){
 				startpage();
 				pagelight();
-				setInterval(updateNetworkInfo(), 5000);
+				setInterval(updateAllInfo(), 5000);
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 			}
 
@@ -152,8 +162,11 @@
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R255 U0 B0');
 			}
 
+			function updateAllInfo() {
+				updateNetworkInfo();
+				updateMonitoringInfo();
+			}
 			function updateNetworkInfo() {
-
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 					.done(function (data) {
 						var IPs = "";
@@ -164,6 +177,35 @@
 					})
 					.fail(function () {
 					});
+			}
+
+			function updateMonitoringInfo() {
+				var moddata="Life Spent: "
+				$.getJSON('/services/machine/getUpdatedMonitoringData')
+					.done(function (data) {
+						var leftspend=data.ledlifespent;///3600;//ms- hours 17008001
+						leftspendHrs=(leftspend/(3600));
+						leftspendHrs=Math.round(leftspendHrs*100)/100;
+						var leftspendHrsStr=leftspendHrs.toString(10)+ " hours ";
+						
+						//
+						var color="#FFA500";//Orange
+						 if (leftspendHrs>5000){//4000 hours
+						 	color="#FF0000"
+						 }
+						 if (leftspendHrs>4000){//3800 hours
+							//var measuredTime = new Date(null);
+							//measuredTime.setSeconds(leftspend); // specify value of SECONDS
+							//var MHSTime = measuredTime.toISOString().substr(11, 8);
+							moddata+=leftspendHrsStr;//MS
+							document.getElementById("mondata").innerHTML =moddata;	
+							document.getElementById("mondata").style.color =color;
+						 }
+					})
+					.fail(function () {
+					});
+				  
+
 			}
 
 		</script>
@@ -181,8 +223,10 @@
 				<img name="network" id="network" class="network" src="images/menumainbuttonANIM.png" onClick="location.href='wifisettings.html';">
 				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
 					<div name="webinfo" id="webinfo" class="webinfo">
-						<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
+						<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>	
 					</div>
+					<div name="MD" id="MD" class="MD"><span id="mondata" class="details"></span></div>
+				
 				</div>
 			</div>
         </div>

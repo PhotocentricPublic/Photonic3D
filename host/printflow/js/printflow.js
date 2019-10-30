@@ -100,7 +100,7 @@ function wifiupdate(){
 	    .error(function () {
 	    	updateWifiURL(0);
 	    })
-}
+        }
             
 function printredirect(){
         if ((typeof printerName === 'undefined')||(String(window.location.href).indexOf("error.html") >= 0)) {

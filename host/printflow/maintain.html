@@ -295,6 +295,7 @@
 			
 			function testdisplay() {
 					$.getJSON('../services/printers/showLogo/GC%20Dental')
+
 						.done(function (data) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
