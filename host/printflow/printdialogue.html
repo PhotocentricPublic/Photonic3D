@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -75,19 +76,6 @@
 			-webkit-user-drag: none;
 			-webkit-user-select: none;
 			-ms-user-select: none;
-		}
-
-		.progressbardiv {
-			position: absolute;
-			top: 297px;
-			left: 253px;
-			width: 292px;
-			max-width: 292px;
-			height: 10px;
-			color: white;
-			font-size: 10px;
-			text-align: right;
-			z-index: 0;
 		}
 
 		.filename {
@@ -268,15 +256,39 @@
 			75% {color: rgba(128, 32, 0, 32);}
 			100% {color: rgba(128, 0, 0, 0);}
 		}
-
+	
 		.progressbar {
 			position: absolute;
-			top: 285px;
-			left: 304px;
-  			width: 350px;
- 			height: 20px;
+			top: 298px;
+			left: 350px;
+			border-radius: 14px;
 		}
 
+		progress[value] {
+			-webkit-appearance: none;
+  			appearance: none;
+  			width: 351px;
+ 			height: 10px;
+		}
+
+		progress[value]::-webkit-progress-bar {
+			border-radius: 20px;
+  			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+			  background: #eef1f3;
+		}
+
+		progress[value]::-webkit-progress-value {
+  			background-image:
+	   			-webkit-linear-gradient(-45deg, 
+	                transparent 33%, rgba(0, 0, 0, .1) 33%, 
+	                rgba(0,0, 0, .1) 66%, transparent 66%),
+	   			-webkit-linear-gradient(top, 
+	                rgba(255, 255, 255, .25), 
+	                rgba(0, 0, 0, .25)),
+	   			-webkit-linear-gradient(left, #F5B041, #75b800);
+    			border-radius: 20px; 
+    			background-size: 35px 20px, 100% 100%, 100% 100%;
+		}
 	</style>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
@@ -385,7 +397,8 @@
 						document.getElementById("totaltimes").innerHTML = moment.duration(endtime - starttime).humanize();
 						initialsliceurl = "../services/printJobs/currentSliceImage/" + jobId;
 						document.getElementById("layerslice").src = initialsliceurl + "?q=" + currentslice;
-						document.getElementById("progress").style = "width:" + parseInt((currentslice / totalslices) * 100) + "%";
+						var v = document.getElementById("jobProgress");
+						v.value = parseInt((currentslice / totalslices) * 100);
 					}
 					else {
 						// double check sliceHeight. If it's a crazy value, do not do the thing with raising the bed. We don't want a Z collision.
@@ -536,10 +549,11 @@
 					});
 		}
 
-		function progressbar() {
-			var bar1 = new ldBar("#myItem1");
- 			var bar2 = document.getElementById('myItem1').ldBar;
+		function myFunction() {
+  			var x = document.getElementById("myProgress").value;
+  			document.getElementById("demo").innerHTML = x;
 		}
+
 	</script>
 	<div class="screen">
 		<div class="main">
@@ -575,10 +589,9 @@
 			<img name="windowframe" id="windowframe" class="windowframe">
 			<div name="pauseglyph" class="pauseglyph" id="pauseglyph"></div>
 			
-			<div name="progressbar" id="progressbar" class="progressbar">
-				<div class="ldBar" style="width:100%;height:60px", data-preset="line" data-value="90"></div>
+			<div name="progressbar" class="progressbar" id="progressbar">
+			<progress id="jobProgress" name="jobProgress" class="jobProgress" value="" max="100"></progress>
 			</div>
-
 			<div name="webinfo" id="webinfo" class="webinfo">
 				<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 			</div>
