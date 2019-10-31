@@ -7,7 +7,7 @@
 			}
 		.homebutton{
 			position: absolute; 
-			top: 185px; 
+			top: 100px; 
 			left: 85px;
 			height: 110px;
 			width: 110px; 
@@ -17,6 +17,7 @@
 			-webkit-user-select: none;
 			-ms-user-select: none;
 		}
+
 		.LedOn{
 			position: absolute; 
 			top: 100px; 
@@ -134,12 +135,21 @@
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
+
+		.whitecure {
+			position: absolute; 
+			top: 270px;
+			left: 72px;
+			height: 110px;
+			width: 110px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+		}
         </style>
-		<style type="text/css">
-			* {
-				cursor: none;
-			}
-		</style>
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
@@ -194,6 +204,45 @@
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R50 U0 B225');
 			}
 
+			function loadcustomizer(){
+				var url  = "http://localhost:9091/services/customizers/upsert";
+				var xhr = new XMLHttpRequest();
+				var data = {
+				"name": "display_cure_to_be_hidden.zip.GC Dental",
+				"printerName": "GC Dental",
+				"printableName": "display_cure_to_be_hidden",
+				"printableExtension": "zip",
+				"supportsAffineTransformSettings": true,
+				"affineTransformSettings": {
+				"rotation": 0,
+				"affineTransformScriptCalculator": null,
+				"xscale": 1,
+				"yscale": 1,
+				"xflip": false,
+				"yflip": false,
+				"xshear": 0,
+				"yshear": 0,
+				"ytranslate": 0,
+				"xtranslate": 0
+				},
+				"externalImageAffectingState": "2019",
+				"cacheId": "245fdeea902fdbfc7790034cdd5fd110838c0e21",
+				"nextSlice": 0,
+				"nextStep": "PerformHeader",
+				"imageManipulationCalculator": null,
+				"zscale": 1
+				}
+				xhr.open("POST",url, true);
+				//Send the proper header information along with the request
+				xhr.setRequestHeader("Content-Type", "application/json");
+				xhr.setRequestHeader("Accept", "application/json");
+				xhr.onreadystatechange = function() { // Call a function when the state changes.
+					if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+						// Request finished. Do processing here.
+					}
+				}
+				xhr.send(JSON.stringify(data));;
+			}
 			
 			function changez(height) {
 				if ((parseInt(document.getElementById("zdata").innerHTML)+parseInt(height))<600) {
@@ -266,7 +315,7 @@
 					}, 10000);
 				}
 
-			function lightoff(){
+			function lightoff() {
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
 				$.getJSON('../services/printers/showBlankScreen/GC Dental');
 				$("#LedOn").show();
@@ -275,7 +324,7 @@
 				 clearTimeout(lighttimer2);
 			}
 
-			function hbutton(){
+			function hbutton() {
 				$.getJSON('../services/printers/showBlankScreen/GC Dental');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M42 P0 S0');
 				$.getJSON('../services/printers/executeGCode/'+printerName+'/M106 P0 S0')
@@ -294,8 +343,7 @@
 				}
 			
 			function testdisplay() {
-					$.getJSON('../services/printers/showLogo/GC%20Dental')
-
+					$.getJSON('../services/printers/showLogo/GC Dental')
 						.done(function (data) {
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
 							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
@@ -362,6 +410,27 @@
 						.fail(function () {
 						});
 				}
+				
+				function whitecurescr() {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/G28 Z0');
+					$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_cure_to_be_hidden.zip.GC Dental')
+						.done(function (data) {
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S1');
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
+							$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1');
+							$("#togglebutton").hide();
+						});
+					setTimeout(function () {
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
+						$.getJSON('../services/printers/showBlankScreen/GC Dental')
+					.done(function (data) {
+						$("#homeZ").show();
+						$("#calibrate").show();
+						$("#homebutton").show();
+						//add more elements here...
+					});
+					}, 30000);
+				}
 
 			</script>
         <div class="screen">
@@ -374,6 +443,7 @@
 					<img name="calibrate" id="calibrate" class="calibrate" src="images/menumainbuttonANIM.png" onClick="calibutton();"/>
 					<img name="homeZ" id="homeZ" class="homeZ" src="images/menumainbuttonANIM.png" onclick="Doliftcheck();"/>
 					<img name="testdisplaybtn" id="testdisplaybtn" class="testdisplaybtn" src="images/menumainbuttonANIM.png" onClick="testdisplay();"/>
+					<img name="whitecure" id="whitecure" class="whitecure" src="images/menumainbuttonANIM.png" onClick="whitecurescr();"/>
 				</map>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
