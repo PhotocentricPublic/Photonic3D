@@ -237,10 +237,10 @@ public class Main {
 		}
 
 		//PXR - clean up preview image directory
-		String prevFilesDir="./unzippedPreview/";
-		File dir =Paths.get(HostProperties.Instance().getWorkingDir().toString(), prevFilesDir).toFile();
+		String prevFilesDir="unzippedPreview/";
+		File dir =Paths.get("./", prevFilesDir).toFile();
 		try{
-			logger.info("pxr deleteDirectory");
+			logger.info("pxr deleteDirectory {} ",HostProperties.Instance().getWorkingDir().toString());
 			FileUtils.deleteDirectory(dir);
 		}
 		catch (IOException e){

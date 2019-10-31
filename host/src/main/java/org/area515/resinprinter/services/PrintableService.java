@@ -423,11 +423,10 @@ public class PrintableService {
 					}	
 				}
 			} catch (FileNotFoundException e) {
-				logger.info("downloadPrintableImageFile IOException: ");
+				//logger.info("downloadPrintableImageFile IOException: ");
 				havePreviewImage=false;
 			}
 			if (!havePreviewImage){
-				logger.info("downloadPrintableImageFile in !havePreviewImage: ");
 				previewFileName= "brokenImage.png";
 				destDir = "./printflow/images/";
 			
@@ -437,12 +436,10 @@ public class PrintableService {
 					//logger.info("Have brokenImage: ");
 				}
 			}	
-			logger.info("downloadPrintableImageFile in !destDir {} : previewFileName {} ", destDir,previewFileName);
 		
 			InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));	
 				ByteStreams.copy(streamImg, output);	
 				streamImg.close();	
-			//logger.info("PXR at brokenImage: ",havePreviewImage2 );
 		}
 		
 	};
