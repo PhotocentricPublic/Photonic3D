@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -395,45 +396,52 @@ public class PrintableService {
 		StreamingOutput stream = new StreamingOutput() {
 		@Override
 		public void write(OutputStream  output) throws IOException, WebApplicationException {
-			InputStream stream = new FileInputStream(new File(HostProperties.Instance().getUploadDir(), fileName));
-				try {
-					stream.close();
-					File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
-					String extension = getFileExtension(fullPath);
-					//extension=extension.toLowerCase();
+			logger.info("downloadPrintableImageFile write:: {}",fileName);
+			boolean havePreviewImage=false;
+			String previewFileName="";
+			String destDir = "./unzippedPreview/";
+			try {
+				InputStream stream = new FileInputStream(new File(HostProperties.Instance().getUploadDir(), fileName));
+				stream.close();
+				File fullPath=new File(HostProperties.Instance().getUploadDir(), fileName);
+				String extension = getFileExtension(fullPath);
+				extension=extension.toLowerCase();
+				logger.info("downloadPrintableImageFile extension:: {}",extension);
+				String fileNameNoExtension =fileName.substring(0,fileName.lastIndexOf("."));
+				
+				if (extension.equals(".zip") || extension.equals(".cws"))
+				{
+					previewFileName=fileNameNoExtension+".png";
 
-					String fileNameNoExtension =fileName.substring(0,fileName.lastIndexOf("."));
-
-					if (extension.equals(".zip") || extension.equals(".cws"))
-					{
-						String destDir = "./unzippedPreview/";
-						String previewFileName=fileNameNoExtension+".png";
-
-						File previewFile= new File(destDir, previewFileName);
-                        boolean havePreviewImage = previewFile.exists() ? true:false;
-						if (!havePreviewImage)
-						{
-							String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
-							logger.info("PXR going into Unzip  :=================");
-
-							havePreviewImage = unzip("preview.png",previewFileName, filePath, destDir);
-						}
-						if (!havePreviewImage){
-							previewFileName= "brokenImage.png";
-							destDir= "./printflow/images/";
-							File previewFile2= new File(destDir, previewFileName);
-							boolean havePreviewImage2 = previewFile2.exists() ? true:false;
-							if (havePreviewImage2){
-								logger.info("Have brokenImage: ");
-							}
-							logger.info("PXR at brokenImage: ",havePreviewImage2 );
-						}
-						InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));	
-						ByteStreams.copy(streamImg, output);	
-						streamImg.close();		
-					}
-				} catch (IOException e) {}
+					File previewFile= new File(destDir, previewFileName);
+					havePreviewImage = previewFile.exists() ? true:false;
+					if (!havePreviewImage)
+					{	
+						String filePath =HostProperties.Instance().getUploadDir()+"/"+ fileName;
+						logger.info("PXR going into Unzip  :=================");
+						havePreviewImage = unzip("preview.png",previewFileName, filePath, destDir);
+					}	
+				}
+			} catch (FileNotFoundException e) {
+				//logger.info("downloadPrintableImageFile IOException: ");
+				havePreviewImage=false;
 			}
+			if (!havePreviewImage){
+				previewFileName= "brokenImage.png";
+				destDir = "./printflow/images/";
+			
+				File previewFile2= new File(destDir, previewFileName);
+				boolean havePreviewImage2 = previewFile2.exists() ? true:false;
+				if (havePreviewImage2){
+					//logger.info("Have brokenImage: ");
+				}
+			}	
+		
+			InputStream streamImg = new FileInputStream(new File(destDir, previewFileName));	
+				ByteStreams.copy(streamImg, output);	
+				streamImg.close();	
+		}
+		
 	};
 	
 	logger.info("PXR at end {}" );

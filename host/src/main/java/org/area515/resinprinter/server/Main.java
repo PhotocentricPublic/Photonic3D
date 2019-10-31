@@ -1,6 +1,8 @@
 package org.area515.resinprinter.server;
 
 import java.io.IOException;
+import java.io.File;
+import java.nio.file.Paths;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -13,10 +15,12 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+
 import javax.naming.InvalidNameException;
 import javax.servlet.ServletException;
 import javax.websocket.server.ServerContainer;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.notification.NotificationManager;
@@ -230,6 +234,17 @@ public class Main {
 			if (configuration.isAutoStart()) {
 				PrinterService.INSTANCE.startPrinter(configuration.getName());
 			}
+		}
+
+		//PXR - clean up preview image directory
+		String prevFilesDir="unzippedPreview/";
+		File dir =Paths.get("./", prevFilesDir).toFile();
+		try{
+			logger.info("pxr deleteDirectory {} ",HostProperties.Instance().getWorkingDir().toString());
+			FileUtils.deleteDirectory(dir);
+		}
+		catch (IOException e){
+			logger.error("Error deleting unzippedPreview folder", e);
 		}
 
 		//At this point we can safely say that a startup is officially complete.
