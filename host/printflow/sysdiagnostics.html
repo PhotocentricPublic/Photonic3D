@@ -1,0 +1,161 @@
+<html>
+    <head>
+        <title>systemdiagnostics</title>
+        <style>
+			*{
+				cursor: none;
+			}
+			::-webkit-scrollbar
+			{
+    		width:0px;
+			}
+			::-webkit-scrollbar-track-piece
+			{
+   			background-color:transparent;
+			}
+		.nettitle { 
+			font-size: 20px;
+			padding-bottom: 5px;
+		}
+		.controllerFW {
+			font-weight: bold; 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		.controllerVoltage{
+			font-weight: bold; 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		.SSID { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		
+		.details { 
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		
+		.visiblelabel { 
+			position: absolute; 
+			top: 65px; 
+			left: 460px;
+			width:350px;
+			color: white;
+			text-align: left;
+			padding-left: 20px;
+			padding-top: 5px;
+			font-size: 20px;
+			z-index: 2;
+		}
+
+		
+		.home{
+			position: absolute; 
+			top: 360px; 
+			left: 25px;
+			height: 90px;
+			width: 80px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 3;
+		}
+		.connect{
+			position: absolute; 
+			top: 360px; 
+			left: 690px;
+			height: 90px;
+			width: 90px;
+			user-drag: none; 
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 3;
+		}
+				
+
+		</style>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="../jquery/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+
+<!-- Latest v1 Angular -->
+<script src="../angular/js/angular.min.js"></script>
+
+<script src="js/moment.min.js"></script>
+
+<script src="js/printflow.js"></script>
+<script src="js/printerconfig.js"></script>
+
+<script src="js/js.cookie.js"></script>
+
+<link href="css/printflow.css" rel="stylesheet">
+    </head>
+    <body style="background-color: black;" onload="init();">
+		<script>
+			function init(){
+				startpage();
+				setInterval(updateDuetFimrwareInfo(), 10000);
+			}
+
+			function updateDuetFimrwareInfo(){
+
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M115')
+				.done(function(result){
+					var text = JSON.stringify(result);
+					document.getElementById("controllerFW").innerHTML=text;
+					
+				})
+				.fail(function(){
+					document.getElementById("controllerFW").innerHTML="failed";
+				});
+
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M122')
+				.done(function(result){
+					var text = JSON.stringify(result);
+					document.getElementById("controllerVoltage").innerHTML=text;
+					
+				})
+				.fail(function(){
+					document.getElementById("controllerVoltage").innerHTML="failed";
+				});
+				
+			}
+		
+		</script>
+		
+        <div class="screen">
+            <div class="main">
+				<img src="images/wifisettings.png" usemap="wifisettings" class="uilayer"></img>
+				<div name="visiblelabel" class="visiblelabel" id="visiblelabel" >System Diagnostics</div>
+				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
+				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
+				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
+					<div name="info" id="info" class="info">
+						<div name="nettitle" id="nettitle" class="nettitle">Controller Info</div>
+						<div name="controllerFW" id="controllerFW" class="controllerFW">Controller: firmware:<br/><span id="controllerFW" class="controllerFW"></span>.local</div>
+						<div name="controllerVoltage" id="controllerVoltage" class="controllerVoltage">Controller: controllerVoltage:<br/><span id="controllerVoltage" class="controllerVoltage"></span>.local</div>
+					</div>
+				</div>
+				<div name="home" class="home" id="home" onClick="location.href='printflow.html';"><img src="images/menumainbuttonANIM.png"></div>
+            </div>
+        </div>
+    </body>
+</html>

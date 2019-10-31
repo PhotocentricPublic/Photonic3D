@@ -207,6 +207,21 @@
 				  
 
 			}
+			var startTime = new Date().getTime();
+			//var startCalled=false;
+			function settingsTouchStart (){
+				startTime = new Date().getTime();
+				//startCalled=true;
+			}
+
+			function settingsTouchEnd (){
+				var endNow =  new Date().getTime();
+				if (startCalled==true && (endNow-startTime> 100000)){
+					//startCalled=false;
+					window.location.href="sysdiagnostics.html";
+				}
+			}
+
 
 		</script>
 		
@@ -219,7 +234,7 @@
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printflowprintables.html';"/>
 				<img name="maintain" id="maintain" class="maintain" src="images/menumainbuttonANIM.png" onClick="location.href='maintain.html';">
-				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='printflowsettings.html';">
+				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='printflowsettings.html';" ontouchstart=settingsTouchStart()  ontouchend=settingsTouchEnd()>
 				<img name="network" id="network" class="network" src="images/menumainbuttonANIM.png" onClick="location.href='wifisettings.html';">
 				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
 					<div name="webinfo" id="webinfo" class="webinfo">
