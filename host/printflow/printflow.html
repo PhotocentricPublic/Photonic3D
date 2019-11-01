@@ -152,6 +152,14 @@
 		<script>
 
 			function init(){
+				var touchable = 'createTouch' in document;
+				if(touchable) {
+					var myElement = document.getElementById("settings");
+					myElement.addEventListener( 'touchstart', settingsTouchStart, false );
+					//
+					myElement.addEventListener( 'touchend', settingsTouchEnd, false );
+				}
+
 				startpage();
 				pagelight();
 				setInterval(updateAllInfo(), 5000);
