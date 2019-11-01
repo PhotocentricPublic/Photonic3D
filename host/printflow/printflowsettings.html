@@ -139,6 +139,10 @@
 			}
 
 			function updateMonitoringInfo() {
+
+				var touchable = 'createTouch' in document;
+
+
 				var moddata="Life Spent: "
 				var ncancels="     Prints cancelled: "
 				$.getJSON('/services/machine/getUpdatedMonitoringData')
@@ -150,7 +154,8 @@
 						moddata+=MHSTime;//MS
 						moddata+=ncancels;
 						moddata+=data.cancelled_count;
-						document.getElementById("mondata").innerHTML =moddata;	
+						document.getElementById("mondata").innerHTML =moddata+" dev- touch:"+touchable;	
+						settingsTouchStart
 					})
 					.fail(function () {
 					});
@@ -175,6 +180,7 @@
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>
 				<div name="MD" id="MD" class="MD"><span id="mondata" class="details"></span></div>
+				<div><p>dev<p></div>
 			</div>
         </div>	
     </body>
