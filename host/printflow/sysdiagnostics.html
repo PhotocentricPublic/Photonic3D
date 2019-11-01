@@ -119,7 +119,9 @@
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M115')
 				.done(function(result){
 					var text = JSON.stringify(result);
-					document.getElementById("controllerFW").innerHTML=text;
+
+					result.message="FIRMWARE_NAME: RepRapFirmware for PC001373 FIRMWARE_VERSION: 3.0beta5+2 ELECTRONICS: PC001373 FIRMWARE_DATE: 2019-06-19b1 ok "
+					document.getElementById("controllerFW").innerHTML=result.message;
 					
 				})
 				.fail(function(){
@@ -129,7 +131,57 @@
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M122')
 				.done(function(result){
 					var text = JSON.stringify(result);
-					document.getElementById("controllerVoltage").innerHTML=text;
+
+// 					"=== Diagnostics ===
+// RepRapFirmware for PC001373 version 3.0beta5+2 running on PC001373
+// Board ID: 08DGM-996GL-FG3S0-7J1FJ-3S46S-T9G7F
+// Used output buffers: 1 of 24 (7 max)
+// === RTOS ===
+// Static ram: 15136
+// Dynamic ram: 62960 of which 0 recycled
+// Exception stack ram used: 260
+// Never used ram: 52716
+// Tasks: HEAT(blocked,1476) MAIN(running,3904) IDLE(ready,160)
+// Owned mutexes:
+// === Platform ===
+// Last reset 18:32:33 ago, cause: power up
+// Last software reset details not available
+// Error status: 0
+// Free file entries: 10
+// SD card 0 detected, interface speed: 15.0MBytes/sec
+// SD card longest block write time: 0.0ms, max retries 0
+// MCU temperature: min 26.5, current 26.8, max 27.2
+// Supply voltage: min 24.1, current 24.1, max 24.2, under voltage events: 0, over voltage events: 0, power good: yes
+// Driver 0: standstill, SG min/max not available
+// Driver 1: standstill, SG min/max not available
+// Driver 2: ok, SG min/max not available
+// Driver 3: ok, SG min/max not available
+// Driver 4: ok, SG min/max not available
+// Driver 5: ok, SG min/max not available
+// Driver 6: ok, SG min/max not available
+// Date/time: 1970-01-01 00:00:00
+// Slowest loop: 0.24ms; fastest: 0.07ms
+// I2C nak errors 0, send timeouts 0, receive timeouts 0, finishTimeouts 0, resets 0
+// === Move ===
+// Hiccups: 0, FreeDm: 169, MinFreeDm: 169, MaxWait: 0ms
+// Bed compensation in use: none, comp offset 0.000
+// === DDARing ===
+// Scheduled moves: 0, completed moves: 0, StepErrors: 0, LaErrors: 0, Underruns: 0, 0
+// === Heat ===
+// Bed heaters = -1, chamberHeaters = -1
+// === GCodes ===
+// Segments left: 0
+// Stack records: 1 allocated, 0 in use
+// Movement lock held by null
+// file is idle in state(s) 0
+// serial is ready with "M122" in state(s) 0
+// daemon is idle in state(s) 0
+// queue is idle in state(s) 0
+// autopause is idle in state(s) 0
+// Code queue is empty.
+// ok
+// "
+					document.getElementById("controllerVoltage").innerHTML=result.message;
 					
 				})
 				.fail(function(){

@@ -208,15 +208,17 @@
 
 			}
 			var startTime = new Date().getTime();
+		
 			//var startCalled=false;
 			function settingsTouchStart (){
 				startTime = new Date().getTime();
+				window.alert("touch down")
 				//startCalled=true;
 			}
 
 			function settingsTouchEnd (){
 				var endNow =  new Date().getTime();
-				if (startCalled==true && (endNow-startTime> 100000)){
+				if (startCalled==true && (endNow-startTime> 10000)){
 					//startCalled=false;
 					window.location.href="sysdiagnostics.html";
 				}
