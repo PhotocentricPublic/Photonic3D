@@ -25,7 +25,7 @@
          "MonitorDriverConfig":{  
             "DLP_X_Res":3840,
             "DLP_Y_Res":2160,
-            "OSMonitorID":":Raspberry Pi Force TV",
+            "OSMonitorID":"Raspberry Pi Force TV",
             "DisplayCommEnabled":false,
             "ComPortSettings":{  
                "PortName":null,
