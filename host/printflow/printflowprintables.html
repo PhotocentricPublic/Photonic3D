@@ -158,7 +158,7 @@
 		.deleteallcheck {
 			position: absolute; 
 			top: 110px; 
-			left: 700px;
+			left: 600px;
 			width:200px;
 			height: 210px;
 		}
@@ -317,6 +317,7 @@
 			}
 
 			function dodeletecheck() {
+					$('#deleteallcheck').hide();
 					if ($("#printables").val() !== null) {
 						var maxlength = 20; //sorry, magic number. best fit for the font size and screen element size
 						var smallfname = $("#printables").val();
@@ -400,12 +401,13 @@
 			function dodeleteallcheck() {
 				     var xx=$("#printables");
 					 var length=xx[0].length;
-
+					 $('#deleteallcheck').css('z-index', 50);
+					 $('#deletecheck').hide();
 					 if (length>0){
 						document.getElementById("deleteallquery").innerHTML = "Are you sure you want to delete all the print files?<br><br><br>";
 						$('#deleteallwarn').fadeIn();
 						$('#deleteallwarn').css('z-index', 50);
-						//$('#deleteallcontainer').fadeOut();
+						
 						
 					 }
 				}
@@ -555,6 +557,9 @@
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<img name="printbutton" id="printbutton" class="printbutton" src="images/pixel.png" onClick="startPrint();"/>
 				<img name="refresh_prints" id="refresh_prints" class="refresh_prints" src="images/menumainbuttonANIM.png" onClick="refreshFunction();"/> 		
+				
+
+
 				
 				<div class="deleteallcontainer" id="deleteallcontainer"><img name="deleteall" id="deleteall" class="deleteall" src="images/delete_all.png" onclick="dodeleteallcheck();"></div>
 				<div name="printallwarn" id="allwarn" class="allwarn"><div id="allwarning" role="alert" class="alert alert-danger collapse" ></div></div>
