@@ -1,6 +1,6 @@
 {  
    "configuration":{  
-      "name":"Photocentric Magna",
+      "name":"GC Dental",
       "machineConfig":{  
          "FileVersion":0,
          "PlatformXSize":309.31,
@@ -25,8 +25,8 @@
          "MonitorDriverConfig":{  
             "DLP_X_Res":3840,
             "DLP_Y_Res":2160,
-            "OSMonitorID":":0.0",
-            "DisplayCommEnabled":false,
+            "OSMonitorID":"Raspberry Pi Main LCD",
+            "DisplayCommEnabled":true,
             "ComPortSettings":{  
                "PortName":null,
                "Handshake":"None"
@@ -86,7 +86,7 @@
             }
          ]
       },
-      "MachineConfigurationName":"Photocentric Magna",
+      "MachineConfigurationName":"GC Dental",
       "SlicingProfileName":"Hard daylight red 0.1",
       "AutoStart":true
    },
