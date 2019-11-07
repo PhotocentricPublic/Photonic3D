@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PrintJob {
 	private volatile int totalSlices = 0;
+	private volatile int estimatedSliceTime = 0;
 	private volatile long currentSliceTime = 0;
 	private volatile long averageSliceTime = 0;
 	private volatile long startTime = 0;
@@ -132,6 +133,13 @@ public class PrintJob {
 	}
 	public void setTotalSlices(int totalSlices){
 		this.totalSlices = totalSlices;
+	}
+
+	public int getestimatedSliceTime(){
+		return estimatedSliceTime;
+	}
+	public void setestimatedSliceTime(int totalSlices){
+		this.estimatedSliceTime = totalSlices;
 	}
 	
 	@JsonIgnore

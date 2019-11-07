@@ -88,6 +88,15 @@
 			overflow: hidden;
 		}
 
+		.MD { 
+			font-weight: bold;
+			position: absolute; 
+			color: white;
+			font-size: 0;
+			top: 360px; 
+			left: 300px;
+
+		}
 		</style>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
@@ -115,7 +124,30 @@
 		<script>
 			function init(){
 				startpage();
-				setInterval(updateNetworkInfo(), 10000);
+				setInterval(updateAllInfo(), 10000);
+			}
+
+			function updateAllInfo() {
+				updateNetworkInfo();
+				updateMonitoringInfo();
+			}
+
+			function updateMonitoringInfo() {
+				var moddata="<br>Display UV exposure: "
+				var ncancels="<br>Total prints cancelled: "
+				$.getJSON('/services/machine/getUpdatedMonitoringData')
+					.done(function (data) {
+						var leftspend=data.ledlifespent;///3600;//ms- hours
+						var measuredTime = new Date(null);
+						measuredTime.setSeconds(leftspend); // specify value of SECONDS
+						var MHSTime = measuredTime.toISOString().substr(11, 8);
+						moddata+=MHSTime;//MS
+						moddata+=ncancels;
+						moddata+=data.cancelled_count;
+						document.getElementById("mondata").innerHTML =moddata;	
+					})
+					.fail(function () {
+					});
 			}
 
 			function sortBy(jsonArray, key){
@@ -156,9 +188,7 @@
 						.fail(function () {
 						});
 				}
-
-		</script>
-		
+		</script>	
         <div class="screen">
             <div class="main">
 				<img src="images/syslog.png" usemap="syslog" class="uilayer">
@@ -175,9 +205,8 @@
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>
+				<div name="MD" id="MD" class="MD"><span id="mondata" class="details"></span></div>
 			</div>
         </div>
-
-	
     </body>
 </html>

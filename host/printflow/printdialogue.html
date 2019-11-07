@@ -331,10 +331,12 @@
 			setInterval(updateNetworkInfo(), 10000);
 			$.getJSON('../services/printJobs/getByPrinterName/' + printerName)
 				.done(function (data) {
+					console.log(data);
 					temp = data;
 					starttime = parseInt(data.startTime);
 					currentslice = parseInt(data.currentSlice);
 					totalslices = parseInt(data.totalSlices);
+					estimatedSliceTime = parseInt(data.estimatedSliceTime);
 					jobId = (data.id);
 					runningjobName = (data.jobName);
 					totalslices = parseInt(data.totalSlices);

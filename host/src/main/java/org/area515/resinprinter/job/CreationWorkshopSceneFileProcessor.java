@@ -150,10 +150,12 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			stream = new BufferedReader(new FileReader(gCodeFile));
 			String currentLine;
 			Integer sliceCount = null;
+			Integer estimatedSliceTime = null;
 			Pattern slicePattern = Pattern.compile("\\s*;\\s*<\\s*Slice\\s*>\\s*(\\d+|blank)\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern liftSpeedPattern = Pattern.compile(   "\\s*;\\s*\\(?\\s*Z\\s*Lift\\s*Feed\\s*Rate\\s*=\\s*([\\d\\.]+)\\s*(?:[Mm]{2}?/[Ss])?\\s*\\)?\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern liftDistancePattern = Pattern.compile("\\s*;\\s*\\(?\\s*Lift\\s*Distance\\s*=\\s*([\\d\\.]+)\\s*(?:[Mm]{2})?\\s*\\)?\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern sliceCountPattern = Pattern.compile("\\s*;\\s*Number\\s*of\\s*Slices\\s*=\\s*(\\d+)\\s*", Pattern.CASE_INSENSITIVE);
+			Pattern estimatedSliceTimePattern = Pattern.compile("\\s*;\\EstimatedSliceTime\\s*=\\s*(\\d+)\\s*", Pattern.CASE_INSENSITIVE);
 			
 			//We can't set these values, that means they aren't set to helpful values when this job starts
 			//data.printJob.setExposureTime(data.inkConfiguration.getExposureTime());
@@ -226,6 +228,14 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						sliceCount = Integer.parseInt(matcher.group(1));
 						printJob.setTotalSlices(sliceCount);
 						logger.info("Found:{} slices", sliceCount);
+						continue;
+					}
+
+					matcher = estimatedSliceTimePattern.matcher(currentLine);
+					if (matcher.matches()) {
+						estimatedSliceTime = Integer.parseInt(matcher.group(1));
+						printJob.setestimatedSliceTime(estimatedSliceTime);
+						logger.info("Found estimated slice time:{} ms", estimatedSliceTime);
 						continue;
 					}
 					
