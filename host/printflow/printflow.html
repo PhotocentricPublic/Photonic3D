@@ -150,7 +150,7 @@
 			function init(){
 				startpage();
 				pagelight();
-				setInterval(updateMonitoringInfo(), 5000);
+				setInterval(updateNetworkInfo(), 5000);
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 			}
 
