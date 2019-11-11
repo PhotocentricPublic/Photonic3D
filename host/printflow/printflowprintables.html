@@ -318,62 +318,7 @@
 				}
 			}
 
-			function dodeletecheck() {
-				g_doDeleteALL=false;
-
-				if ($("#printables").val() !== null) {
-					var maxlength = 20; //sorry, magic number. best fit for the font size and screen element size
-					var smallfname = $("#printables").val();
-					var extension = smallfname.split(".")[smallfname.split(".").length - 1];
-					if ($("#printables").val().length > maxlength) {
-						smallfname = smallfname.substring(0, smallfname.length - 1 - extension.length).match(/[A-Z,a-z]+\w{0,12}/g).join('&#8203;') + "&#8203;." + extension + "";
-					}
-					document.getElementById("deletequery").innerHTML = "Are you sure you want to delete " + smallfname + "?<br><br><br>";
-					$('#deletewarn').fadeIn();
-					$('#deletewarn').css('z-index', 50);
-					$('#deletecontainer').fadeOut();
-				}
-			}
-				
-			function deletefile() {
-					$.getJSON("../services/printables/delete/" + encodeURIComponent($("#printables").val()))
-						.done(function () {
-							document.getElementById("deletequery").innerHTML = "";
-							$('#deletewarn').css('z-index', -50);
-							$('#deletewarn').hide();
-							$('#deletecontainer').hide();
-							var options = $("#printables option"); // Collect options         
-							options.detach();
-							if ($("#sortprintables").is(':hidden')) {
-								fillListbyName();
-							}
-							else if ($("#refreshlist").is(':hidden')) {
-								fillList();
-							}
-							else {
-							}
-						})
-						.fail(function () {
-							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
-							$('#warning').show();
-							setTimeout(function () {
-								$('#warning').hide();
-							}, 5000);
-						});
-				}
-				function deletefile(fileName) {
-					$.getJSON("../services/printables/delete/" + encodeURIComponent(fileName))
-						.done(function () {
-							//DO nothing - yet
-						})
-						.fail(function () {
-							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
-							$('#warning').show();
-							setTimeout(function () {
-								$('#warning').hide();
-							}, 5000);
-						});
-				}
+			
 
 			function displayPreviewImage(){
 				var printfileName=$("#printables").val();
@@ -397,53 +342,6 @@
 				$('#deletecontainer').fadeIn();
 				$('#deletewarn').fadeOut();
 				displayPreviewImage();
-			}
-
-			function dodeleteallcheck() {
-				g_doDeleteALL=true;
-				document.getElementById("deletequery").innerHTML = "Are you sure you want to delete all the print files?<br><br><br>";
-				$('#deletewarn').fadeIn();
-				$('#deletewarn').css('z-index', 50);
-				$('#deletecontainer').fadeOut();
-			}
-
-			function dodelete(){
-				console.log ("in dodelete")
-				if (g_doDeleteALL==true){
-					deleteAllfiles();
-					g_doDeleteALL=false;
-				}
-				else {
-					deletefile();
-				}
-				$('#deletewarn').hide();
-
-			}
-
-			function deleteAllfiles() {
-				
-				var printfilelist=$("#printables");
-
-				var opts=printfilelist[0];
-				//empty();
-				for (var i=0; i<opts.length;i++){
-					var fname = opts[i].innerText;
-					deletefile(fname);
-				}
-				$('#deleteallwarn').css('z-index', -50);
-				$('#deleteallwarn').hide();
-				//$('#deleteallcontainer').hide();
-				var options = $("#printables option"); // Collect options         
-				options.detach();
-				if ($("#sortprintables").is(':hidden')) {
-					fillListbyName();
-				}
-				else if ($("#refreshlist").is(':hidden')) {
-					fillList();
-				}
-				else {
-				}
-
 			}
 
 			function updateNetworkInfo(){ 
@@ -547,6 +445,114 @@
 							.fail(function () {
 							});
 					}
+
+
+
+			function dodeletecheck() {
+				g_doDeleteALL=false;
+
+				if ($("#printables").val() !== null) {
+					var maxlength = 20; //sorry, magic number. best fit for the font size and screen element size
+					var smallfname = $("#printables").val();
+					var extension = smallfname.split(".")[smallfname.split(".").length - 1];
+					if ($("#printables").val().length > maxlength) {
+						smallfname = smallfname.substring(0, smallfname.length - 1 - extension.length).match(/[A-Z,a-z]+\w{0,12}/g).join('&#8203;') + "&#8203;." + extension + "";
+					}
+					document.getElementById("deletequery").innerHTML = "Are you sure you want to delete " + smallfname + "?<br><br><br>";
+					$('#deletewarn').fadeIn();
+					$('#deletewarn').css('z-index', 50);
+					$('#deletecontainer').fadeOut();
+				}
+			}
+
+			function dodeleteallcheck() {
+				g_doDeleteALL=true;
+				document.getElementById("deletequery").innerHTML = "Are you sure you want to delete all the print files?<br><br><br>";
+				$('#deletewarn').fadeIn();
+				$('#deletewarn').css('z-index', 50);
+				$('#deletecontainer').fadeOut();
+			}
+
+			function dodelete(){
+				console.log ("in dodelete")
+				if (g_doDeleteALL==true){
+					deleteAllfiles();
+					g_doDeleteALL=false;
+				}
+				else {
+					deletefile();
+				}
+				$('#deletewarn').hide();
+
+			}
+
+			function deleteAllfiles() {
+				
+				var printfilelist=$("#printables");
+
+				var opts=printfilelist[0];
+				//empty();
+				for (var i=0; i<opts.length;i++){
+					var fname = opts[i].innerText;
+					deletefile(fname);
+				}
+				$('#deleteallwarn').css('z-index', -50);
+				$('#deleteallwarn').hide();
+				//$('#deleteallcontainer').hide();
+				var options = $("#printables option"); // Collect options         
+				options.detach();
+				if ($("#sortprintables").is(':hidden')) {
+					fillListbyName();
+				}
+				else if ($("#refreshlist").is(':hidden')) {
+					fillList();
+				}
+				else {
+				}
+
+			}
+
+				
+			function deletefile() {
+					$.getJSON("../services/printables/delete/" + encodeURIComponent($("#printables").val()))
+						.done(function () {
+							document.getElementById("deletequery").innerHTML = "";
+							$('#deletewarn').css('z-index', -50);
+							$('#deletewarn').hide();
+							$('#deletecontainer').hide();
+							var options = $("#printables option"); // Collect options         
+							options.detach();
+							if ($("#sortprintables").is(':hidden')) {
+								fillListbyName();
+							}
+							else if ($("#refreshlist").is(':hidden')) {
+								fillList();
+							}
+							else {
+							}
+						})
+						.fail(function () {
+							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						});
+				}
+				
+				function deletefile(fileName) {
+					$.getJSON("../services/printables/delete/" + encodeURIComponent(fileName))
+						.done(function () {
+							//DO nothing - yet
+						})
+						.fail(function () {
+							$('#warning').html("<strong>Error</strong><br>Could not delete item " + $("#printables").val());
+							$('#warning').show();
+							setTimeout(function () {
+								$('#warning').hide();
+							}, 5000);
+						});
+				}
 
 		</script>
         <div class="screen">
