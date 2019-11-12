@@ -1,6 +1,11 @@
 
 package org.area515.resinprinter.services;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -40,7 +45,6 @@ import org.area515.resinprinter.job.InkDetector;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.job.PrintJob;
 import org.area515.resinprinter.job.PrintJobManager;
-import org.area515.resinprinter.monitoring.MonEventLogger;
 import org.area515.resinprinter.printer.BuildDirection;
 import org.area515.resinprinter.printer.ComPortSettings;
 import org.area515.resinprinter.printer.MachineConfig;
@@ -59,11 +63,6 @@ import org.area515.resinprinter.server.HostProperties;
 import org.area515.resinprinter.services.TestingResult.ChartData;
 import org.area515.resinprinter.util.security.PhotonicUser;
 import org.area515.util.TemplateEngine;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 @Api(value="printers")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -178,9 +177,7 @@ public class PrinterService {
 		if (printer == null) {
 			PrinterConfiguration currentConfiguration = HostProperties.Instance().getPrinterConfiguration(printerName);
 			if (currentConfiguration == null) {
-				logger.error("No printer with that name:" + printerName);
-				return null;
-				//throw new InappropriateDeviceException("No printer with that name:" + printerName);
+				throw new InappropriateDeviceException("No printer with that name:" + printerName);
 			}
 				
 				printer = new Printer(currentConfiguration);
@@ -646,10 +643,6 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse executeCode(@PathParam("printername") String printerName, @PathParam("gcode") String code) {
 		Printer printer = PrinterManager.Instance().getPrinter(printerName);
-		
-		MonEventLogger monEvtLogr=MonEventLogger.Instance();
-		monEvtLogr.addCmdEvt(code);
-
 		if (printer == null) {
 			return new MachineResponse("gcode", false, "Printer:" + printerName + " not started");
 		}
