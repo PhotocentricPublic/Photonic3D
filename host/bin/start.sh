@@ -11,9 +11,9 @@ cpu=`uname -m`
 if [ -z "$HOME" ] || [ "$HOME" == "/" ]; then
   HOME=~root
 fi
+
 CONFIG_REPO="PhotocentricPublic/Photonic3D"
 DEFAULT_REPO="area515/Photonic3D"
-CONFIG_PROPS="${HOME}/3dPrinters/config.properties"
 
 echo "Local Config: $CONFIG_PROPS"
 
