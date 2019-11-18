@@ -192,7 +192,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							
 					 		imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
 					 		nextConFuture = startImageRendering(aid, imageFileToRender);
-					// 		//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
+							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
 							
 							
 					// 		//Notify the client that the printJob has increased the currentSlice
