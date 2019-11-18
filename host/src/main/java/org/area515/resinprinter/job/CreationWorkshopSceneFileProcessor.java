@@ -185,9 +185,9 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					 		aid.cache.setCurrentRenderingPointer(currentImage);
 							
 					 		//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-					 		if (incoming != imageIndexCached) {
-					 			nextConFuture = startImageRendering(aid, currentImage);
-					 		}
+					 		// if (incoming != imageIndexCached) {
+					 		// 	nextConFuture = startImageRendering(aid, currentImage);
+					 		// }
 					 		imageIndexCached = incoming + 1;
 							
 					// 		imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
