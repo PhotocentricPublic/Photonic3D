@@ -198,7 +198,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
-							printer.showImage(context.getPrintableImage(), true);
+							//PXR printer.showImage(context.getPrintableImage(), true);
 						}
 						continue;
 					}
