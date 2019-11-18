@@ -199,7 +199,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					// 		NotificationManager.jobChanged(printer, printJob);
 
 							//PXR printer.showImage(context.getPrintableImage(), true);
-							logger.info("Show picture 1.0.1: {}", incoming);
+							logger.info("Show picture 1.0.2: {}", incoming);
 						}
 						continue;
 					}
