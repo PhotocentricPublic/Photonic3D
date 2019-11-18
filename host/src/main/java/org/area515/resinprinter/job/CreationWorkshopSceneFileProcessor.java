@@ -174,21 +174,21 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							//This is the perfect time to wait for a pause if one is required.
 							printer.waitForPauseIfRequired(this, aid);
 						} else {
-					// 		if (startOfLastImageDisplay > -1) {
-					// //printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
-					// 			printJob.completeRenderingSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
-					// 		}
-					// 		startOfLastImageDisplay = System.currentTimeMillis();
-					// 		RenderingContext context = nextConFuture.get();
-					// 		int incoming = Integer.parseInt(matcher.group(1));
-					// 		File currentImage = buildImageFile(gCodeFile, padLength, incoming);
-					// 		aid.cache.setCurrentRenderingPointer(currentImage);
+					 		if (startOfLastImageDisplay > -1) {
+					 //printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
+					 			printJob.completeRenderingSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
+					 		}
+					 		startOfLastImageDisplay = System.currentTimeMillis();
+					 		RenderingContext context = nextConFuture.get();
+							int incoming = Integer.parseInt(matcher.group(1));
+					 		File currentImage = buildImageFile(gCodeFile, padLength, incoming);
+					 		aid.cache.setCurrentRenderingPointer(currentImage);
 							
-					// 		//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-					// 		if (incoming != imageIndexCached) {
-					// 			nextConFuture = startImageRendering(aid, currentImage);
-					// 		}
-					// 		imageIndexCached = incoming + 1;
+					 		//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
+					 		if (incoming != imageIndexCached) {
+					 			nextConFuture = startImageRendering(aid, currentImage);
+					 		}
+					 		imageIndexCached = incoming + 1;
 							
 					// 		imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
 					// 		nextConFuture = startImageRendering(aid, imageFileToRender);
@@ -199,7 +199,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					// 		NotificationManager.jobChanged(printer, printJob);
 
 							//PXR printer.showImage(context.getPrintableImage(), true);
-							logger.info("Show picture 1.0: {}", incoming);
+							logger.info("Show picture 1.0.1: {}", incoming);
 						}
 						continue;
 					}
