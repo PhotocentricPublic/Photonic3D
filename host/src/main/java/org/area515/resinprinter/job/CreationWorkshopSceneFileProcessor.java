@@ -193,7 +193,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							imageIndexCached = incoming + 1;
 							
 							imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
-							nextConFuture = startImageRendering(aid, imageFileToRender);
+							//nextConFuture = startImageRendering(aid, imageFileToRender);
 							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
 							logger.info("Show picture: {}", incoming);
 							
@@ -202,7 +202,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 
 							printer.showImage(context.getPrintableImage(), true);
 						}
-						aid.cache.clearCache(Boolean.TRUE);
 						continue;
 					}
 
