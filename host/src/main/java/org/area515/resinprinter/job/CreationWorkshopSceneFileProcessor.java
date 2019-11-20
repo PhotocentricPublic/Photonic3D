@@ -190,10 +190,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							if (incoming != imageIndexCached) {
 								nextConFuture = startImageRendering(aid, currentImage);
 							}
-							imageIndexCached = incoming + 1;
+							imageIndexCached = incoming;
 							
-							//imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
-							//nextConFuture = startImageRendering(aid, imageFileToRender);
+							imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1); //Disabled and didnt render image, apart from first one. Incl next line
+							nextConFuture = startImageRendering(aid, imageFileToRender);
 							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
 							logger.info("Show picture: {}", incoming);
 							
