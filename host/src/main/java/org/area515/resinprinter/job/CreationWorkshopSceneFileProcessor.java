@@ -181,20 +181,20 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							int incoming = Integer.parseInt(matcher.group(1));
 							
 							//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-							if (incoming != imageIndexCached) {
-								nextConFuture = startImageRendering(aid, buildImageFile(gCodeFile, padLength, incoming));
-							}
-							imageIndexCached = incoming + 1;
-							RenderingContext context = nextConFuture.get();
+							// if (incoming != imageIndexCached) {
+							// 	nextConFuture = startImageRendering(aid, buildImageFile(gCodeFile, padLength, incoming));
+							// }
+							// imageIndexCached = incoming + 1;
+							// RenderingContext context = nextConFuture.get();
 							
-							nextConFuture = startImageRendering(aid, buildImageFile(gCodeFile, padLength, incoming + 1));
-							BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
-							logger.info("Show picture: {}", incoming);
+							// nextConFuture = startImageRendering(aid, buildImageFile(gCodeFile, padLength, incoming + 1));
+							// BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
+							// logger.info("Show picture: {}", incoming);
 							
-							//Notify the client that the printJob has increased the currentSlice
-							NotificationManager.jobChanged(printer, printJob);
+							// //Notify the client that the printJob has increased the currentSlice
+							// NotificationManager.jobChanged(printer, printJob);
 
-							printer.showImage(context.getPrintableImage(), true);
+							// printer.showImage(context.getPrintableImage(), true);
 						}
 						continue;
 					}
