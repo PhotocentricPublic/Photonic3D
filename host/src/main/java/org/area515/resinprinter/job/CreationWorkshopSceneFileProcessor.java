@@ -202,6 +202,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 
 							printer.showImage(context.getPrintableImage(), true);
 						}
+						aid.cache.clearCache(Boolean.TRUE);
 						continue;
 					}
 
