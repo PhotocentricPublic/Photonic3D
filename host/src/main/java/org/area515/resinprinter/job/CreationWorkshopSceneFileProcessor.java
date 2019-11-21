@@ -40,7 +40,6 @@ import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.server.HostProperties;
 import org.area515.resinprinter.twodim.SimpleImageRenderer;
 import org.area515.util.IOUtilities;
-
 import se.sawano.java.text.AlphanumericComparator;
 
 public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcessor<Object,Object> implements Previewable {
@@ -112,9 +111,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				throw new IOException("No Image Found for index:" + dataAid.customizer.getNextSlice());
 			}
 			File imageFile = imgIter.next();
-			RenderingContext stdImage = startImageRendering(dataAid, imageFile).get();
+			SimpleImageRenderer renderer = new SimpleImageRenderer(dataAid, this, imageFile);
+			RenderingContext stdImage = renderer.call();
 			return stdImage.getPrintableImage();
-		} catch (IOException | JobManagerException | InterruptedException | ExecutionException e) {
+		} catch (IOException | JobManagerException e) {
 			throw new SliceHandlingException(e);
 		}
 	}
@@ -181,26 +181,26 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							}
 							startOfLastImageDisplay = System.currentTimeMillis();
 							
-							RenderingContext context = nextConFuture.get();
+							RenderingContext context = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
+							BufferedImage oldImage = context.getPrintableImage();
 							int incoming = Integer.parseInt(matcher.group(1));
-							File currentImage = buildImageFile(gCodeFile, padLength, incoming);
-							aid.cache.setCurrentRenderingPointer(currentImage);
-							
-							//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-							if (incoming != imageIndexCached) {
-								nextConFuture = startImageRendering(aid, currentImage);
-							}
-							imageIndexCached = incoming;
-							
-							imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1); //Disabled and didnt render image, apart from first one. Incl next line
-							nextConFuture = startImageRendering(aid, imageFileToRender);
-							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
+							//printJob.setCurrentSlice(incoming);
+							String imageNumber = String.format("%0" + padLength + "d", incoming);
+							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
+							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
+							BufferedImage newImage = ImageIO.read(imageFile);
+							newImage = applyImageTransforms(aid, context.getScriptEngine(), newImage);
+							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
+							context.setPrintableImage(newImage);
 							logger.info("Show picture: {}", incoming);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
 							printer.showImage(context.getPrintableImage(), true);
+							if (oldImage != null) {
+								oldImage.flush();
+							}
 						}
 						continue;
 					}
