@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -124,13 +122,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		return null;
 	}
 
-	private File buildImageFile(File gCodeFile, int padLength, int index) {
-		String imageNumber = String.format("%0" + padLength + "d", index);
-		String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
-		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-		return imageFile;
-	}
-
 	@Override
 	public JobStatus processFile(final PrintJob printJob) throws Exception {
 		File gCodeFile = findGcodeFile(printJob.getJobFile());
@@ -142,12 +133,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		try {
 			logger.info("Parsing file:{}", gCodeFile);
 			int padLength = determinePadLength(gCodeFile);
-			File imageFileToRender = buildImageFile(gCodeFile, padLength, 0);
-			Future<RenderingContext> nextConFuture = startImageRendering(aid, imageFileToRender);
-			aid.cache.setCurrentRenderingPointer(imageFileToRender);
-
-			int imageIndexCached = 0;
-
+			
 			stream = new BufferedReader(new FileReader(gCodeFile));
 			String currentLine;
 			Integer sliceCount = null;
