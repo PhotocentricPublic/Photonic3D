@@ -205,8 +205,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						//Performs all of the duties that are common to most print files
 						RenderingContext rendered = nextConFuture.get();
 						JobStatus status;
+						logger.info("just before printImageAndPerformPostProcessing ");
 						status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
 						if (status != null) {
+							logger.info("error after printImageAndPerformPostProcessing  {}", status);
 							return status;
 						}
 							logger.info("Show picture 1.0.4: {}", incoming);
