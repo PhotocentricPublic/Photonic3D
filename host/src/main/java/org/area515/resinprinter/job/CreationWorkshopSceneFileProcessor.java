@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -120,6 +122,13 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 	@Override
 	public Double getBuildAreaMM(PrintJob processingFile) {
 		return null;
+	}
+
+	private File buildImageFile(File gCodeFile, int padLength, int index) {
+		String imageNumber = String.format("%0" + padLength + "d", index);
+		String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
+		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
+		return imageFile;
 	}
 
 	@Override
