@@ -209,7 +209,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						if (status != null) {
 							return status;
 						}
-							logger.info("Show picture 1.0.3: {}", incoming);
+							logger.info("Show picture 1.0.4: {}", incoming);
 						}
 						continue;
 					}
