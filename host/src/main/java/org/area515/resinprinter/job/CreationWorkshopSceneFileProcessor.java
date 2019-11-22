@@ -18,8 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -40,17 +38,17 @@ import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.server.HostProperties;
 import org.area515.resinprinter.twodim.SimpleImageRenderer;
 import org.area515.util.IOUtilities;
-
 import se.sawano.java.text.AlphanumericComparator;
 
 public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcessor<Object,Object> implements Previewable {
 	private static final Logger logger = LogManager.getLogger();
-	
+
+
 	@Override
 	public String[] getFileExtensions() {
 		return new String[]{"cws", "zip"};
 	}
-	
+
 	@Override
 	public boolean acceptsFile(File processingFile) {
 		//TODO: we shouldn't except all zip files only those that have embedded gif/jpg/png information.
@@ -63,7 +61,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		}
 		return false;
 	}
-	
+
 	@Override
 	public CurrentImageRenderer createRenderer(DataAid aid, Object imageIndexToBuild) {
 		return new SimpleImageRenderer(aid, this, imageIndexToBuild);
@@ -72,7 +70,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 	protected SortedMap<String, File> findImages(File jobFile) throws JobManagerException {
 		String [] extensions = {"png", "PNG"};
 		boolean recursive = true;
-		
+
 		Collection<File> files =
 				FileUtils.listFiles(buildExtractionDirectory(jobFile.getName()),
 				extensions, recursive);
@@ -83,7 +81,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			if (file.getPath().contains("__MACOSX") && file.getName().startsWith(".")) {
 				continue;
 			}
-			
+
 			images.put(file.getName(), file);
 		}
 		
@@ -94,26 +92,27 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 	public BufferedImage renderPreviewImage(DataAid dataAid) throws SliceHandlingException {
 		try {
 			prepareEnvironment(dataAid.printJob.getJobFile(), dataAid.printJob);
-			
+
 			SortedMap<String, File> imageFiles = findImages(dataAid.printJob.getJobFile());
-			
+
 			dataAid.printJob.setTotalSlices(imageFiles.size());
 			Iterator<File> imgIter = imageFiles.values().iterator();
-	
+
 			// Preload first image then loop
 			int sliceIndex = dataAid.customizer.getNextSlice();
 			while (imgIter.hasNext() && sliceIndex > 0) {
 				sliceIndex--;
 				imgIter.next();
 			}
-			
+
 			if (!imgIter.hasNext()) {
 				throw new IOException("No Image Found for index:" + dataAid.customizer.getNextSlice());
 			}
 			File imageFile = imgIter.next();
-			RenderingContext stdImage = startImageRendering(dataAid, imageFile).get();
+			SimpleImageRenderer renderer = new SimpleImageRenderer(dataAid, this, imageFile);
+			RenderingContext stdImage = renderer.call();
 			return stdImage.getPrintableImage();
-		} catch (IOException | JobManagerException | InterruptedException | ExecutionException e) {
+		} catch (IOException | JobManagerException e) {
 			throw new SliceHandlingException(e);
 		}
 	}
@@ -123,18 +122,11 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		return null;
 	}
 
-	private File buildImageFile(File gCodeFile, int padLength, int index) {
-		String imageNumber = String.format("%0" + padLength + "d", index);
-		String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
-		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-		return imageFile;
-	}
-	
 	@Override
 	public JobStatus processFile(final PrintJob printJob) throws Exception {
 		File gCodeFile = findGcodeFile(printJob.getJobFile());
 		DataAid aid = initializeJobCacheWithDataAid(printJob);
-		
+
 		Printer printer = printJob.getPrinter();
 		BufferedReader stream = null;
 		long startOfLastImageDisplay = -1;
@@ -203,7 +195,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					/*matcher = delayPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						try {
@@ -221,7 +213,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}*/
-					
+
 					matcher = sliceCountPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						sliceCount = Integer.parseInt(matcher.group(1));
@@ -229,7 +221,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						logger.info("Found:{} slices", sliceCount);
 						continue;
 					}
-					
+
 					matcher = liftSpeedPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						double foundLiftSpeed = Double.parseDouble(matcher.group(1));
@@ -241,7 +233,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					matcher = liftDistancePattern.matcher(currentLine);
 					if (matcher.matches()) {
 						double foundLiftDistance = Double.parseDouble(matcher.group(1));
@@ -253,7 +245,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					/*matcher = gCodePattern.matcher(currentLine);
 					if (matcher.matches()) {
 						String gCode = matcher.group(1).trim();
@@ -295,7 +287,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			clearDataAid(printJob);
 		}
 	}
-	
+
 	public static File buildExtractionDirectory(String archive) {
 		return Paths.get(HostProperties.Instance().getWorkingDir().toString(), archive).toFile();
 	}
@@ -330,7 +322,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				deletePerformed = false;
 			}
 		} while (!deletePerformed && attemptsToDelete < 3);
-		
+
 		if (!deletePerformed) {
 			if (cantDelete.size() > 1) {
 				for (IOException e : cantDelete) {
@@ -340,7 +332,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			throw new JobManagerException("Couldn't clean directory for new job:" + extractDirectory, cantDelete.get(0));
 		}
 	}
-	
+
 	@Override
 	public void prepareEnvironment(File processingFile, PrintJob printJob) throws JobManagerException {
 		List<PrintJob> printJobs = PrintJobManager.Instance().getJobsByFilename(processingFile.getName());
@@ -349,7 +341,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				throw new JobManagerException("It currently isn't possible to print more than 1 " + getFriendlyName() + " file at once.");
 			}
 		}
-		
+
 		synchronized (processingFile.getAbsolutePath().intern()) {
 			File extractDirectory = buildExtractionDirectory(processingFile.getName());
 			long oldCRC = 0;
@@ -391,10 +383,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			deleteDirectory(extractDirectory);
 		}
 	}
-	
+
 	protected boolean zipHasGCode(File zipFile) {
 		ZipFile zip = null;
-		
+
 		try {
 			zip = new ZipFile(zipFile, Charset.forName("CP437"));
 			return zip.stream().anyMatch(z -> z.getName().toLowerCase().endsWith("gcode"));
@@ -409,17 +401,17 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				}
 			}
 		}
-		
+
 		return false;
-		
+
 	}
 	
-	
+
 	private File findGcodeFile(File jobFile) throws JobManagerException{
-	
+
             String[] extensions = {"gcode"};
             boolean recursive = true;
-            
+
             //
             // Finds files within a root directory and optionally its
             // subdirectories which match an array of extensions. When the
@@ -440,10 +432,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
             }else if (files.size() == 0){
             	throw new JobManagerException("Gcode file was not found. Did you include the Gcode when you exported your scene?");
             }
-           
+
            return files.get(0);
 	}
-	
+
 	private void unpackDir(File jobFile) throws IOException, JobManagerException {
 		ZipFile zipFile = null;
 		InputStream in = null;
@@ -473,7 +465,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			zipFile.close();
 		}
 	}
-	
+
 	public int determinePadLength(File gCode) throws FileNotFoundException {
 		File currentFile = null;
 		for (int t = 1; t < 10; t++) {
@@ -482,7 +474,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				return t;
 			}
 		}
-		
+
 		throw new FileNotFoundException("Couldn't find any files to determine image index pad.");
 	}
 
