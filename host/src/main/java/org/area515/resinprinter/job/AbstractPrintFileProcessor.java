@@ -181,10 +181,13 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 	
 	public Future<RenderingContext> startImageRendering(DataAid aid, Object imageIndexToBuild) {
 		aid.currentlyRenderingImage = createRenderer(aid, imageIndexToBuild);
-		aid.startSlice();
-		if (aid.currentlyRenderingImage == null) {
-			return null;
-		}
+
+		logger.info("startImageRendering disablled start slice {}");
+		return null;
+		// aid.startSlice();
+		// if (aid.currentlyRenderingImage == null) {
+		// 	return null;
+		// }
 		
 		return Main.GLOBAL_EXECUTOR.submit(aid.currentlyRenderingImage);
 	}
