@@ -200,6 +200,15 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					// 		NotificationManager.jobChanged(printer, printJob);
 
 							//PXR printer.showImage(context.getPrintableImage(), true);
+
+
+							// //Performs all of the duties that are common to most print files
+							// RenderingContext rendered = nextConFuture.get();
+							// JobStatus status;
+							// status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
+							// if (status != null) {
+							// 	return status;
+							// }
 							logger.info("Show picture 1.0.3: {}", incoming);
 						}
 						continue;
