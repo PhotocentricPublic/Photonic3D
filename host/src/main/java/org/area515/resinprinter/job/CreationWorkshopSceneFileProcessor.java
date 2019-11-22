@@ -188,30 +188,32 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					 		//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
 					 		if (incoming != imageIndexCached) {
 					 		 	nextConFuture = startImageRendering(aid, currentImage);
-					 		 }
-					 		imageIndexCached = incoming + 1;
+							}
+							imageIndexCached = incoming + 1;
+							
+							logger.info("Show picture 1.0.5: {}", incoming);
 							
 					 		imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
 					 		nextConFuture = startImageRendering(aid, imageFileToRender);
-							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
+							BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
 							
 							
-					// 		//Notify the client that the printJob has increased the currentSlice
-					// 		NotificationManager.jobChanged(printer, printJob);
+							//Notify the client that the printJob has increased the currentSlice
+							NotificationManager.jobChanged(printer, printJob);
 
-							//PXR printer.showImage(context.getPrintableImage(), true);
+							printer.showImage(context.getPrintableImage(), true);
 
 
-						//Performs all of the duties that are common to most print files
-						RenderingContext rendered = nextConFuture.get();
-						JobStatus status;
-						logger.info("just before printImageAndPerformPostProcessing ");
-						status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
-						if (status != null) {
-							logger.info("error after printImageAndPerformPostProcessing  {}", status);
-							return status;
-						}
-							logger.info("Show picture 1.0.4: {}", incoming);
+							//Performs all of the duties that are common to most print files
+							RenderingContext rendered = nextConFuture.get();
+							JobStatus status;
+							logger.info("just before printImageAndPerformPostProcessing ");
+							status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
+							if (status != null) {
+								logger.info("error after printImageAndPerformPostProcessing  {}", status);
+								return status;
+							}
+							
 						}
 						continue;
 					}
