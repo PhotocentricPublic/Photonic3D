@@ -179,40 +179,64 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					 //printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
 					 			printJob.completeRenderingSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
 					 		}
-					 		startOfLastImageDisplay = System.currentTimeMillis();
-					 		RenderingContext context = nextConFuture.get();
+							 startOfLastImageDisplay = System.currentTimeMillis();
+							 RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
+							 
+							BufferedImage oldImage = data.getPrintableImage();
 							int incoming = Integer.parseInt(matcher.group(1));
-					 		File currentImage = buildImageFile(gCodeFile, padLength, incoming);
-					 		aid.cache.setCurrentRenderingPointer(currentImage);
-							
-					 		//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-					 		if (incoming != imageIndexCached) {
-					 		 	nextConFuture = startImageRendering(aid, currentImage);
-							}
-							imageIndexCached = incoming + 1;
-							
-							logger.info("Show picture 1.0.5: {}", incoming);
-							
-					 		imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
-					 		nextConFuture = startImageRendering(aid, imageFileToRender);
-							BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
-							
+					//printJob.setCurrentSlice(incoming);
+							String imageNumber = String.format("%0" + padLength + "d", incoming);
+							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
+							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
+							BufferedImage newImage = ImageIO.read(imageFile);
+							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
+							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
+							data.setPrintableImage(newImage);
+							logger.info("Show picture: {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
-							printer.showImage(context.getPrintableImage(), true);
-
-
-							//Performs all of the duties that are common to most print files
-							RenderingContext rendered = nextConFuture.get();
-							JobStatus status;
-							logger.info("just before printImageAndPerformPostProcessing ");
-							status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
-							if (status != null) {
-								logger.info("error after printImageAndPerformPostProcessing  {}", status);
-								return status;
+							printer.showImage(data.getPrintableImage(), true);
+							
+							if (oldImage != null) {
+								oldImage.flush();
 							}
+							 
+
+					 		// RenderingContext context = nextConFuture.get();
+							// int incoming = Integer.parseInt(matcher.group(1));
+					 		// File currentImage = buildImageFile(gCodeFile, padLength, incoming);
+					 		// aid.cache.setCurrentRenderingPointer(currentImage);
+							
+					 		// //This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
+					 		// if (incoming != imageIndexCached) {
+					 		//  	nextConFuture = startImageRendering(aid, currentImage);
+							// }
+							// imageIndexCached = incoming + 1;
+							
+							// logger.info("Show picture 1.0.5: {}", incoming);
+							
+					 		// imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
+					 		// nextConFuture = startImageRendering(aid, imageFileToRender);
+							// BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
+							
+							
+							// //Notify the client that the printJob has increased the currentSlice
+							// NotificationManager.jobChanged(printer, printJob);
+
+							// printer.showImage(context.getPrintableImage(), true);
+
+
+							// //Performs all of the duties that are common to most print files
+							// RenderingContext rendered = nextConFuture.get();
+							// JobStatus status;
+							// logger.info("just before printImageAndPerformPostProcessing ");
+							// status = printImageAndPerformPostProcessing(aid, rendered.getScriptEngine(), rendered.getPrintableImage());
+							// if (status != null) {
+							// 	logger.info("error after printImageAndPerformPostProcessing  {}", status);
+							// 	return status;
+							// }
 							
 						}
 						continue;
