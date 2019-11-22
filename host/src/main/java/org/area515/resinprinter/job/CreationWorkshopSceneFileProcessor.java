@@ -181,7 +181,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					 		}
 							 startOfLastImageDisplay = System.currentTimeMillis();
 							 RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
-							 
+
 							BufferedImage oldImage = data.getPrintableImage();
 							int incoming = Integer.parseInt(matcher.group(1));
 					//printJob.setCurrentSlice(incoming);
@@ -192,7 +192,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
 							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 							data.setPrintableImage(newImage);
-							logger.info("Show picture: {}", imageFilename);
+							logger.info("Show picture pxr old : {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
