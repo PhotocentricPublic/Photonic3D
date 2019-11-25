@@ -188,11 +188,11 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							String imageNumber = String.format("%0" + padLength + "d", incoming);
 							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
 							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-							BufferedImage newImage = ImageIO.read(imageFile);
-							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
+							///PXR BufferedImage newImage = ImageIO.read(imageFile);
+							///PXR newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
 							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 							///PXR data.setPrintableImage(newImage);
-							logger.info("Show picture pxr old 0.0.1 : {}", imageFilename);
+							logger.info("Show picture pxr old 0.0.2 : {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
