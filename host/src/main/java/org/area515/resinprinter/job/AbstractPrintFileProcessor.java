@@ -587,23 +587,23 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		
 		logger.trace("Writing applyImageTransforms1Begin:{}", () -> Log4jUtil.logImage(imageToRender, "applyImageTransforms1Begin.png"));
 
-		 BufferedImage imageToRenderAfterTransformations = aid.printer.createBufferedImageFromGraphicsOutputInterface(aid.xResolution, aid.yResolution);
-		// Graphics2D graphicsAfterTransformations = (Graphics2D)imageToRenderAfterTransformations.getGraphics();
-		// graphicsAfterTransformations.setColor(Color.BLACK);
-		// graphicsAfterTransformations.fillRect(0, 0, aid.xResolution, aid.yResolution);
+		BufferedImage imageToRenderAfterTransformations = aid.printer.createBufferedImageFromGraphicsOutputInterface(aid.xResolution, aid.yResolution);
+		Graphics2D graphicsAfterTransformations = (Graphics2D)imageToRenderAfterTransformations.getGraphics();
+		graphicsAfterTransformations.setColor(Color.BLACK);
+		graphicsAfterTransformations.fillRect(0, 0, aid.xResolution, aid.yResolution);
 		
-		// logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
+		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
-		// AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
-		// graphicsAfterTransformations.drawImage(imageToRender, transform, null);
+		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
+		graphicsAfterTransformations.drawImage(imageToRender, transform, null);
 	
-		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
+		logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
 
-		// if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
-		// 	Map<String, Object> overrides = new HashMap<>();
-		// 	overrides.put("affineTransform", transform);
-		// 	TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
-		// }
+		if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
+			Map<String, Object> overrides = new HashMap<>();
+			overrides.put("affineTransform", transform);
+			TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
+		}
 
 		// logger.trace("Writing applyImageTransforms4AfterImageManipulation:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms4AfterImageManipulation.png"));
 
