@@ -597,14 +597,14 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
 		graphicsAfterTransformations.drawImage(imageToRender, transform, null);
 	
-		logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
+		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
 
-		if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
-			Map<String, Object> overrides = new HashMap<>();
-			overrides.put("affineTransform", transform);
-			TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
-		}
-
+		// if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
+		// 	Map<String, Object> overrides = new HashMap<>();
+		// 	overrides.put("affineTransform", transform);
+		// 	TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
+		// }
+///----PXR
 		// logger.trace("Writing applyImageTransforms4AfterImageManipulation:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms4AfterImageManipulation.png"));
 
 		// //TODO: I was using imageToRenderAfterTransformations.getGraphics() but recently changed to graphicsAfterTransformations
