@@ -189,7 +189,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
 							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
 							BufferedImage newImage = ImageIO.read(imageFile);
-							///PXR newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
+							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
 							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 							///PXR data.setPrintableImage(newImage);
 							logger.info("Show picture pxr old 0.0.3 : {}", imageFilename);
