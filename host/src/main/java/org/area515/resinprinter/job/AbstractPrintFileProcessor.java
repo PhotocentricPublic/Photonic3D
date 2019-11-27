@@ -136,7 +136,7 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 				logger.info("AffineTransform in 1 ");
 				if (this.affineTransform == null || customizer.getAffineTransformSettings().getAffineTransformScriptCalculator() != null) {
 					logger.info("AffineTransform in 1.1 ");
-					//this.affineTransform = customizer.createAffineTransform(this, engine, buildPlatformImage, printImage);
+					this.affineTransform = customizer.createAffineTransform(this, engine, buildPlatformImage, printImage);
 				}
 			} else {
 				logger.info("AffineTransform in 2 ");
@@ -597,8 +597,8 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		
 		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
-		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks
-		// graphicsAfterTransformations.drawImage(imageToRender, transform, null);
+		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks??
+		graphicsAfterTransformations.drawImage(imageToRender, transform, null);//leaks??
 	///-----leaks
 		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
 
