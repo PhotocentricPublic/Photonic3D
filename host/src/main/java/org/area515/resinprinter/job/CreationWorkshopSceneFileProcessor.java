@@ -192,7 +192,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
 							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 							///PXR data.setPrintableImage(newImage);
-							logger.info("Show picture pxr old 0.0.10 : {}", imageFilename);
+							logger.info("Show picture pxr old 0.0.11 : {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
