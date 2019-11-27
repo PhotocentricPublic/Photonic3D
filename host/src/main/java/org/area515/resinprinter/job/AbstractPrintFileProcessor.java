@@ -592,9 +592,9 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		graphicsAfterTransformations.setColor(Color.BLACK);
 		graphicsAfterTransformations.fillRect(0, 0, aid.xResolution, aid.yResolution);
 		
-		// logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
+		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
-		// AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
+		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
 		// graphicsAfterTransformations.drawImage(imageToRender, transform, null);
 	///-----leaks
 		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
