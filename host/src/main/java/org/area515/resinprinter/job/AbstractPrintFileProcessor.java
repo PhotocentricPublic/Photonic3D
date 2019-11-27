@@ -594,7 +594,7 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		
 		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
-		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);
+		//AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks
 		// graphicsAfterTransformations.drawImage(imageToRender, transform, null);
 	///-----leaks
 		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
