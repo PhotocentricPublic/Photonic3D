@@ -133,10 +133,13 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		
 		public AffineTransform getAffineTransform(ScriptEngine engine, BufferedImage buildPlatformImage, BufferedImage printImage) throws ScriptException {			
 			if (customizer != null && customizer.getAffineTransformSettings() != null) {
+				logger.info("AffineTransform in 1 ");
 				if (this.affineTransform == null || customizer.getAffineTransformSettings().getAffineTransformScriptCalculator() != null) {
-					this.affineTransform = customizer.createAffineTransform(this, engine, buildPlatformImage, printImage);
+					logger.info("AffineTransform in 1.1 ");
+					//this.affineTransform = customizer.createAffineTransform(this, engine, buildPlatformImage, printImage);
 				}
 			} else {
+				logger.info("AffineTransform in 2 ");
 				this.affineTransform = new AffineTransform();
 				affineTransform.translate(xResolution/2, yResolution/2);
 				affineTransform.translate(-printImage.getWidth()/2 , -printImage.getHeight()/2);
@@ -594,7 +597,7 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		
 		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
-		//AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks
+		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks
 		// graphicsAfterTransformations.drawImage(imageToRender, transform, null);
 	///-----leaks
 		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
