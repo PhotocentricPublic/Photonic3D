@@ -186,7 +186,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					//12 		int incoming = Integer.parseInt(matcher.group(1));
 					// // //printJob.setCurrentSlice(incoming);
 					// 	String imageNumber = String.format("%0" + padLength + "d", incoming);
-					// 		String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
+							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
 					// // 		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
 					// // 		BufferedImage newImage = ImageIO.read(imageFile);
 					// // 		newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
