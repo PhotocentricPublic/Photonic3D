@@ -183,7 +183,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							 RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
 
 							BufferedImage oldImage = data.getPrintableImage();
-					//12 		int incoming = Integer.parseInt(matcher.group(1));
+					 		int incoming = Integer.parseInt(matcher.group(1));
 					// // //printJob.setCurrentSlice(incoming);
 					 	String imageNumber = String.format("%0" + padLength + "d", incoming);
 							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
