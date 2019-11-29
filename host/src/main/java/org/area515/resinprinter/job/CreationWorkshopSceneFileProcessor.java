@@ -182,27 +182,27 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							 startOfLastImageDisplay = System.currentTimeMillis();
 							 RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
 
-							//BufferedImage oldImage = data.getPrintableImage();
+							BufferedImage oldImage = data.getPrintableImage();
 					 		int incoming = Integer.parseInt(matcher.group(1));
 					// // //printJob.setCurrentSlice(incoming);
-					 	String imageNumber = String.format("%0" + padLength + "d", incoming);
+					 		String imageNumber = String.format("%0" + padLength + "d", incoming);
 							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
-					// // 		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-					// // 		BufferedImage newImage = ImageIO.read(imageFile);
+					 		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
+					 		BufferedImage newImage = ImageIO.read(imageFile);
 					// // 		newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
 					// // 		// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 					// // 		///PXR data.setPrintableImage(newImage);
-							logger.info("Show picture pxr old 0.0.14 : {}", imageFilename);
+							logger.info("Show picture pxr old 0.0.14.1 : {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
 							///PXRprinter.showImage(data.getPrintableImage(), true);
 							
-							// if (oldImage != null) {
-							// 	logger.info("PXR flushing old image");
-							// 	oldImage.flush();
-							// }
+							if (oldImage != null) {
+								logger.info("PXR flushing old image");
+								oldImage.flush();
+							}
 							 
 
 					 		// RenderingContext context = nextConFuture.get();
