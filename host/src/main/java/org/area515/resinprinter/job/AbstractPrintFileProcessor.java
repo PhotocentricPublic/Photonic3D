@@ -598,7 +598,22 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		logger.trace("Writing applyImageTransforms2AfterFill:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms2AfterFill.png"));
 		
 		AffineTransform transform = aid.getAffineTransform(engineForManipulation, imageToRenderAfterTransformations, imageToRender);//Leaks??
+
+		Runtime rt = Runtime.getRuntime();
+		rt.gc();
+		long maxMemory = rt.maxMemory();
+		long usedMemory = rt.totalMemory() - rt.freeMemory();
+		long freeMem = maxMemory - usedMemory;
+		logger.info("PXR freeMem before drawImage {}",freeMem );
+		////
 		graphicsAfterTransformations.drawImage(imageToRender, transform, null);//leaks??15.1 - yes 15 .3 back in
+
+		 maxMemory = rt.maxMemory();
+		 usedMemory = rt.totalMemory() - rt.freeMemory();
+		 freeMem = maxMemory - usedMemory;
+		 logger.info("PXR freeMem after {}",freeMem );
+
+		///
 	//-----leaks 15
 		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
 
