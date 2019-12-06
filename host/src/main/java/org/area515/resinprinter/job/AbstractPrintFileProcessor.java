@@ -614,14 +614,14 @@ public abstract class AbstractPrintFileProcessor<G,E> implements PrintFileProces
 		//  logger.info("PXR freeMem after {}",freeMem );
 
 		///
-	//-----leaks 15
-		// logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
+	//-----leaks 15 - 15.4
+		logger.trace("Writing applyImageTransforms3AfterDraw:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms3AfterDraw.png"));
 
-		// if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
-		// 	Map<String, Object> overrides = new HashMap<>();
-		// 	overrides.put("affineTransform", transform);
-		// 	TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
-		// }// --15
+		if (aid.customizer.getImageManipulationCalculator() != null && aid.customizer.getImageManipulationCalculator().trim().length() > 0) {
+			Map<String, Object> overrides = new HashMap<>();
+			overrides.put("affineTransform", transform);
+			TemplateEngine.runScriptInImagingContext(imageToRenderAfterTransformations, imageToRender, aid.printJob, aid.printer, engineForManipulation, overrides, aid.customizer.getImageManipulationCalculator(), "Image manipulation script", false);
+		}// --15
 ///----PXR
 		// logger.trace("Writing applyImageTransforms4AfterImageManipulation:{}", () -> Log4jUtil.logImage(imageToRenderAfterTransformations, "applyImageTransforms4AfterImageManipulation.png"));
 
