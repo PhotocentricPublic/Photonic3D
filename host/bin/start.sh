@@ -11,8 +11,8 @@ cpu=`uname -m`
 if [ -z "$HOME" ] || [ "$HOME" == "/" ]; then
   HOME=~root
 fi
-CONFIG_REPO="PhotocentricPublic/Photonic3D"
-DEFAULT_REPO="area515/Photonic3D"
+
+DEFAULT_REPO="area515/Creation-Workshop-Host"
 CONFIG_PROPS="${HOME}/3dPrinters/config.properties"
 
 echo "Local Config: $CONFIG_PROPS"
@@ -51,6 +51,11 @@ elif [ "${cpu}" = "x86_64" ]; then
 	javaURL="http://download.oracle.com/otn-pub/java/jdk/8u102-b14/jdk-8u102-linux-x64.tar.gz"
 elif [ "${cpu}" = "aarch64" ]; then
 	javaURL="http://download.oracle.com/otn-pub/java/jdk/8u101-b13/jdk-8u101-linux-arm64-vfp-hflt.tar.gz"
+fi
+
+if [ ! -f "/usr/lib/jni/librxtxSerial.so" ]; then
+	echo Installing RxTx
+	apt-get install --yes --force-yes librxtx-java
 fi
 
 #This application will always need to have the display set to the following
@@ -180,13 +185,13 @@ fi
 if [ "$2" == "debug" ]; then
 	pkill -9 -f "org.area515.resinprinter.server.Main"
 	echo "Starting printer host server($2)"
-	java -Xmx512m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n -Dlog4j.configurationFile=debuglog4j2.properties -Djava.library.path=/usr/lib/jni -cp lib/*:. org.area515.resinprinter.server.Main > log.out 2> log.err &
+	java -Xmx512m -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=n -Dlog4j.configurationFile=debuglog4j2.properties -Djava.library.path=/usr/lib/jni:os/Linux/${cpu} -cp lib/*:. org.area515.resinprinter.server.Main > log.out 2> log.err &
 elif [ "$2" == "TestKit" ]; then
 	pkill -9 -f "org.area515.resinprinter.test.HardwareCompatibilityTestSuite"
 	echo Starting test kit
-	java -Xmx512m -Dlog4j.configurationFile=testlog4j2.properties -Djava.library.path=/usr/lib/jni -cp lib/*:. org.junit.runner.JUnitCore org.area515.resinprinter.test.HardwareCompatibilityTestSuite &
+	java -Xmx512m -Dlog4j.configurationFile=testlog4j2.properties -Djava.library.path=/usr/lib/jni:os/Linux/${cpu} -cp lib/*:. org.junit.runner.JUnitCore org.area515.resinprinter.test.HardwareCompatibilityTestSuite &
 else
 	pkill -9 -f "org.area515.resinprinter.server.Main"
 	echo Starting printer host server
-	java -Xmx512m -Dlog4j.configurationFile=log4j2.properties -Djava.library.path=/usr/lib/jni -cp lib/*:. org.area515.resinprinter.server.Main > log.out 2> log.err &
+	java -Xmx512m -Dlog4j.configurationFile=log4j2.properties -Djava.library.path=/usr/lib/jni:os/Linux/${cpu} -cp lib/*:. org.area515.resinprinter.server.Main > log.out 2> log.err &
 fi

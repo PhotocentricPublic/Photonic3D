@@ -89,7 +89,7 @@
 		this.refreshPrintables = function refreshPrintables() {
 	  		$http.get("services/printables/list").success(
 	  			function (data) {
-					  controller.printables = data;
+	  				controller.printables = data;
 	  			})
 		};
 		
@@ -256,7 +256,7 @@
 		        controller: 'UploadFileController',
 		        size: "lg",
 		        resolve: {
-		        	title: function () {return "Upload Print File";},
+		        	title: function () {return "Upload Printable";},
 		        	supportedFileTypes: function () {return null},
 		        	getRestfulFileUploadURL: function () {return function (filename) {return '/services/printables/uploadPrintableFile/' + encodeURIComponent(filename);}},
 		        	getRestfulURLUploadURL: function () {return function (filename, url) {return "services/printables/uploadviaurl/" + encodeURIComponent(filename) + "/" + encodeURIComponent(url);}}

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -123,13 +122,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		return null;
 	}
 
-	private File buildImageFile(File gCodeFile, int padLength, int index) {
-		String imageNumber = String.format("%0" + padLength + "d", index);
-		String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
-		File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-		return imageFile;
-	}
-	
 	@Override
 	public JobStatus processFile(final PrintJob printJob) throws Exception {
 		File gCodeFile = findGcodeFile(printJob.getJobFile());
@@ -141,12 +133,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		try {
 			logger.info("Parsing file:{}", gCodeFile);
 			int padLength = determinePadLength(gCodeFile);
-			File imageFileToRender = buildImageFile(gCodeFile, padLength, 0);
-			Future<RenderingContext> nextConFuture = startImageRendering(aid, imageFileToRender);
-			aid.cache.setCurrentRenderingPointer(imageFileToRender);
-
-			int imageIndexCached = 0;
-			
 			stream = new BufferedReader(new FileReader(gCodeFile));
 			String currentLine;
 			Integer sliceCount = null;
@@ -172,33 +158,35 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 							printer.showBlankImage();
 							
 							//This is the perfect time to wait for a pause if one is required.
-							printer.waitForPauseIfRequired(this, aid);
+							printer.waitForPauseIfRequired();
 						} else {
 							if (startOfLastImageDisplay > -1) {
 					//printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
 								printJob.completeRenderingSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
 							}
 							startOfLastImageDisplay = System.currentTimeMillis();
-							RenderingContext context = nextConFuture.get();
+							
+							RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
+							BufferedImage oldImage = data.getPrintableImage();
 							int incoming = Integer.parseInt(matcher.group(1));
-							File currentImage = buildImageFile(gCodeFile, padLength, incoming);
-							aid.cache.setCurrentRenderingPointer(currentImage);
-							
-							//This is to prevent a miscache in the event that someone built this file as 1 based or some other strange configuration.
-							if (incoming != imageIndexCached) {
-								nextConFuture = startImageRendering(aid, currentImage);
-							}
-							imageIndexCached = incoming + 1;
-							
-							imageFileToRender = buildImageFile(gCodeFile, padLength, incoming + 1);
-							nextConFuture = startImageRendering(aid, imageFileToRender);
-							//BufferedImage newImage = applyImageTransforms(aid, context.getScriptEngine(), context.getPrintableImage());
-							logger.info("Show picture: {}", incoming);
+					//printJob.setCurrentSlice(incoming);
+							String imageNumber = String.format("%0" + padLength + "d", incoming);
+							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
+							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
+							BufferedImage newImage = ImageIO.read(imageFile);
+							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
+							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
+							data.setPrintableImage(newImage);
+							logger.info("Show picture: {}", imageFilename);
 							
 							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
-							printer.showImage(context.getPrintableImage(), true);
+							printer.showImage(data.getPrintableImage(), true);
+							
+							if (oldImage != null) {
+								oldImage.flush();
+							}
 						}
 						continue;
 					}
@@ -271,12 +259,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 					
 					// print out comments
 					//logger.info("Ignored line:{}", currentLine);
-					printer.getPrinterController().executeCommands(printJob, currentLine, true);
-			}
-			
-			//This is a special case where the gcode footer wasn't executed since the user cancelled the job and it didn't reach the end of the gcode file.
-			if (printer.getStatus() == JobStatus.Cancelling) {
-				performFooter(aid);
+					printer.getGCodeControl().executeGCodeWithTemplating(printJob, currentLine, true);
 			}
 			
 			return printer.isPrintActive()?JobStatus.Completed:printer.getStatus();

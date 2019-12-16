@@ -8,37 +8,37 @@ import org.area515.resinprinter.printer.Printer;
 /// This class is the go-between for sending gcode commands to the Device interface
 /// This is here so delegate functions can be bound not to a GUI control for control of the printer
 /// </summary>
-public class SedgwickGCodeControl extends eGENERICGCodeControl {
+public class SedgwickGCodeControl extends GCodeControl {
 	public SedgwickGCodeControl(Printer printer) {
 		super(printer);
 	}
 
     public String executeMoveX(double dist) {
-    	return executeSingleCommand("O\r\n");
+    	return sendGcode("O\r\n");
     }
 
     public String executeMoveY(double dist) {
-    	return executeSingleCommand("C\r\n");
+    	return sendGcode("C\r\n");
     }
 
     public String executeMoveZ(double dist) {
         if (dist > .024 && dist < .026) { // small reverse 
-            return executeSingleCommand("Y\r\n");
+            return sendGcode("Y\r\n");
         }
         if (dist == 10.0) { // large reverse
-            return executeSingleCommand("I\r\n");
+            return sendGcode("I\r\n");
         }
         if (dist < -.024 && dist > -.026) { // small forward
-            return executeSingleCommand("H\r\n");
+            return sendGcode("H\r\n");
         }
         if (dist == -1.0) {  // medium forward
-            return executeSingleCommand("J\r\n");
+            return sendGcode("J\r\n");
         }
         if (dist == -10.0) {  // large forward
-            return executeSingleCommand("K\r\n");
+            return sendGcode("K\r\n");
         }
         //if (dist == 1.0) { // medium reverse
-            return executeSingleCommand("U\r\n");
+            return sendGcode("U\r\n");
         //}
     }
 
@@ -48,15 +48,15 @@ public class SedgwickGCodeControl extends eGENERICGCodeControl {
     
     //Sedgwick doesn't have a welcome mat
     @Override
-    public String readWelcomeChitChatFromFirmwareSerialPort() throws IOException {
+    public String readWelcomeChitChat() throws IOException {
     	return null;
     }
     
     public String executeMotorsOn() {
-    	return executeSingleCommand("E\r\n");
+    	return sendGcode("E\r\n");
     }
 
     public String executeMotorsOff(){
-        return executeSingleCommand("D\r\n");
+        return sendGcode("D\r\n");
     }
 }

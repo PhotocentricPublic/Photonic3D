@@ -74,10 +74,10 @@ public class PrintJob {
 	}
 
 	@JsonIgnore
-	public DataAid getDataAid() {
+	DataAid getDataAid() {
 		return dataAid;
 	}
-	public void setDataAid(DataAid dataAid) {
+	void setDataAid(DataAid dataAid) {
 		this.dataAid = dataAid;
 	}
 
@@ -197,9 +197,7 @@ public class PrintJob {
 		if (futureJobStatus != null && (futureJobStatus.isDone() || futureJobStatus.isCancelled())) {
 			try {
 				return futureJobStatus.get();
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-				return JobStatus.Failed;
+			} catch (InterruptedException | ExecutionException e) {
 			}
 		}
 
@@ -270,7 +268,7 @@ public class PrintJob {
 		try {
 			overrideZLiftDistance = true;
 			this.zLiftDistance = zLiftDistance;
-			printer.getPrinterController().executeCommands(this, printer.getConfiguration().getSlicingProfile().getZLiftDistanceGCode(), true);
+			printer.getGCodeControl().executeGCodeWithTemplating(this, printer.getConfiguration().getSlicingProfile().getZLiftDistanceGCode(), true);
 		} catch (InappropriateDeviceException e) {
 			throw e;
 		}
@@ -306,7 +304,7 @@ public class PrintJob {
 		try {
 			this.overrideZLiftSpeed = true;
 			this.zLiftSpeed = zLiftSpeed;
-			printer.getPrinterController().executeCommands(this, printer.getConfiguration().getSlicingProfile().getZLiftSpeedGCode(), true);
+			printer.getGCodeControl().executeGCodeWithTemplating(this, printer.getConfiguration().getSlicingProfile().getZLiftSpeedGCode(), true);
 		} catch (InappropriateDeviceException e) {
 			throw e;
 		}
