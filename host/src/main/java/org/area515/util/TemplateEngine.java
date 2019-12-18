@@ -98,22 +98,16 @@ public class TemplateEngine {
 		root.put("now", new Date());
 		root.put("shutterOpen", printer.isShutterOpen());
 		root.put("bulbHours", printer.getCachedBulbHours());
-		root.put("CURSLICE", job.getRenderingSlice());
+		root.put("CURSLICE", job.getCurrentSlice());
 		root.put("LayerThickness", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getSliceHeight());
 		root.put("ZDir", printer.getConfiguration().getSlicingProfile().getDirection().getVector());
-//TODO: Create a retract calculator
-//TODO: Create a computed ZLiftSpeed
-//TODO: Create a computed ZLiftDistance
-//TODO: What about race conditions on these varaibles?
-root.put("ZLiftRate", job.getZLiftSpeed());
-root.put("ZLiftDist", job.getZLiftDistance());
-Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
+		root.put("ZLiftRate", job.getZLiftSpeed());
+		root.put("ZLiftDist", job.getZLiftDistance());
+		Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
 		root.put("buildAreaMM", buildArea == null || buildArea < 0?null:buildArea);
 		root.put("LayerTime", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getExposureTime());
 		root.put("FirstLayerTime", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getFirstLayerExposureTime());
 		root.put("NumFirstLayers", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getNumberOfFirstLayers());
-//TODO: Computed Exposure Time
-//TODO: get all other computed values
 		root.put("SlideTiltVal", printer.getConfiguration().getSlicingProfile().getSlideTiltValue());
 		root.put("buildPlatformXPixels", printer.getConfiguration().getSlicingProfile().getxResolution());
 		root.put("buildPlatformYPixels", printer.getConfiguration().getSlicingProfile().getyResolution());
@@ -205,7 +199,7 @@ Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
 		bindings.put("$shutterOpen", printer.isShutterOpen());
 		Integer bulbHours = printer.getCachedBulbHours();
 		bindings.put("$bulbHours", bulbHours == null || bulbHours < 0?Double.NaN:new Double(bulbHours));
-		bindings.put("$CURSLICE", job.getRenderingSlice());
+		bindings.put("$CURSLICE", job.getCurrentSlice());
 		bindings.put("$LayerThickness", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getSliceHeight());
 		bindings.put("$ZDir", printer.getConfiguration().getSlicingProfile().getDirection().getVector());
 		bindings.put("$ZLiftRate", job.getZLiftSpeed());

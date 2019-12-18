@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -67,9 +66,8 @@ public class MachineServiceTest {
     	config.setName(configName);
     	MachineService.INSTANCE.saveMachineConfiguration(config);
     	Assert.assertTrue(isFound(MachineService.INSTANCE.getMachineConfigurations(), configName));
-    	Assert.assertEquals(Response.Status.OK.getStatusCode(), MachineService.INSTANCE.deleteMachineConfiguration(configName).getStatus());
+    	MachineService.INSTANCE.deleteMachineConfiguration(configName);
     	Assert.assertFalse(isFound(MachineService.INSTANCE.getMachineConfigurations(), configName));
-    	Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), MachineService.INSTANCE.deleteMachineConfiguration(configName).getStatus());
     }
     
     @Test
@@ -79,9 +77,8 @@ public class MachineServiceTest {
     	config.setName(configName);
     	MachineService.INSTANCE.saveSlicingProfile(config);
     	Assert.assertTrue(isFound(MachineService.INSTANCE.getSlicingProfiles(), configName));
-    	Assert.assertEquals(Response.Status.OK.getStatusCode(), MachineService.INSTANCE.deleteSlicingProfile(configName).getStatus());
+    	MachineService.INSTANCE.deleteSlicingProfile(configName);
     	Assert.assertFalse(isFound(MachineService.INSTANCE.getSlicingProfiles(), configName));
-    	Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), MachineService.INSTANCE.deleteSlicingProfile(configName).getStatus());
     }
     
     @Test

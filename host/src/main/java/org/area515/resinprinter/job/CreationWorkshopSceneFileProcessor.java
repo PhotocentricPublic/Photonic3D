@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -32,8 +31,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.exception.SliceHandlingException;
-import org.area515.resinprinter.job.render.CurrentImageRenderer;
-import org.area515.resinprinter.job.render.RenderingContext;
+import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
+import org.area515.resinprinter.job.render.RenderedData;
 import org.area515.resinprinter.notification.NotificationManager;
 import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.server.HostProperties;
@@ -63,11 +62,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		return false;
 	}
 	
-	@Override
-	public CurrentImageRenderer createRenderer(DataAid aid, Object imageIndexToBuild) {
-		return new SimpleImageRenderer(aid, this, imageIndexToBuild);
-	}
-
 	protected SortedMap<String, File> findImages(File jobFile) throws JobManagerException {
 		String [] extensions = {"png", "PNG"};
 		boolean recursive = true;
@@ -79,10 +73,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		TreeMap<String, File> images = new TreeMap<>(new AlphanumericComparator());
 
 		for (File file : files) {
-			if (file.getPath().contains("__MACOSX") && file.getName().startsWith(".")) {
-				continue;
-			}
-			
 			images.put(file.getName(), file);
 		}
 		
@@ -110,9 +100,11 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				throw new IOException("No Image Found for index:" + dataAid.customizer.getNextSlice());
 			}
 			File imageFile = imgIter.next();
-			RenderingContext stdImage = startImageRendering(dataAid, imageFile).get();
+			
+			SimpleImageRenderer renderer = new SimpleImageRenderer(dataAid, this, imageFile);
+			RenderedData stdImage = renderer.call();
 			return stdImage.getPrintableImage();
-		} catch (IOException | JobManagerException | InterruptedException | ExecutionException e) {
+		} catch (IOException | JobManagerException e) {
 			throw new SliceHandlingException(e);
 		}
 	}
@@ -162,11 +154,11 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						} else {
 							if (startOfLastImageDisplay > -1) {
 					//printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
-								printJob.completeRenderingSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
+								printJob.addNewSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
 							}
 							startOfLastImageDisplay = System.currentTimeMillis();
 							
-							RenderingContext data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
+							RenderedData data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
 							BufferedImage oldImage = data.getPrintableImage();
 							int incoming = Integer.parseInt(matcher.group(1));
 					//printJob.setCurrentSlice(incoming);
@@ -332,37 +324,15 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			}
 		}
 		
-		synchronized (processingFile.getAbsolutePath().intern()) {
-			File extractDirectory = buildExtractionDirectory(processingFile.getName());
-			long oldCRC = 0;
-			File crc32File = new File(extractDirectory, "CRC32");
-			if (crc32File.exists()) {
-				try {
-					oldCRC = Long.parseLong(FileUtils.readFileToString(crc32File));
-				} catch (IOException e) {
-					throw new JobManagerException("Couldn't compute CRC for:" + processingFile, e);
-				}
-			}
-	
-			try {
-				long newCRC = FileUtils.checksumCRC32(processingFile);
-				if (oldCRC == newCRC) {
-					logger.info("CRC checks match, reusing old structure:" + processingFile);
-					return;
-				}
-	
-				deleteDirectory(extractDirectory);
-				extractDirectory.mkdirs();
-				FileUtils.writeStringToFile(crc32File, newCRC + "");
-			} catch (IOException e) {
-				logger.error(e);
-			}
-	
-			try {
-				unpackDir(processingFile);
-			} catch (IOException e) {
-				throw new JobManagerException("Couldn't unpack new job:" + processingFile + " into working directory:" + extractDirectory + " due to:" + e.getMessage(), e);
-			}
+		File extractDirectory = buildExtractionDirectory(processingFile.getName());
+		if (extractDirectory.exists()) {
+			deleteDirectory(extractDirectory);
+		}
+
+		try {
+			unpackDir(processingFile);
+		} catch (IOException e) {
+			throw new JobManagerException("Couldn't unpack new job:" + processingFile + " into working directory:" + extractDirectory, e);
 		}
 	}
 
@@ -410,15 +380,9 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
             // This method will returns matched file as java.io.File
             //
             List<File> files = new ArrayList<File>(FileUtils.listFiles(buildExtractionDirectory(jobFile.getName()), extensions, recursive));
-            Iterator<File> iter = files.iterator();
-            for (File currentFile = iter.next(); iter.hasNext(); currentFile = iter.next()) {
-    			if (currentFile.getPath().contains("__MACOSX") && currentFile.getName().startsWith(".")) {
-    				iter.remove();
-    			}
-    		}
-            
+
            if (files.size() > 1){
-            	throw new JobManagerException("More than one gcode file exists in print directory:" + files);
+            	throw new JobManagerException("More than one gcode file exists in print directory");
             }else if (files.size() == 0){
             	throw new JobManagerException("Gcode file was not found. Did you include the Gcode when you exported your scene?");
             }

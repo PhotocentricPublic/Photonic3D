@@ -31,7 +31,6 @@
 			<zipfileset dir="bin"/>
 			<zipfileset dir="resources" prefix="resources" includes="**/*"/>
 			<zipfileset dir="resourcesnew" prefix="resourcesnew" includes="**/*"/>
-			<zipfileset dir="printflow" prefix="printflow" includes="**/*"/>
 			<zipfileset dir="build/install/photonic3d/lib" prefix="lib" includes="**/*.jar"/>
 		</zip>
 		<!--
@@ -42,7 +41,6 @@
 			<zipfileset dir="bin"/>
 			<zipfileset dir="resources" prefix="resources" includes="**/*"/>
 			<zipfileset dir="resourcesnew" prefix="resourcesnew" includes="**/*"/>
-			<zipfileset dir="printflow" prefix="printflow" includes="**/*"/>
 			<zipfileset dir="build/install/photonic3d/lib" prefix="lib" includes="**/*.jar"/>
 		</zip>
 		<zip destfile="${deployedClientZipFile}">
