@@ -98,7 +98,7 @@ public class SettingsService {
 	@PUT
 	@Path("emailSettings")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void setEmailSettings(CwhEmailSettings settings) {
+	public void setEmailSettings(final CwhEmailSettings settings) {
 		HostProperties.Instance().saveEmailSettings(settings);
 	}
 	
@@ -121,7 +121,7 @@ public class SettingsService {
             @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
     @PUT
 	@Path("hostInformation")
-	public void setHostInformation(HostInformation info) {
+	public void setHostInformation(final HostInformation info) {
 		HostProperties.Instance().saveHostInformation(info);
 	}
 
@@ -193,7 +193,7 @@ public class SettingsService {
             @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
     @PUT
 	@Path("skins")
-	public void upsertSkin(Skin skin)
+	public void upsertSkin(Skin skin) {
     	List<Skin> skins = HostProperties.Instance().getSkins();
     	boolean skinFound = false;
     	for (int t = 0; t < skins.size(); t++) {
