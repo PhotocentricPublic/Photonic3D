@@ -18,6 +18,10 @@
 								<button class="btn btn-primary" ng-click="printablesController.showUpload()">
 									<b class="fa fa-upload"></b> 
 									<span>Upload</span>
+									<b class="fa fa-upload"></b>
+								</button>
+								<button class="btn btn-primary" ng-disabled="printablesController.currentPrintable == null" ng-click="downloadPrintable(printablesController.currentPrintable)">
+									<b class="fa fa-download"></b>
 								</button>
 								
 						    </div>
@@ -40,7 +44,7 @@
 					</div>
 					<div class="panel-footer">
 						<button class="btn btn-primary btn-sm" ng-click="printablesController.goToSlacer()">
-							<b class="fa fa-external-link"></b>ý
+							<b class="fa fa-external-link"></b> 
 							<span>Open SLAcer.js</span>
 						</button>
 						<small class="pull-left">{{releaseTagName}}</small>
@@ -56,6 +60,9 @@
 						<div class="panel-heading">
 							<i class="fa fa-2x fa-desktop pull-left"></i>
 							<h3 class="panel-title pull-left">Preview box for: {{printablesController.currentPrintable.name}}
+								<a class="pull-right" ng-click="printablesController.downloadPrintable(printable.name + printable.extension)">
+									<i class="fa fa-download"></i>
+								</a>
 							</h3>
 							<span class="btn-group pull-right" >
 								<a class="btn btn-success btn-sm" ng-click="printablesController.setProjectImage(true)" ng-disabled="printablesController.projectImage || printablesController.errorMsg">
@@ -280,11 +287,15 @@
 						</div>
 						
 						<div class="list-group-item">
-				 			<i class="fa fa-2x fa-retweet pull-left"></i>
-							<h4>3D spiral</h4>
+							<i class="fa fa-2x fa-puzzle-piece pull-left"></i>
+							<h4>Misc</h4>
 							<button class="btn btn-primary btn-sm" ng-click="printablesController.write3dTwistCode()">
-								<b class="fa fa-thumbs-o-up"></b> 
-								<span>Create</span>
+								<b class="fa fa-retweet"></b> 
+								<span>3d Spiral</span>
+							</button> 
+							<button class="btn btn-primary btn-sm" ng-click="printablesController.correctAspectRatio()">
+								<b class="fa fa-chain"></b> 
+								<span>Correct Aspect Ratio</span>
 							</button> 
 						</div>
 						

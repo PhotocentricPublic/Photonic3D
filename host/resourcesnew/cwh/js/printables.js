@@ -1,8 +1,8 @@
 (function() {
 	var cwhApp = angular.module('cwhApp');
-	cwhApp.controller("PrintablesController", ['$scope', '$http', '$location', '$uibModal', '$anchorScroll', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $uibModal, $anchorScroll, cwhWebSocket, photonicUtils) {
+	cwhApp.controller("PrintablesController", ['$scope', '$http', '$location', '$uibModal', '$anchorScroll', '$window', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $uibModal, $anchorScroll, $window, cwhWebSocket, photonicUtils) {
 		controller = this;
-		
+	
 		this.currentPrintable = null;
 		this.currentCustomizer = null;
 		this.currentPrinter = null;
@@ -230,7 +230,9 @@
     			$scope.$emit("HTTPError", {status:status, statusText:data});
     		})
 	    };
-	    
+		$scope.downloadPrintable = function downloadPrintable(printable) {
+		$window.location.href = "services/printables/downloadPrintableFile/" + encodeURIComponent(printable.name + "." + printable.extension);
+			
 		//TODO: When we get an upload complete message, we need to refresh file list...
 		this.showUpload = function showUpload() {
 			var fileChosenModal = $uibModal.open({
@@ -389,6 +391,30 @@
 				"currentTransform";
 		}
 		
+		this.correctAspectRatio = function correctAspectRatio() {
+			controller.currentCustomizer.affineTransformSettings.affineTransformScriptCalculator = 
+				"var currentTransform = new java.awt.geom.AffineTransform();\n" +
+				"var scaleXDimension = false;\n" +
+				"var ppmmx = pixelsPerMMX;\n" +
+				"var ppmmy = pixelsPerMMY;\n" +
+				"function reduce(numerator,denominator){\n" +
+				"   var gcd = function gcd(a,b){\n" +
+				"      return b ? gcd(b, a%b) : a;\n" +
+				"   };\n" +
+				"   gcd = gcd(numerator,denominator);\n" +
+				"   return [numerator/gcd, denominator/gcd];\n" +
+				"}\n" +
+				"var reduced = reduce(ppmmx, ppmmy);" +
+				"ppmmx = reduced[0];\n" +
+				"ppmmy = reduced[1];\n" +
+				"if (scaleXDimension) {\n" +
+				"   currentTransform.scale(ppmmx / ppmmy, 1);\n" +
+				"} else {\n" +
+				"   currentTransform.scale(1, ppmmy / ppmmx);\n" +
+				"}\n" +
+				"currentTransform";
+		}
+
 		this.getPrintableIconClass = function getPrintableIconClass(printable) {
 			return photonicUtils.getPrintFileProcessorIconClass(printable);
 		};

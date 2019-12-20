@@ -13,14 +13,15 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.area515.resinprinter.display.InappropriateDeviceException;
 import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
 import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.printer.SlicingProfile.InkConfig;
-import org.area515.resinprinter.printer.SlicingProfile.TwoDimensionalSettings;
 import org.area515.resinprinter.services.PrinterService;
+import org.area515.util.DynamicJSonSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -54,6 +55,8 @@ public class PrintJob {
 	private Map<String, CompiledScript> scriptsByName = new HashMap<>();
 
 	private Customizer customizer;
+	@XmlElement(name="printableContributions")
+	private DynamicJSonSettings contributions;
 
 	public PrintJob(File jobFile) {
 		this.jobFile = jobFile;
@@ -62,7 +65,16 @@ public class PrintJob {
 	public UUID getId() {
 		return id;
 	}
+
+	@XmlTransient
+	public DynamicJSonSettings getContributions() {
+		return contributions;
+	}
 	
+	public void setContributions(DynamicJSonSettings contributions) {
+		this.contributions = contributions;
+	}
+
 	@JsonIgnore
 	DataAid getDataAid() {
 		return dataAid;

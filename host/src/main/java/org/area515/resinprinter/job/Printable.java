@@ -3,7 +3,11 @@ package org.area515.resinprinter.job;
 import java.io.File;
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.commons.io.FilenameUtils;
+import org.area515.util.DynamicJSonSettings;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

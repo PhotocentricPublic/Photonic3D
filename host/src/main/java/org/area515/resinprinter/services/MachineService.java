@@ -214,8 +214,19 @@ public class MachineService {
 			return false;
 		}
 	}
-    
-	//TODO: getWirelessStrength
+
+    @ApiOperation(value="Restarts the Photonic3D print Host software, but now the operating system itself. "
+    		+ "This is helpful for when the the HostSettings need to be reloaded from disk.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
+            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
+	@GET
+	@Path("restartPhotonic")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void restartPhotonicServer() {
+    	Main.restartServer();
+	}
+
     @ApiOperation(value="Retrieves all of the supported file types that are returned from the each of the org.area515.resinprinter.job.PrintFileProcessor.getFileExtensions()."
     		+ SwaggerMetadata.PRINT_FILE_PROCESSOR)
     @ApiResponses(value = {

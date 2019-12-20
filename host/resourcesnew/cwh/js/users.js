@@ -1,22 +1,22 @@
 (function() {
 	var cwhApp = angular.module('cwhApp');
-	cwhApp.controller("UsersController", ['$scope', '$http', '$location', '$anchorScroll', '$uibModal', 'photonicUtils', 
-	function ($scope, $http, $location, $anchorScroll, $uibModal, photonicUtils) {
+	cwhApp.controller("UsersController", ['$scope', '$http', '$location', '$anchorScroll', '$uibModal', 'photonicUtils', function ($scope, $http, $location, $anchorScroll, $uibModal, photonicUtils) {
 		$scope.guid = function guid() {
-			function s4() {
-			  return Math.floor((1 + Math.random()) * 0x10000)
-				.toString(16)
-				.substring(1);
+			  function s4() {
+			    return Math.floor((1 + Math.random()) * 0x10000)
+			      .toString(16)
+			      .substring(1);
+			  }
+			  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+			    s4() + '-' + s4() + s4() + s4();
 			}
-			return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-			  s4() + '-' + s4() + s4() + s4();
-		  }
+		
 		$scope.refreshUsers = function refreshUsers() {
 	        $http.get('/services/users/list').success(function(data) {
 	        	$scope.users = data;
 	        });
-		}
-		
+	    }
+
 		$scope.refreshMessages = function refreshMessages() {
 			$http.get('/services/messages/list').success(
 				function (data) {
@@ -35,9 +35,9 @@
 		        	editUser: function () {return $scope.editUser;}
 		        }
 			});
-			editUserModal.result.then(function (savedUser) {$scope.saveUser(savedUser, isNewUser)});
+		    editUserModal.result.then(function (savedUser) {$scope.saveUser(savedUser, isNewUser)});
 		}		
-
+		
 		$scope.openSaveMessageDialog = function openSaveMessageDialog(editTitle, isNewUser) {
 			var editUserModal = $uibModal.open({
 		        animation: true,
@@ -67,9 +67,9 @@
 				$scope.refreshUsers();
 			}).error(function (data, status, headers, config, statusText) {
      			$scope.$emit("HTTPError", {status:status, statusText:data});
-			});
+    		});
 		}		
-
+		
 		$scope.deleteCurrentMessage = function deleteCurrentMessage() {
 			$http.delete("/services/messages/" + $scope.currentMessage.id).success(function (data) {
 		        $scope.currentMessage = null;
@@ -124,32 +124,32 @@
 			
 			$scope.openSaveUserDialog(editTitle, true);
 		}
-	
+
 		$scope.createNewMessage = function createNewMessage(editTitle) {
 			$scope.editMessage = {
 					fromUser: $scope.myUser,
 				    message: "test message"	
 				};
-
+			
 			if ($scope.currentUser != null) {
 				$scope.editMessage.toUser = $scope.currentUser;
 			} 
-
+			
 			if ($scope.currentMessage != null) {
 				$scope.editMessage.toUser = $scope.currentMessage.fromUser;
 			}
-
+			
 			if (editTitle == null) {
 				editTitle = "Message from " + $scope.myUser.name;
 			}
-
+			
 			$scope.openSaveMessageDialog(editTitle, true);
 		}
 
-		//TODO: We need to add in a watch for messages with a web socket	
+		//TODO: We need to add in a watch for messages with a web socket
 		$scope.refreshUsers();
 		$scope.refreshMessages();
-
+		
         $http.get('/services/users/whoAmI').success(function(data) {
         	$scope.myUser = data;
         });
