@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -25,6 +26,8 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+
+import com.jcraft.jsch.Buffer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -43,12 +46,13 @@ import se.sawano.java.text.AlphanumericComparator;
 
 public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcessor<Object,Object> implements Previewable {
 	private static final Logger logger = LogManager.getLogger();
-	
+	private CreationWorkshopImageCache imageCache = null;
+
 	@Override
 	public String[] getFileExtensions() {
 		return new String[]{"cws", "zip"};
 	}
-	
+
 	@Override
 	public boolean acceptsFile(File processingFile) {
 		//TODO: we shouldn't except all zip files only those that have embedded gif/jpg/png information.
@@ -61,11 +65,9 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		}
 		return false;
 	}
-	
 	protected SortedMap<String, File> findImages(File jobFile) throws JobManagerException {
 		String [] extensions = {"png", "PNG"};
 		boolean recursive = true;
-		
 		Collection<File> files =
 				FileUtils.listFiles(buildExtractionDirectory(jobFile.getName()),
 				extensions, recursive);
@@ -75,7 +77,6 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 		for (File file : files) {
 			images.put(file.getName(), file);
 		}
-		
 		return images;
 	}
 
@@ -83,24 +84,24 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 	public BufferedImage renderPreviewImage(DataAid dataAid) throws SliceHandlingException {
 		try {
 			prepareEnvironment(dataAid.printJob.getJobFile(), dataAid.printJob);
-			
+
 			SortedMap<String, File> imageFiles = findImages(dataAid.printJob.getJobFile());
-			
+
 			dataAid.printJob.setTotalSlices(imageFiles.size());
 			Iterator<File> imgIter = imageFiles.values().iterator();
-	
+
 			// Preload first image then loop
 			int sliceIndex = dataAid.customizer.getNextSlice();
 			while (imgIter.hasNext() && sliceIndex > 0) {
 				sliceIndex--;
 				imgIter.next();
 			}
-			
+
 			if (!imgIter.hasNext()) {
 				throw new IOException("No Image Found for index:" + dataAid.customizer.getNextSlice());
 			}
 			File imageFile = imgIter.next();
-			
+
 			SimpleImageRenderer renderer = new SimpleImageRenderer(dataAid, this, imageFile);
 			RenderedData stdImage = renderer.call();
 			return stdImage.getPrintableImage();
@@ -118,13 +119,12 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 	public JobStatus processFile(final PrintJob printJob) throws Exception {
 		File gCodeFile = findGcodeFile(printJob.getJobFile());
 		DataAid aid = initializeJobCacheWithDataAid(printJob);
-		
+
 		Printer printer = printJob.getPrinter();
 		BufferedReader stream = null;
 		long startOfLastImageDisplay = -1;
 		try {
 			logger.info("Parsing file:{}", gCodeFile);
-			int padLength = determinePadLength(gCodeFile);
 			stream = new BufferedReader(new FileReader(gCodeFile));
 			String currentLine;
 			Integer sliceCount = null;
@@ -132,11 +132,30 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			Pattern liftSpeedPattern = Pattern.compile(   "\\s*;\\s*\\(?\\s*Z\\s*Lift\\s*Feed\\s*Rate\\s*=\\s*([\\d\\.]+)\\s*(?:[Mm]{2}?/[Ss])?\\s*\\)?\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern liftDistancePattern = Pattern.compile("\\s*;\\s*\\(?\\s*Lift\\s*Distance\\s*=\\s*([\\d\\.]+)\\s*(?:[Mm]{2})?\\s*\\)?\\s*", Pattern.CASE_INSENSITIVE);
 			Pattern sliceCountPattern = Pattern.compile("\\s*;\\s*Number\\s*of\\s*Slices\\s*=\\s*(\\d+)\\s*", Pattern.CASE_INSENSITIVE);
-			
+
+			// Transform unary operator on buffered image, to pass to cache thread.
+			UnaryOperator<BufferedImage> imageTransformOp = image -> {
+				BufferedImage transformedImage = null;
+				try {
+					RenderedData data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);	// ?
+					transformedImage = applyImageTransforms(aid, data.getScriptEngine(), image);
+				} catch(Exception e) {
+					transformedImage = null;
+				}
+				return transformedImage;
+			};
+			// Image cache object, automatically pre-loading and transforming images.
+			String baseFilename = FilenameUtils.removeExtension(gCodeFile.getName());
+			int padLength = determinePadLength(gCodeFile);
+			imageCache = new CreationWorkshopImageCache(gCodeFile.getParentFile(), baseFilename, padLength, imageTransformOp);
+			// Start image caching thread.
+			imageCache.start();
+
 			//We can't set these values, that means they aren't set to helpful values when this job starts
 			//data.printJob.setExposureTime(data.inkConfiguration.getExposureTime());
 			//data.printJob.setZLiftDistance(data.slicingProfile.getLiftFeedRate());
 			//data.printJob.setZLiftSpeed(data.slicingProfile.getLiftDistance());
+			ImageIO.setUseCache(false);
 
 			while ((currentLine = stream.readLine()) != null && printer.isPrintActive()) {
 					Matcher matcher = slicePattern.matcher(currentLine);
@@ -148,32 +167,33 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						if (matcher.group(1).toUpperCase().equals("BLANK")) {
 							logger.info("Show Blank");
 							printer.showBlankImage();
-							
+
 							//This is the perfect time to wait for a pause if one is required.
 							printer.waitForPauseIfRequired();
 						} else {
 							if (startOfLastImageDisplay > -1) {
-					//printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
+								//printJob.setCurrentSliceTime(System.currentTimeMillis() - startOfLastImageDisplay);
 								printJob.addNewSlice(System.currentTimeMillis() - startOfLastImageDisplay, null);
 							}
 							startOfLastImageDisplay = System.currentTimeMillis();
 							
 							RenderedData data = aid.cache.getOrCreateIfMissing(Boolean.TRUE);
 							BufferedImage oldImage = data.getPrintableImage();
-							int incoming = Integer.parseInt(matcher.group(1));
-					//printJob.setCurrentSlice(incoming);
-							String imageNumber = String.format("%0" + padLength + "d", incoming);
+							int sliceIndex = Integer.parseInt(matcher.group(1));
+							//printJob.setCurrentSlice(sliceIndex);
+							String imageNumber = String.format("%0" + padLength + "d", sliceIndex);
 							String imageFilename = FilenameUtils.removeExtension(gCodeFile.getName()) + imageNumber + ".png";
-							File imageFile = new File(gCodeFile.getParentFile(), imageFilename);
-							BufferedImage newImage = ImageIO.read(imageFile);
-							newImage = applyImageTransforms(aid, data.getScriptEngine(), newImage);
+
+							logger.info("Load cached picture from file: {}", imageFilename);
+							BufferedImage newImage = imageCache.getCachedOrLoadImage(sliceIndex);
 							// applyBulbMask(aid, (Graphics2D)newImage.getGraphics(), newImage.getWidth(), newImage.getHeight());
 							data.setPrintableImage(newImage);
-							logger.info("Show picture: {}", imageFilename);
+							// Notify the client that the printJob has increased the currentSlice
 							
-							//Notify the client that the printJob has increased the currentSlice
 							NotificationManager.jobChanged(printer, printJob);
 
+							// Call display driver.
+							logger.info("Display picture on screen: {}", imageFilename);
 							printer.showImage(data.getPrintableImage(), true);
 							
 							if (oldImage != null) {
@@ -182,7 +202,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					/*matcher = delayPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						try {
@@ -200,7 +220,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}*/
-					
+
 					matcher = sliceCountPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						sliceCount = Integer.parseInt(matcher.group(1));
@@ -208,7 +228,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						logger.info("Found:{} slices", sliceCount);
 						continue;
 					}
-					
+
 					matcher = liftSpeedPattern.matcher(currentLine);
 					if (matcher.matches()) {
 						double foundLiftSpeed = Double.parseDouble(matcher.group(1));
@@ -220,7 +240,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					matcher = liftDistancePattern.matcher(currentLine);
 					if (matcher.matches()) {
 						double foundLiftDistance = Double.parseDouble(matcher.group(1));
@@ -232,12 +252,11 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						}
 						continue;
 					}
-					
+
 					/*matcher = gCodePattern.matcher(currentLine);
 					if (matcher.matches()) {
 						String gCode = matcher.group(1).trim();
 						logger.info("Send GCode:{}", gCode);
-
 						for (int t = 0; t < 3; t++) {
 							gCode = printer.getGCodeControl().sendGcodeAndRespectPrinter(printJob, gCode);
 							if (gCode != null) {
@@ -248,12 +267,12 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 						logger.info("Printer Response:{}", gCode);
 						continue;
 					}*/
-					
+
 					// print out comments
 					//logger.info("Ignored line:{}", currentLine);
 					printer.getGCodeControl().executeGCodeWithTemplating(printJob, currentLine, true);
 			}
-			
+
 			return printer.isPrintActive()?JobStatus.Completed:printer.getStatus();
 		} catch (IOException e) {
 			logger.error("Error occurred while processing file.", e);
@@ -265,11 +284,14 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				} catch (IOException e) {
 				}
 			}
+			if (imageCache != null) {
+				imageCache.close();
+			}
 			aid.cache.clearCache(Boolean.TRUE);
 			clearDataAid(printJob);
 		}
 	}
-	
+
 	public static File buildExtractionDirectory(String archive) {
 		return Paths.get(HostProperties.Instance().getWorkingDir().toString(), archive).toFile();
 	}
@@ -304,7 +326,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				deletePerformed = false;
 			}
 		} while (!deletePerformed && attemptsToDelete < 3);
-		
+
 		if (!deletePerformed) {
 			if (cantDelete.size() > 1) {
 				for (IOException e : cantDelete) {
@@ -314,7 +336,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			throw new JobManagerException("Couldn't clean directory for new job:" + extractDirectory, cantDelete.get(0));
 		}
 	}
-	
+
 	@Override
 	public void prepareEnvironment(File processingFile, PrintJob printJob) throws JobManagerException {
 		List<PrintJob> printJobs = PrintJobManager.Instance().getJobsByFilename(processingFile.getName());
@@ -323,7 +345,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				throw new JobManagerException("It currently isn't possible to print more than 1 " + getFriendlyName() + " file at once.");
 			}
 		}
-		
+
 		File extractDirectory = buildExtractionDirectory(processingFile.getName());
 		if (extractDirectory.exists()) {
 			deleteDirectory(extractDirectory);
@@ -343,10 +365,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			deleteDirectory(extractDirectory);
 		}
 	}
-	
+
 	protected boolean zipHasGCode(File zipFile) {
 		ZipFile zip = null;
-		
+
 		try {
 			zip = new ZipFile(zipFile, Charset.forName("CP437"));
 			return zip.stream().anyMatch(z -> z.getName().toLowerCase().endsWith("gcode"));
@@ -361,17 +383,17 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				}
 			}
 		}
-		
+
 		return false;
-		
+
 	}
-	
-	
+
+
 	private File findGcodeFile(File jobFile) throws JobManagerException{
-	
+
             String[] extensions = {"gcode"};
             boolean recursive = true;
-            
+
             //
             // Finds files within a root directory and optionally its
             // subdirectories which match an array of extensions. When the
@@ -386,10 +408,10 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
             }else if (files.size() == 0){
             	throw new JobManagerException("Gcode file was not found. Did you include the Gcode when you exported your scene?");
             }
-           
+
            return files.get(0);
 	}
-	
+
 	private void unpackDir(File jobFile) throws IOException, JobManagerException {
 		ZipFile zipFile = null;
 		InputStream in = null;
@@ -419,7 +441,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 			zipFile.close();
 		}
 	}
-	
+
 	public int determinePadLength(File gCode) throws FileNotFoundException {
 		File currentFile = null;
 		for (int t = 1; t < 10; t++) {
@@ -428,7 +450,7 @@ public class CreationWorkshopSceneFileProcessor extends AbstractPrintFileProcess
 				return t;
 			}
 		}
-		
+
 		throw new FileNotFoundException("Couldn't find any files to determine image index pad.");
 	}
 
