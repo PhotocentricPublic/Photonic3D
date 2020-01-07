@@ -1,30 +1,27 @@
 package org.area515.resinprinter.services;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
-import javax.jws.WebParam;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 
 import org.area515.resinprinter.server.CwhEmailSettings;
 import org.area515.resinprinter.server.HostInformation;
 import org.area515.resinprinter.server.HostProperties;
-import org.area515.resinprinter.server.Skin;
 import org.area515.resinprinter.util.security.PhotonicUser;
 
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(value="settings")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -98,7 +95,7 @@ public class SettingsService {
 	@PUT
 	@Path("emailSettings")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void setEmailSettings(final CwhEmailSettings settings) {
+	public void setEmailSettings(CwhEmailSettings settings) {
 		HostProperties.Instance().saveEmailSettings(settings);
 	}
 	
@@ -121,90 +118,7 @@ public class SettingsService {
             @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
     @PUT
 	@Path("hostInformation")
-	public void setHostInformation(final HostInformation info) {
+	public void setHostInformation(HostInformation info) {
 		HostProperties.Instance().saveHostInformation(info);
-	}
-
-    @ApiOperation(value="This method returns all of the GUI skins available on the machine")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-	@GET
-	@Path("skins/list")
-	public List<Skin> getSkins() {
-		return HostProperties.Instance().getSkins();
-	}
-	
-    /*    @ApiOperation(value="This method activates one of the GUI skins available on the machine")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-    @PUT
-	@Path("skins/activate/{skinName}")
-	public void activateSkin(@WebParam(name="skinName") String skinName) {
-    	List<Skin> skins = HostProperties.Instance().getSkins();
-    	for (Skin skin : skins) {
-    		if (skin.getName().equals(skinName)) {
-    			skin.setActive(true);
-    		}
-    	}
-
-		HostProperties.Instance().saveSkins(skins);
-	}
-
-    @ApiOperation(value="This method deactivates one of the GUI skins available on the machine")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-    @PUT
-	@Path("skins/deactivate/{skinName}")
-	public void deactivateSkin(@WebParam(name="skinName") String skinName) {
-    	List<Skin> skins = HostProperties.Instance().getSkins();
-    	for (Skin skin : skins) {
-    		if (skin.getName().equals(skinName)) {
-    			skin.setActive(false);
-    		}
-    	}
-
-		HostProperties.Instance().saveSkins(skins);
-	}*/
-
-    @ApiOperation(value="This method permenently deletes a skin available on the machine")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-    @DELETE
-	@Path("skins/{skinName}")
-	public void deleteSkin(@WebParam(name="skinName") String skinName) {
-    	List<Skin> skins = HostProperties.Instance().getSkins();
-    	Iterator<Skin> skinIter = skins.iterator();
-    	for (Skin currentSkin = skinIter.next(); skinIter.hasNext();) {
-    		if (currentSkin.getName().equals(skinName)) {
-    			skinIter.remove();
-    		}
-    	}
-
-		HostProperties.Instance().saveSkins(skins);
-	}
-
-    @ApiOperation(value="This method allows the GUI to create a skin from scratch")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-    @PUT
-	@Path("skins")
-	public void upsertSkin(Skin skin) {
-    	List<Skin> skins = HostProperties.Instance().getSkins();
-    	boolean skinFound = false;
-    	for (int t = 0; t < skins.size(); t++) {
-    		if (skins.get(t).getName().equals(skin.getName())) {
-    			skins.set(t, skin);
-    			skinFound = true;
-    		}
-    	}
-    	if (!skinFound) {
-    		skins.add(skin);
-    	}
-		HostProperties.Instance().saveSkins(skins);
 	}
 }

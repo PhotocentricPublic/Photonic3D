@@ -3,16 +3,19 @@ package org.area515.resinprinter.security;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-
+import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -48,6 +51,17 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateIssuerName;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateSubjectName;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 public class JettySecurityUtils {
     private static final Logger logger = LogManager.getLogger();
@@ -156,7 +170,7 @@ public class JettySecurityUtils {
 		}
 	}
 	
-	public static void secureContext(String ipAddress, ServletContextHandler context, Server jettyServer) throws InvalidNameException, IOException, GeneralSecurityException {
+	public static void secureContext(String ipAddress, ServletContextHandler context, Server jettyServer) throws Exception {
     	if (HostProperties.Instance().getExternallyAccessableName() != null) {
     		ipAddress = HostProperties.Instance().getExternallyAccessableName();
     	}

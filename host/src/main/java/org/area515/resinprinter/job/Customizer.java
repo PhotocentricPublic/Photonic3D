@@ -235,7 +235,7 @@ public class Customizer {
 	
 	public String getCacheId() {
 		if (cacheId != null) {
-			return name + " " + getCacheId();
+			return cacheId;
 		}
 		
 		cacheId = "";//This is a trick to stop the original cacheId from being included into the next computed cacheId 

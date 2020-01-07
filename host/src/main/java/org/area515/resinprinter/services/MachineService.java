@@ -214,19 +214,8 @@ public class MachineService {
 			return false;
 		}
 	}
-
-    @ApiOperation(value="Restarts the Photonic3D print Host software, but now the operating system itself. "
-    		+ "This is helpful for when the the HostSettings need to be reloaded from disk.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-	@GET
-	@Path("restartPhotonic")
-	@Produces(MediaType.APPLICATION_JSON)
-	public void restartPhotonicServer() {
-    	Main.restartServer();
-	}
-
+    
+	//TODO: getWirelessStrength
     @ApiOperation(value="Retrieves all of the supported file types that are returned from the each of the org.area515.resinprinter.job.PrintFileProcessor.getFileExtensions()."
     		+ SwaggerMetadata.PRINT_FILE_PROCESSOR)
     @ApiResponses(value = {
@@ -505,18 +494,13 @@ public class MachineService {
 	
 	@ApiOperation(value = "Deletes a machine configuration(by name) from the machine config directory of Photonic 3D host.")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-			@ApiResponse(code = 404, message = SwaggerMetadata.RESOURCE_NOT_FOUND),
+	        @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
 	        @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
 	@DELETE
 	@Path("machineConfigurations/{machineConfigurationName}")
-	public Response deleteMachineConfiguration(@PathParam("machineConfigurationName") String machineConfig) throws JAXBException {
+	public void deleteMachineConfiguration(@PathParam("machineConfigurationName") String machineConfig) throws JAXBException {
 		File machineFile = new File(HostProperties.Instance().MACHINE_DIR, machineConfig + HostProperties.MACHINE_EXTENSION);
-		if (!machineFile.delete()) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-
-		return Response.ok().build();
+		machineFile.delete();
 	}
 	
 	
@@ -548,17 +532,12 @@ public class MachineService {
 	
 	@ApiOperation(value = "Deletes a slicing profile from the slicing profile directory of Photonic 3D host.")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
-			@ApiResponse(code = 404, message = SwaggerMetadata.RESOURCE_NOT_FOUND),
+	        @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
 	        @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
 	@DELETE
 	@Path("slicingProfiles/{slicingProfileName}")
-	public Response deleteSlicingProfile(@PathParam("slicingProfileName") String profile) throws JAXBException {
+	public void deleteSlicingProfile(@PathParam("slicingProfileName") String profile) throws JAXBException {
 		File profileFile = new File(HostProperties.Instance().PROFILES_DIR, profile + HostProperties.PROFILES_EXTENSION);
-		if (!profileFile.delete()) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-
-		return Response.ok().build();
+		profileFile.delete();
 	}
 }

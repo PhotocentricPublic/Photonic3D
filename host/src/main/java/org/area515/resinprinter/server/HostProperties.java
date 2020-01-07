@@ -75,6 +75,7 @@ public class HostProperties {
 	private static HostProperties INSTANCE = null;
 	private File uploadDir;
 	private File printDir;
+	private String hostGUI;
 	private boolean fakeSerial = false;
 	private boolean removeJobOnCompletion = true;
 	private boolean forceCalibrationOnFirstUse = false;
@@ -86,11 +87,11 @@ public class HostProperties {
 	private List<GraphicsOutputInterface> displayDevices = new ArrayList<GraphicsOutputInterface>();
 	private Class<SerialCommunicationsPort> serialPortClass;
 	private Class<NetworkManager> networkManagerClass;
-
+	
+	private int versionNumber;
 	private String releaseTagName;
 	private List<String> visibleCards;
 	private String hexCodeBasedProjectorsJson;
-	private String skinsStringJson;
 	private String forwardHeader;
 	private CountDownLatch hostReady = new CountDownLatch(1);
 	private String scriptEngineLanguage = null;
@@ -189,8 +190,8 @@ public class HostProperties {
 		uploadDirString = configurationProperties.getProperty("uploaddir");
 		
 		fakeSerial = new Boolean(configurationProperties.getProperty("fakeserial", "false"));
+		hostGUI = configurationProperties.getProperty("hostGUI", "resources");
 		visibleCards = Arrays.asList(configurationProperties.getProperty("visibleCards", "printers,printJobs,printables,users,settings").split(","));
-		skinsStringJson = configurationProperties.getProperty("skins", "[{\"name\":\"Main skin\", \"welcomeFiles\":[\"index.htm\"], \"resourceBase\": \"resourcesnew\", \"active\": true}]");
 		
 		//This loads features
 		for (Entry<Object, Object> currentProperty : configurationProperties.entrySet()) {
@@ -330,7 +331,7 @@ public class HostProperties {
 			Properties newProperties = new Properties();
 			try {
 				newProperties.load(new FileInputStream(versionFile));
-				//versionNumber = Integer.valueOf((String)newProperties.get("build.number")) - 1;
+				versionNumber = Integer.valueOf((String)newProperties.get("build.number")) - 1;
 				releaseTagName = (String)newProperties.get("repo.version");
 			} catch (IOException e) {
 				logger.error("Version file is missing:{}", versionFile);
@@ -354,16 +355,6 @@ public class HostProperties {
 		}
 		
 		this.sharedScriptEngine = this.buildScriptEngine();
-	}
-
-	public Skin getFirstActiveSkin() {
-		for (Skin skin : getSkins()) {
-			if (skin.isActive()) {
-				return skin;
-			}
-		}
-
-		return null;
 	}
 
 	private Properties getClasspathProperties() {
@@ -476,6 +467,10 @@ public class HostProperties {
 		return printerHostPort;
 	}
 
+	public String getHostGUIDir() {
+		return hostGUI;
+	}
+	
 	public File getUploadDir(){
 		return uploadDir;
 	}
@@ -673,27 +668,6 @@ public class HostProperties {
 		}
 	}
 	
-	public List<Skin> getSkins() {
-		ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-		try {
-			List<Skin> skins = mapper.readValue(skinsStringJson, new TypeReference<List<Skin>>(){});
-			return skins;
-		} catch (IOException e) {
-			logger.error("Problem loading skins json.", e);
-			return new ArrayList<Skin>();
-		}
-	}
-
-	public void saveSkins(List<Skin> skins) {
-		ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-		try {
-			skinsStringJson = mapper.writeValueAsString(skins);
-			saveProperty("skins", skinsStringJson);
-		} catch (IOException e) {
-			logger.error("Problem saving skins json.", e);
-		}
-	}
-
 	public <T extends Named> List<T> getConfigurations(File searchDirectory, String extension, Class<T> clazz) {
 		List<T> configurations = new ArrayList<T>();
 		

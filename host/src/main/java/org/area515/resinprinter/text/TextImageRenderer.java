@@ -33,6 +33,24 @@ public class TextImageRenderer extends TwoDimensionalImageRenderer {
 	public BufferedImage scaleImageAndDetectEdges(PrintJob printJob) throws JobManagerException {
 		return waitForImage();
 	}
+
+	public Font buildFont(DataAid data) {
+		TwoDimensionalSettings cwhTwoDim = data.slicingProfile.getTwoDimensionalSettings();
+		org.area515.resinprinter.printer.SlicingProfile.Font cwhFont = cwhTwoDim != null?cwhTwoDim.getFont():new org.area515.resinprinter.printer.SlicingProfile.Font();
+		if (cwhFont == null) {
+			cwhFont = PrinterService.DEFAULT_FONT;
+		}
+		
+		if (cwhFont.getName() == null) {
+			cwhFont.setName(PrinterService.DEFAULT_FONT.getName());
+		}
+		
+		if (cwhFont.getSize() == 0) {
+			cwhFont.setSize(PrinterService.DEFAULT_FONT.getSize());
+		}
+		
+		return new Font(cwhFont.getName(), Font.PLAIN, cwhFont.getSize());
+	}
 	
 	private Object[] readTextDataFromFile(File textFile) throws JobManagerException {
 		try (BufferedReader reader = new BufferedReader(new FileReader(textFile))) {
@@ -51,7 +69,7 @@ public class TextImageRenderer extends TwoDimensionalImageRenderer {
 
         chickenEggGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         chickenEggGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		Font font = textFile.buildFont();
+		Font font = buildFont(aid);
 		chickenEggGraphics.setFont(font);
 		FontMetrics metrics = chickenEggGraphics.getFontMetrics();
 		double maxWidth = 0;
@@ -64,12 +82,7 @@ public class TextImageRenderer extends TwoDimensionalImageRenderer {
         	}
         	totalHeight += rect.getHeight();
         }
-		if (maxWidth < 1) {
-        	maxWidth = 1;
-        }
-        if (totalHeight < 1) {
-        	totalHeight = 1;
-        }
+        
 		BufferedImage textImage = new BufferedImage((int)maxWidth, (int)totalHeight, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics2D textGraphics = (Graphics2D)textImage.getGraphics();
 		textGraphics.setFont(font);

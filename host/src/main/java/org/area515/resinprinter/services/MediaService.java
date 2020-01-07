@@ -1,10 +1,5 @@
 package org.area515.resinprinter.services;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
-
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,6 +44,11 @@ import com.googlecode.mp4parser.FileDataSourceImpl;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.builder.FragmentedMp4Builder;
 import com.googlecode.mp4parser.authoring.tracks.H264TrackImpl;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(value="media")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -105,7 +104,7 @@ public class MediaService {
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
 				taker.write(stream);
 				return stream.toByteArray();
-			} catch (IOException | WebApplicationException e) {
+			} catch (IOException e) {
 				logger.error("Problem occurred while taking snapshot (recovering)", e);
 				throw e;
 			} finally {
@@ -144,9 +143,8 @@ public class MediaService {
 			
 			InputStream inputStream = null;
 			processLock.lock();
-			Process imagingProcess = null;
 			try {
-				imagingProcess = Runtime.getRuntime().exec(replacedCommands);
+				Process imagingProcess = Runtime.getRuntime().exec(replacedCommands);
 				ByteStreams.copy(imagingProcess.getInputStream(), output);
 				logger.debug("Image snapshot complete {}ms", ()-> Log4jUtil.completeTimer("PictureTimer"));
 			} finally {
@@ -161,13 +159,6 @@ public class MediaService {
 						output.close();
 					} catch (IOException e) {
 					}
-				}
-				if (imagingProcess != null && imagingProcess.exitValue() != 0) {
-					ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
-					ByteStreams.copy(imagingProcess.getErrorStream(), errorOutput);
-					String error = new String(errorOutput.toByteArray());
-					logger.error(error);
-					throw new WebApplicationException(error, 400);
 				}
 				processLock.unlock();
 			}

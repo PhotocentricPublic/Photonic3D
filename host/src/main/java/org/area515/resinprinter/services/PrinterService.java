@@ -221,7 +221,7 @@ public class PrinterService {
     @ApiResponses(value = {
             @ApiResponse(code = 200, response=MachineResponse.class, message = SwaggerMetadata.MACHINE_RESPONSE),
             @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-	@GET
+	@POST
 	@Path("save")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)

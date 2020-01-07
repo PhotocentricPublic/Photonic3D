@@ -1,8 +1,6 @@
 package org.area515.resinprinter.job;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.concurrent.Future;
@@ -11,11 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.job.render.CurrentImageRenderer;
 import org.area515.resinprinter.job.render.RenderedData;
-import org.area515.util.DynamicJSonSettings;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.area515.resinprinter.server.Main;
 import org.area515.resinprinter.twodim.SimpleImageRenderer;
 
@@ -38,40 +31,12 @@ public class ZipImagesFileProcessor extends CreationWorkshopSceneFileProcessor {
 		}
 		return false;
 	}
-	private void loadContributionsFromSlacerFile(PrintJob printJob) {
-		File file = new File(buildExtractionDirectory(printJob.getJobFile().getName()), "slacer.json");
-		if (!file.exists()) {
-			return;
-		}
-
-		ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-		DynamicJSonSettings settings;
-		FileReader reader = null;
-		try {
-			reader = new FileReader(file);
-			settings = mapper.readValue(reader, new TypeReference<DynamicJSonSettings>(){});
-			printJob.setContributions(settings);
-		} catch (IOException e) {
-			logger.error("Problem loading file contributions from slacer.json.", e);
-		} finally {
-			if (reader != null) {
-				try {reader.close();} catch (IOException e) {}
-			}
-		}
-	}
-
-	@Override
-	public void prepareEnvironment(File processingFile, PrintJob printJob) throws JobManagerException {
-		super.prepareEnvironment(processingFile, printJob);
-	}
-
+	
 	@Override
 	public JobStatus processFile(PrintJob printJob) throws Exception {
-		boolean footerAttempted = false;
-		DataAid dataAid = null;
 		try {
-			dataAid = initializeJobCacheWithDataAid(printJob);
-			loadContributionsFromSlacerFile(printJob);
+			DataAid dataAid = initializeJobCacheWithDataAid(printJob);
+
 			SortedMap<String, File> imageFiles = findImages(printJob.getJobFile());
 
 			printJob.setTotalSlices(imageFiles.size());
@@ -122,19 +87,9 @@ public class ZipImagesFileProcessor extends CreationWorkshopSceneFileProcessor {
 				} while (slicePending);
 			}
 
-			try {
-				return performFooter(dataAid);
-			} finally {
-				footerAttempted = true;
-			}
+			return performFooter(dataAid);
 		} finally {
-			try {
-				if (!footerAttempted && dataAid != null) {
-					performFooter(dataAid);
-				}
-			} finally {
-				clearDataAid(printJob);
-			}
+			clearDataAid(printJob);
 		}
 	}
 	
