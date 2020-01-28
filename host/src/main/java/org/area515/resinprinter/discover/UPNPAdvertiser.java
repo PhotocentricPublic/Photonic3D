@@ -16,7 +16,6 @@ import org.area515.resinprinter.client.Main;
 import org.area515.resinprinter.plugin.Feature;
 import org.area515.resinprinter.server.HostInformation;
 import org.area515.resinprinter.server.HostProperties;
-import org.fourthline.cling.DefaultUpnpServiceConfiguration;
 import org.fourthline.cling.UpnpServiceImpl;
 import org.fourthline.cling.binding.annotations.AnnotationLocalServiceBinder;
 import org.fourthline.cling.controlpoint.ControlPoint;
@@ -90,7 +89,7 @@ public class UPNPAdvertiser implements Feature {
 					null);
 			
 			List<Icon> icons = new ArrayList<Icon>();
-			File iconFiles[] = new File(HostProperties.Instance().getHostGUIDir(), "favicon").listFiles(new FilenameFilter() {
+			File iconFiles[] = new File(HostProperties.Instance().getFirstActiveSkin().getResourceBase(), "favicon").listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File dir, String name) {
 					name = name.toLowerCase();
@@ -101,10 +100,13 @@ public class UPNPAdvertiser implements Feature {
 					return name.contains("48") || name.contains("120");
 				}
 			});
-			for (File currentFile : iconFiles) {
-				String mimeType = Files.probeContentType(currentFile.toPath());
-				BufferedImage image = ImageIO.read(currentFile);
-				icons.add(new Icon(mimeType, image.getWidth(), image.getHeight(), image.getColorModel().getPixelSize(), new URI(webPresentationURI.toString() + "/favicon/" + currentFile.getName())));
+			
+			if (iconFiles != null) {
+				for (File currentFile : iconFiles) {
+					String mimeType = Files.probeContentType(currentFile.toPath());
+					BufferedImage image = ImageIO.read(currentFile);
+					icons.add(new Icon(mimeType, image.getWidth(), image.getHeight(), image.getColorModel().getPixelSize(), new URI(webPresentationURI.toString() + "/favicon/" + currentFile.getName())));
+				}
 			}
 			
 			LocalService<PrinterDirectoryService> contentManagerService = new AnnotationLocalServiceBinder().read(PrinterDirectoryService.class);

@@ -7,6 +7,7 @@ import java.io.File;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.area515.resinprinter.display.ControlFlow;
 import org.area515.resinprinter.display.InappropriateDeviceException;
 import org.area515.resinprinter.gcode.eGENERICGCodeControl;
 import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
@@ -29,7 +30,14 @@ import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+	"javax.management.*", 
+	"com.sun.xml.bind.v2.*", 
+	"com.sun.xml.bind.v2.model.impl.*", 
+	"javax.xml.bind.*", 
+	"javax.xml.datatype.*", 
+	"javax.xml.namespace.*",
+	"javax.xml.transform.*"})
 @RunWith(PowerMockRunner.class)
 public class AbstractPrintFileProcessorTest {
 	private BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_4BYTE_ABGR);
@@ -55,14 +63,14 @@ public class AbstractPrintFileProcessorTest {
 		Mockito.when(printer.getPrinterFirmwareSerialPort()).thenReturn(serialPort);
 		Mockito.when(printJob.getPrintFileProcessor()).thenReturn(processor);
 		Mockito.when(printer.getConfiguration()).thenReturn(printerConfiguration);
-		Mockito.when(printer.waitForPauseIfRequired()).thenReturn(true);
+		Mockito.when(printer.waitForPauseIfRequired(Mockito.any(PrintFileProcessor.class), Mockito.any(DataAid.class))).thenReturn(true);
 		Mockito.when(printer.isPrintActive()).thenReturn(true);
 		Mockito.when(printerConfiguration.getSlicingProfile()).thenReturn(slicingProfile);
 		Mockito.when(slicingProfile.getSelectedInkConfig()).thenReturn(inkConfiguration);
 		Mockito.when(slicingProfile.getDirection()).thenReturn(BuildDirection.Bottom_Up);
-		Mockito.when(printer.getGCodeControl()).thenReturn(gCode);
+		Mockito.when(printer.getPrinterController()).thenReturn(gCode);
 		Mockito.when(slicingProfile.getgCodeLift()).thenReturn("Lift z");
-		Mockito.doCallRealMethod().when(gCode).executeGCodeWithTemplating(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
+		Mockito.doCallRealMethod().when(gCode).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
 		Mockito.when(printer.getConfiguration().getMachineConfig()).thenReturn(machine);
 		Mockito.when(printer.getConfiguration().getMachineConfig().getMonitorDriverConfig()).thenReturn(monitorConfig);
 		return printJob;
@@ -130,7 +138,7 @@ public class AbstractPrintFileProcessorTest {
 		DataAid aid = processor.initializeJobCacheWithDataAid(printJob);
 		aid.customizer.setNextStep(PrinterStep.PerformExposure);
 		processor.printImageAndPerformPostProcessing(aid, scriptEngine, image);
-		Mockito.verify(printJob.getPrinter().getGCodeControl(), Mockito.times(1)).executeGCodeWithTemplating(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
+		Mockito.verify(printJob.getPrinter().getPrinterController(), Mockito.times(1)).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
 	}
 
 	@Test
@@ -143,7 +151,7 @@ public class AbstractPrintFileProcessorTest {
 		try {
 			aid.customizer.setNextStep(PrinterStep.PerformExposure);
 			processor.printImageAndPerformPostProcessing(aid, scriptEngine, image);
-			Mockito.verify(printJob.getPrinter().getGCodeControl(), Mockito.times(1)).executeGCodeWithTemplating(Mockito.any(PrintJob.class), Mockito.anyString(), true);
+			Mockito.verify(printJob.getPrinter().getPrinterController(), Mockito.times(1)).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), true);
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("The result of your lift distance script needs to evaluate to an instance of java.lang.Number", e.getMessage());
 		}
@@ -159,7 +167,7 @@ public class AbstractPrintFileProcessorTest {
 		try {
 			aid.customizer.setNextStep(PrinterStep.PerformExposure);
 			processor.printImageAndPerformPostProcessing(aid, scriptEngine, image);
-			Mockito.verify(printJob.getPrinter().getGCodeControl(), Mockito.times(1)).executeGCodeWithTemplating(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
+			Mockito.verify(printJob.getPrinter().getPrinterController(), Mockito.times(1)).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
 		} catch (IllegalArgumentException e) {
 			Assert.assertEquals("The result of your lift distance script needs to evaluate to an instance of java.lang.Number", e.getMessage());
 		}
@@ -207,7 +215,22 @@ public class AbstractPrintFileProcessorTest {
 			Mockito.verify(printJob.getPrintFileProcessor(), Mockito.times(2)).getBuildAreaMM(Mockito.any(PrintJob.class));
 		}
 	}
-
+	
+	@Test
+	public void TestThatFooterRunsSaveCustomizerMethod() throws Exception {
+		AbstractPrintFileProcessor processor = createNewPrintFileProcessor();
+		PrintJob printJob = createTestPrintJob(processor);
+		DataAid aid = Mockito.spy(processor.initializeJobCacheWithDataAid(printJob));
+		Mockito.when(printJob.getPrinter().isPrintActive()).thenReturn(false);
+		Mockito.when(printJob.getPrinter().isPrintInProgress()).thenReturn(true);
+		Mockito.when(aid.configuration.getMachineConfig().getFooterExecutionHandling()).thenReturn(ControlFlow.OnSuccessAndCancellation);
+		Mockito.when(aid.slicingProfile.getgCodeFooter()).thenReturn("Some Manufacturing GCode");
+		
+		processor.performFooter(aid);
+		Mockito.verify(aid, Mockito.times(1)).saveOriginalCustomizer();
+		Mockito.verify(aid.printer.getPrinterController(), Mockito.times(1)).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
+	}
+	
 	@Test
 	public void properGCodeCreated() throws Exception {
 		AbstractPrintFileProcessor processor = createNewPrintFileProcessor();
@@ -217,7 +240,7 @@ public class AbstractPrintFileProcessorTest {
 		Double whenBuilAreaMMCalled = printJob.getPrintFileProcessor().getBuildAreaMM(Mockito.any(PrintJob.class));
 		Mockito.when(whenBuilAreaMMCalled).thenReturn(new Double("5.0"));
 		DataAid aid = processor.initializeJobCacheWithDataAid(printJob);
-		Mockito.when(printJob.getPrinter().getGCodeControl().sendGcode(Mockito.anyString())).then(new Answer<String>() {
+		Mockito.when(printJob.getPrinter().getPrinterController().executeSingleCommand(Mockito.anyString())).then(new Answer<String>() {
 			private int count = 0;
 
 			@Override
@@ -237,6 +260,6 @@ public class AbstractPrintFileProcessorTest {
 		aid.customizer.setNextStep(PrinterStep.PerformExposure);
 		processor.printImageAndPerformPostProcessing(aid, scriptEngine, image);
 		//The two executes are for getZLiftDistanceGCode and the life gcode itself
-		Mockito.verify(printJob.getPrinter().getGCodeControl(), Mockito.times(2)).executeGCodeWithTemplating(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
+		Mockito.verify(printJob.getPrinter().getPrinterController(), Mockito.times(2)).executeCommands(Mockito.any(PrintJob.class), Mockito.anyString(), Mockito.anyBoolean());
 	}
 }
