@@ -44,10 +44,7 @@ public class PrintJobSupplier implements Supplier<JobStatus> {
 			return status;
 		} catch (Exception e) {
 			logger.error("Execution failure.", e);
-			//I really think this needs to throw a new RuntimeException instead of this Failed jobstatus that way we let the proper error message get back to the user
-			throw new RuntimeException("Execution failure.", e);
-			//This is what it used to do:
-			//return JobStatus.Failed;
+			return JobStatus.Failed;
 		}
 	}
 }

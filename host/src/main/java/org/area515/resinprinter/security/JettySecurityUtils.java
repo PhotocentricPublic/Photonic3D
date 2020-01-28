@@ -170,7 +170,7 @@ public class JettySecurityUtils {
 		}
 	}
 	
-	public static void secureContext(String ipAddress, ServletContextHandler context, Server jettyServer) throws InvalidNameException, IOException, GeneralSecurityException {
+	public static void secureContext(String ipAddress, ServletContextHandler context, Server jettyServer) throws Exception {
     	if (HostProperties.Instance().getExternallyAccessableName() != null) {
     		ipAddress = HostProperties.Instance().getExternallyAccessableName();
     	}

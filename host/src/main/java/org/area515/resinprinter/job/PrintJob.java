@@ -13,21 +13,21 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.area515.resinprinter.display.InappropriateDeviceException;
 import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
 import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.printer.SlicingProfile.InkConfig;
+import org.area515.resinprinter.printer.SlicingProfile.TwoDimensionalSettings;
 import org.area515.resinprinter.services.PrinterService;
-import org.area515.util.DynamicJSonSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PrintJob {
 	private volatile int totalSlices = 0;
+	private volatile int currentSlice = 0;
 	private volatile long currentSliceTime = 0;
 	private volatile long averageSliceTime = 0;
 	private volatile long startTime = 0;
@@ -54,8 +54,6 @@ public class PrintJob {
 	private Map<String, CompiledScript> scriptsByName = new HashMap<>();
 
 	private Customizer customizer;
-	@XmlElement(name="printableContributions")
-	private DynamicJSonSettings contributions;
 
 	public PrintJob(File jobFile) {
 		this.jobFile = jobFile;
@@ -65,19 +63,11 @@ public class PrintJob {
 		return id;
 	}
 	
-	@XmlTransient
-	public DynamicJSonSettings getContributions() {
-		return contributions;
-	}
-	public void setContributions(DynamicJSonSettings contributions) {
-		this.contributions = contributions;
-	}
-
 	@JsonIgnore
-	public DataAid getDataAid() {
+	DataAid getDataAid() {
 		return dataAid;
 	}
-	public void setDataAid(DataAid dataAid) {
+	void setDataAid(DataAid dataAid) {
 		this.dataAid = dataAid;
 	}
 
@@ -134,28 +124,11 @@ public class PrintJob {
 		this.totalSlices = totalSlices;
 	}
 	
-	@JsonIgnore
-	public int getRenderingSlice(){
-		if (dataAid == null) {
-			return -1;
-		}
-		
-		return dataAid.getRenderingSlice();
-	}
-
 	public int getCurrentSlice(){
-		if (dataAid == null || dataAid.customizer == null) {
-			return -1;
-		}
-		
-		return dataAid.customizer.getNextSlice();
+		return currentSlice;
 	}
 	public void setCurrentSlice(int currentSlice){
-		if (dataAid == null || dataAid.customizer == null) {
-			return;
-		}
-		
-		this.dataAid.customizer.setNextSlice(currentSlice);
+		this.currentSlice = currentSlice;
 	}
 
 	public long getCurrentSliceTime(){
@@ -197,9 +170,7 @@ public class PrintJob {
 		if (futureJobStatus != null && (futureJobStatus.isDone() || futureJobStatus.isCancelled())) {
 			try {
 				return futureJobStatus.get();
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-				return JobStatus.Failed;
+			} catch (InterruptedException | ExecutionException e) {
 			}
 		}
 
@@ -270,7 +241,7 @@ public class PrintJob {
 		try {
 			overrideZLiftDistance = true;
 			this.zLiftDistance = zLiftDistance;
-			printer.getPrinterController().executeCommands(this, printer.getConfiguration().getSlicingProfile().getZLiftDistanceGCode(), true);
+			printer.getGCodeControl().executeGCodeWithTemplating(this, printer.getConfiguration().getSlicingProfile().getZLiftDistanceGCode(), true);
 		} catch (InappropriateDeviceException e) {
 			throw e;
 		}
@@ -306,7 +277,7 @@ public class PrintJob {
 		try {
 			this.overrideZLiftSpeed = true;
 			this.zLiftSpeed = zLiftSpeed;
-			printer.getPrinterController().executeCommands(this, printer.getConfiguration().getSlicingProfile().getZLiftSpeedGCode(), true);
+			printer.getGCodeControl().executeGCodeWithTemplating(this, printer.getConfiguration().getSlicingProfile().getZLiftSpeedGCode(), true);
 		} catch (InappropriateDeviceException e) {
 			throw e;
 		}
@@ -361,15 +332,15 @@ public class PrintJob {
 		this.currentSliceCost = currentSliceCost;
 	}
 	
-	public void completeRenderingSlice(long sliceTime, Double buildAreaInMM) {
+	public void addNewSlice(long sliceTime, Double buildAreaInMM) {
 		sliceTime -= getPrinter().getCurrentSlicePauseTime();
 		getPrinter().setCurrentSlicePauseTime(0);
 		InkConfig inkConfig = getPrinter().getConfiguration().getSlicingProfile().getSelectedInkConfig();
-		int currentSlice = dataAid.completeRenderingSlice();
 		averageSliceTime = ((averageSliceTime * currentSlice) + sliceTime) / (currentSlice + 1);
 		elapsedTime = System.currentTimeMillis() - startTime;
 		
 		currentSliceTime = sliceTime;
+		currentSlice++;
 		
 		if (buildAreaInMM != null && buildAreaInMM > 0) {
 			double buildVolume = buildAreaInMM * inkConfig.getSliceHeight();

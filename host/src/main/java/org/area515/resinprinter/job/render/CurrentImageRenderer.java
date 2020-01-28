@@ -15,7 +15,7 @@ import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.util.Log4jUtil;
 
-public abstract class CurrentImageRenderer implements Callable<RenderingContext> {
+public abstract class CurrentImageRenderer implements Callable<RenderedData> {
 	private static final Logger logger = LogManager.getLogger();
 	protected Object imageIndexToBuild;
 	protected AbstractPrintFileProcessor<?,?> processor;
@@ -27,9 +27,13 @@ public abstract class CurrentImageRenderer implements Callable<RenderingContext>
 		this.imageIndexToBuild = imageIndexToBuild;
 	}
 	
-	public RenderingContext call() throws JobManagerException {
+	public BufferedImage buildImage(int renderedWidth, int renderedHeight) {
+		return new BufferedImage(renderedWidth, renderedHeight, BufferedImage.TYPE_4BYTE_ABGR);
+	}
+	
+	public RenderedData call() throws JobManagerException {
 		long startTime = System.currentTimeMillis();
-		RenderingContext preImageCache = aid.cache.getOrCreateIfMissing(imageIndexToBuild);
+		RenderedData preImageCache = aid.cache.getOrCreateIfMissing(imageIndexToBuild);
 		ReentrantLock preImageLock = preImageCache.getLock();
 		preImageLock.lock();
 		try {

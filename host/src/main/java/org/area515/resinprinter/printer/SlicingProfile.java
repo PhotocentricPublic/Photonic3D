@@ -273,8 +273,6 @@ public class SlicingProfile implements Named {
 	private boolean flipY;
     @XmlElement(name="Notes")
 	private String notes;
-	private String gCodePause;
-	private String gCodeResume;
 	private String gCodeHeader;
 	private String gCodeFooter;
 	private String gCodePreslice;
@@ -412,20 +410,6 @@ public class SlicingProfile implements Named {
 	}
 	public void setgCodeHeader(String gCodeHeader) {
 		this.gCodeHeader = TemplateEngine.convertToFreeMarkerTemplate(gCodeHeader);
-	}
-	
-	public String getgCodePause() {
-		return gCodePause;
-	}
-	public void setgCodePause(String gCodePause) {
-		this.gCodePause = TemplateEngine.convertToFreeMarkerTemplate(gCodePause);
-	}
-	
-	public String getgCodeResume() {
-		return gCodeResume;
-	}
-	public void setgCodeResume(String gCodeResume) {
-		this.gCodeResume = TemplateEngine.convertToFreeMarkerTemplate(gCodeResume);
 	}
 	
 	public String getgCodeFooter() {

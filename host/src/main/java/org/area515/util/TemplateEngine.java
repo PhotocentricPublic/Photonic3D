@@ -3,6 +3,7 @@ package org.area515.util;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -12,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.script.Bindings;
 import javax.script.CompiledScript;
@@ -22,12 +22,7 @@ import javax.script.ScriptException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
-import org.area515.resinprinter.job.Customizer;
-import org.area515.resinprinter.job.JobManagerException;
-import org.area515.resinprinter.job.JobStatus;
 import org.area515.resinprinter.job.PrintJob;
-import org.area515.resinprinter.job.render.StubPrintFileProcessor;
 import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.server.HostProperties;
 
@@ -49,17 +44,6 @@ public class TemplateEngine {
 		}
 	};
 
-	public static PrintJob buildStubJob(Printer printer) throws JobManagerException {
-		PrintJob job = new PrintJob(null);//Null job for testing...
-		job.setCustomizer(new Customizer());
-		StubPrintFileProcessor<Object,Object> processor = new StubPrintFileProcessor<>();
-		job.setPrintFileProcessor(processor);
-		job.setPrinter(printer);
-		job.initializePrintJob(CompletableFuture.completedFuture(JobStatus.Ready));
-		job.setDataAid(new DataAid(job));
-		return job;
-	}
-	
 	public static String convertToFreeMarkerTemplate(String template) {
 		if (template == null || template.trim().length() == 0) {
 			return template;
@@ -114,22 +98,16 @@ public class TemplateEngine {
 		root.put("now", new Date());
 		root.put("shutterOpen", printer.isShutterOpen());
 		root.put("bulbHours", printer.getCachedBulbHours());
-		root.put("CURSLICE", job.getRenderingSlice());
+		root.put("CURSLICE", job.getCurrentSlice());
 		root.put("LayerThickness", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getSliceHeight());
 		root.put("ZDir", printer.getConfiguration().getSlicingProfile().getDirection().getVector());
-//TODO: Create a retract calculator
-//TODO: Create a computed ZLiftSpeed
-//TODO: Create a computed ZLiftDistance
-//TODO: What about race conditions on these varaibles?
-root.put("ZLiftRate", job.getZLiftSpeed());
-root.put("ZLiftDist", job.getZLiftDistance());
-Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
+		root.put("ZLiftRate", job.getZLiftSpeed());
+		root.put("ZLiftDist", job.getZLiftDistance());
+		Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
 		root.put("buildAreaMM", buildArea == null || buildArea < 0?null:buildArea);
 		root.put("LayerTime", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getExposureTime());
 		root.put("FirstLayerTime", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getFirstLayerExposureTime());
 		root.put("NumFirstLayers", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getNumberOfFirstLayers());
-//TODO: Computed Exposure Time
-//TODO: get all other computed values
 		root.put("SlideTiltVal", printer.getConfiguration().getSlicingProfile().getSlideTiltValue());
 		root.put("buildPlatformXPixels", printer.getConfiguration().getSlicingProfile().getxResolution());
 		root.put("buildPlatformYPixels", printer.getConfiguration().getSlicingProfile().getyResolution());
@@ -221,7 +199,7 @@ Double buildArea = job.getPrintFileProcessor().getBuildAreaMM(job);
 		bindings.put("$shutterOpen", printer.isShutterOpen());
 		Integer bulbHours = printer.getCachedBulbHours();
 		bindings.put("$bulbHours", bulbHours == null || bulbHours < 0?Double.NaN:new Double(bulbHours));
-		bindings.put("$CURSLICE", job.getRenderingSlice());
+		bindings.put("$CURSLICE", job.getCurrentSlice());
 		bindings.put("$LayerThickness", printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getSliceHeight());
 		bindings.put("$ZDir", printer.getConfiguration().getSlicingProfile().getDirection().getVector());
 		bindings.put("$ZLiftRate", job.getZLiftSpeed());

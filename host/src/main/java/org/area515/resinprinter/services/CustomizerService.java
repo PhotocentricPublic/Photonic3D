@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.RolesAllowed;
@@ -40,7 +39,6 @@ import org.area515.resinprinter.job.PrintFileProcessor;
 import org.area515.resinprinter.job.PrintJob;
 import org.area515.resinprinter.printer.Printer;
 import org.area515.resinprinter.server.HostProperties;
-import org.area515.resinprinter.server.Main;
 import org.area515.resinprinter.util.security.PhotonicUser;
 import org.area515.util.PrintFileFilter;
 
@@ -48,7 +46,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 @Api(value="customizers")
 @RolesAllowed(PhotonicUser.FULL_RIGHTS)
@@ -106,13 +103,12 @@ public class CustomizerService {
 	 		printJob.setPrinter(activePrinter);
 	 		printJob.setCustomizer(customizer);
 	 		printJob.setPrintFileProcessor(processor);
-	 		//printJob.setCurrentSlice(customizer.getNextSlice()); No need to do this since it just sets itself
+	 		printJob.setCurrentSlice(customizer.getNextSlice());
 
 			return ((AbstractPrintFileProcessor<?,?>)processor).initializeJobCacheWithDataAid(printJob);
 	       }
 	     });
 
-	//TODO: Some day this needs to load from disk. Otherwise we will overwrite customizers on normal prints
     @ApiOperation(value="Retrieves all Customizers")
 	@GET
     @Path("list")
@@ -121,6 +117,7 @@ public class CustomizerService {
 		return customizersByName.asMap();
 	}
     
+    //TODO: Why don't we read this from disk if it doesn't exist first?
     @ApiOperation(value="Find a customizer by name.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
@@ -128,48 +125,25 @@ public class CustomizerService {
 	@GET
 	@Path("get/{customizerName}")
     @Produces(MediaType.APPLICATION_JSON)
-	public Customizer getCustomizer(final @PathParam("customizerName")String customizerName, @QueryParam("externalState") String externalState) {
-		Customizer customizer;
-		try {
-			customizer = customizersByName.get(customizerName, 
-					new Callable<Customizer>() {
-						@Override
-						public Customizer call() throws Exception {
-							Customizer loadedCustomizer = HostProperties.Instance().loadCustomizer(customizerName);
-							if (loadedCustomizer == null) {
-								throw new IllegalArgumentException("Couldn't find customizer");
-							}
-							
-							return loadedCustomizer;
-						}
-					});
-		} catch (UncheckedExecutionException e) {
-			if (e.getCause() instanceof IllegalArgumentException) {
-				logger.info("Couldn't find customizer", customizerName);//Probably normal
-				return null;
+	public Customizer getCustomizer(@PathParam("customizerName")String customizerName, @QueryParam("externalState") String externalState) {
+		Customizer customizer = customizersByName.getIfPresent(customizerName);
+		if (customizer != null) {
+			if (customizer.getExternalImageAffectingState() == null || !customizer.getExternalImageAffectingState().equals(externalState)) {
+				dataAidsByCustomizer.invalidate(customizer);
+				//TODO: start building image in a background task before the client asks for it!
 			}
-			
-			logger.error("Couldn't load customizer(unchecked):" + customizerName, e);
-			return null;			
-		} catch (ExecutionException e) {
-			logger.error("Couldn't load customizer:" + customizerName, e);
-			return null;
+			customizer.setExternalImageAffectingState(externalState);
 		}
 		
-		//our cache loader ensures that customizer will be set at this position
-		if (customizer.getExternalImageAffectingState() == null || !customizer.getExternalImageAffectingState().equals(externalState)) {
-			dataAidsByCustomizer.invalidate(customizer);
-			//TODO: start building image in a background task before the client asks for it!
-		}
-		customizer.setExternalImageAffectingState(externalState);
 		return customizer;
 	}
     
+    //TODO: Why don't we save this to disk as an async action?
 	@ApiOperation(value="Save Customizer.")
 	@POST
 	@Path("upsert")
     @Produces(MediaType.APPLICATION_JSON)
-	public Customizer addOrUpdateCustomizer(final Customizer customizer) {
+	public Customizer addOrUpdateCustomizer(Customizer customizer) {
 		Customizer oldCustomizer = customizersByName.getIfPresent(customizer.getName());
 		if (oldCustomizer != null) {
 			//If the image was affected by some external state other than the customizer(e.g. calibration), trash the cache.
@@ -181,7 +155,7 @@ public class CustomizerService {
 					oldAid.customizer = customizer;
 					oldAid.clearAffineTransformCache();
 					
-					//TODO: do we have to do this? Shouldn't this be done naturally through the soft references? This needs to be tested!
+					//TODO: do we have to do this? Shouldn't this be done naturally through the soft references?
 					dataAidsByCustomizer.invalidate(oldCustomizer);
 				} catch (ExecutionException e) {
 					logger.error("Couldn't create dataAid:", e);
@@ -191,17 +165,6 @@ public class CustomizerService {
 		}
 		
 		customizersByName.put(customizer.getName(), customizer);
-		//Don't wait for us to save the file to disk
-		Main.GLOBAL_EXECUTOR.submit(new Runnable(){
-			@Override
-			public void run() {
-				try {
-					HostProperties.Instance().saveCustomizer(customizer);
-				} catch (InappropriateDeviceException e) {
-					logger.error("Couldn't save customizer:" + customizer,  e);
-				}
-			}
-		});
 		return customizer;
 	}
 

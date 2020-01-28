@@ -12,20 +12,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.display.GraphicsOutputInterface;
 import org.area515.resinprinter.display.InappropriateDeviceException;
-import org.area515.resinprinter.gcode.PrinterController;
-import org.area515.resinprinter.gcode.PrinterDriver;
-import org.area515.resinprinter.job.AbstractPrintFileProcessor;
-import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
+import org.area515.resinprinter.gcode.GCodeControl;
 import org.area515.resinprinter.job.JobStatus;
-import org.area515.resinprinter.job.PrintFileProcessor;
 import org.area515.resinprinter.projector.ProjectorModel;
 import org.area515.resinprinter.serial.SerialCommunicationsPort;
-import org.area515.resinprinter.server.HostProperties;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Printer implements Named {
+public class Printer {
     private static final Logger logger = LogManager.getLogger();
 	private PrinterConfiguration configuration;
 	
@@ -46,8 +41,8 @@ public class Printer implements Named {
 	private ReentrantLock statusLock = new ReentrantLock();
 	private Condition jobContinued = statusLock.newCondition();
 	
-	//Controls how templates are interrpretted
-	private PrinterController printerControl;
+	//GCode
+	private GCodeControl gCodeControl;
 
 	//Projector model
 	private ProjectorModel projectorModel;
@@ -66,20 +61,22 @@ public class Printer implements Named {
 	public Printer(PrinterConfiguration configuration) throws InappropriateDeviceException {
 		this.configuration = configuration;
 		
-		String driverType = configuration.getMachineConfig().getMotorsDriverConfig().getDriverType();
-		for (PrinterDriver currentDriver : HostProperties.Instance().getPrinterDrivers()) {
-			if (driverType.equalsIgnoreCase(currentDriver.getDriverName())) {
-				printerControl = currentDriver.buildNewPrinterController(this);
-			}
+		try {
+			@SuppressWarnings("unchecked")
+			Class<GCodeControl> gCodeClass = (Class<GCodeControl>)Class.forName("org.area515.resinprinter.gcode." + configuration.getMachineConfig().getMotorsDriverConfig().getDriverType() + "GCodeControl");
+			gCodeControl = (GCodeControl)gCodeClass.getConstructors()[0].newInstance(this);
+		} catch (ClassNotFoundException e) {
+			throw new InappropriateDeviceException("Couldn't find GCode controller for:" + configuration.getMachineConfig().getMotorsDriverConfig().getDriverType(), e);
+		} catch (SecurityException e) {
+			throw new InappropriateDeviceException("No permission to create class for:" + configuration.getMachineConfig().getMotorsDriverConfig().getDriverType(), e);
+		} catch (Exception e) {
+			throw new InappropriateDeviceException("Couldn't create instance for:" + configuration.getMachineConfig().getMotorsDriverConfig().getDriverType(), e);
 		}
 	}
 	
 	@JsonIgnore
 	public String getName() {
 		return configuration.getName();
-	}
-	public void setName(String name) {
-		configuration.setName(name);
 	}
 	
 	@XmlTransient
@@ -138,7 +135,7 @@ public class Printer implements Named {
 		}
 	}
 	
-	public boolean waitForPauseIfRequired(PrintFileProcessor<?, ?> processor, DataAid aid) {
+	public boolean waitForPauseIfRequired() {
 		statusLock.lock();
 		try {
 			//Very important that this check is performed
@@ -147,23 +144,7 @@ public class Printer implements Named {
 			}
 			logger.info("Print has been paused.");
 			long startPause = System.currentTimeMillis();
-			
-			try {
-				if (processor instanceof AbstractPrintFileProcessor) {
-					((AbstractPrintFileProcessor)processor).performPauseGCode(aid);
-				}
-			} catch (IOException | InappropriateDeviceException e) {
-				logger.error("Error while executing pause gCode, but we will recover", e);
-			}
 			jobContinued.await();
-			try {
-				if (processor instanceof AbstractPrintFileProcessor) {
-					((AbstractPrintFileProcessor)processor).performResumeGCode(aid);
-				}
-			} catch (IOException | InappropriateDeviceException e) {
-				logger.error("Error while executing resume gCode, but we will recover", e);
-			}
-			
 			currentSlicePauseTime += System.currentTimeMillis() - startPause;
 			logger.info("Print has resumed.");
 			return isPrintActive();
@@ -193,13 +174,9 @@ public class Printer implements Named {
 		}
 	}
 	
-	public BufferedImage createBufferedImageFromGraphicsOutputInterface(int x, int y) {
-		return refreshFrame.buildBufferedImage(x, y);
-	}
-	
 	public void initializeAndAssignGraphicsOutputInterface(final GraphicsOutputInterface device, final String displayDeviceID) {
 		this.displayDeviceID = displayDeviceID;
-		this.refreshFrame = device.initializeDisplay(displayDeviceID, getConfiguration());
+		this.refreshFrame = device.initializeDisplay(displayDeviceID);
 		
 		Rectangle screenSize = refreshFrame.getBoundary();
 		getConfiguration().getMachineConfig().getMonitorDriverConfig().setDLP_X_Res(screenSize.width);
@@ -311,8 +288,8 @@ public class Printer implements Named {
 	}
 	
 	@JsonIgnore
-	public PrinterController getPrinterController() {
-		return printerControl;
+	public GCodeControl getGCodeControl() {
+		return gCodeControl;
 	}
 	
 	public void setPrinterFirmwareSerialPort(SerialCommunicationsPort printerFirmwareSerialPort) {
@@ -322,7 +299,7 @@ public class Printer implements Named {
 		//Read the welcome mat if it's not null
 		if (printerFirmwareSerialPort != null) {
 			try {
-				logger.info("Firmware Welcome chitchat:" + getPrinterController().readWelcomeChitChatFromFirmwareSerialPort());
+				logger.info("Firmware Welcome chitchat:" + getGCodeControl().readWelcomeChitChat());
 			} catch (IOException e) {
 				logger.error("Error while reading welcome chitchat", e);
 			}

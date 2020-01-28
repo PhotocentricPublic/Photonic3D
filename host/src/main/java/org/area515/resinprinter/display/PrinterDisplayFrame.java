@@ -7,14 +7,16 @@ import java.awt.GraphicsDevice;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.printer.Printer.DisplayState;
-import org.area515.resinprinter.printer.PrinterConfiguration;
 import org.area515.util.Log4jUtil;
 
 public class PrinterDisplayFrame extends JFrame implements GraphicsOutputInterface {
@@ -77,7 +79,6 @@ public class PrinterDisplayFrame extends JFrame implements GraphicsOutputInterfa
 		this.isSimulatedDisplay = true;
 		getRootPane().setBackground(Color.black);
 		getContentPane().setBackground(Color.black);
-		setBackground(Color.black);
 		add(new DoubleBufferedJPanel());
 		IMAGE_REALIZE_TIMER += hashCode();
 	}
@@ -87,7 +88,6 @@ public class PrinterDisplayFrame extends JFrame implements GraphicsOutputInterfa
 		this.isSimulatedDisplay = false;
 		getRootPane().setBackground(Color.black);
 		getContentPane().setBackground(Color.black);
-		setBackground(Color.black);
 		add(new DoubleBufferedJPanel());
 		IMAGE_REALIZE_TIMER += hashCode();
 	}
@@ -155,12 +155,7 @@ public class PrinterDisplayFrame extends JFrame implements GraphicsOutputInterfa
 	}
 
 	@Override
-	public GraphicsOutputInterface initializeDisplay(String displayId, PrinterConfiguration configuration) {
+	public GraphicsOutputInterface initializeDisplay(String displayId) {
 		throw new IllegalStateException("You should never call initializeDisplay from this class");
-	}
-	
-	@Override
-	public BufferedImage buildBufferedImage(int x, int y) {
-		return new BufferedImage(x, y, BufferedImage.TYPE_4BYTE_ABGR);
 	}
 }
