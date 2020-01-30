@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.locks.ReentrantLock;
 
+import java.awt.image.DataBufferByte;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.display.GraphicsOutputInterface;
@@ -157,10 +158,10 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		
 		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.startTimer(IMAGE_REALIZE_TIMER));
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-        		destPixels.setInt((y*(pitch / bytesPerPixel) + x) * bytesPerPixel, image.getRGB(x, y));
-            }
+		byte[] raw_image = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		for (int y = 0; y < image.getHeight(); y++) {
+			destPixels.write(y * pitch, raw_image, y * image.getWidth() * bytesPerPixel,
+					image.getWidth() * bytesPerPixel);
         }
 		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 
