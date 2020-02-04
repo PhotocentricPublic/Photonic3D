@@ -6,44 +6,43 @@
 		var BRANCH = "master";
 		var REPO = $scope.repo;
 		
+		var tempSLicingProfile;
+		
 		this.loadingFontsMessage = "--- Loading fonts from server ---"
 		this.loadingProfilesMessage = "--- Loading slicing profiles from server ---"
 		this.loadingMachineConfigMessage = "--- Loading machine configurations from server ---"
 		this.autodirect = $location.search().autodirect;
 		
+		function findAPrinterThatTheUserMostLikelyWantsToWorkWith(printerList) {
+			//There is only one printer. So it's likely they want to work with this printer
+			if (printerList.length == 1) {
+				return printerList[0];
+			}
+			
+			var firstStartedPrinter = null;
+        	for (var i = 0; i < printerList.length; i++) {
+        		//If the user has already selected a printer. It's very likely that they want to work with it...
+        		if (controller.currentPrinter != null && printerList[i].configuration.name === controller.currentPrinter.configuration.name) {
+        			return printerList[i];
+        		}
+
+        		if (firstStartedPrinter == null && printerList[i].started) {
+        			firstStartedPrinter = printerList[i];
+        		}
+        		
+        		//TODO: Isn't it more likely that they want to work with a printer that is printing than one that is simply just started?
+        	}
+        	
+        	//As the name implies, this will return the first started printer. There is a decent chance they want to work with it.
+        	return firstStartedPrinter;
+		}
+		
 		//TODO: Instead of having this method we should understand how the selected printer gets out of sync and fix that
 		function refreshSelectedPrinterAndAutodirectIfNecessary(printerList) {
-        	var foundPrinter = false;
-        	if (printerList.length == 1 && printerList[0].started && controller.autodirect != 'disabled') {
-        		controller.currentPrinter = printerList[0];
-        		controller.gotoPrinterControls();
-        		foundPrinter = true;
-        	} else {
-        		var printersStarted = 0;
-        		var currPrinter = null;
-	        	for (printer of printerList) {
-	        		if (printersStarted > 1) {
-	        			break;
-	        		}
-	        		if (printer.started) {
-	        			printersStarted += 1;
-	        			currPrinter = printer;
-	        		}
-	        		
-	        		if (controller.currentPrinter != null && printer.configuration.name === controller.currentPrinter.configuration.name) {
-	        			controller.currentPrinter = printer;
-	        			foundPrinter = true;
-	        		}
-	        	}
-	        	if (printersStarted == 1 && controller.autodirect != 'disabled') {
-	        		controller.currentPrinter = currPrinter;
-	        		controller.gotoPrinterControls();
-	        		foundPrinter = true;
-	        	}
-        	}
-        	if (!foundPrinter) {
-        		controller.currentPrinter = null;
-        	}
+			controller.currentPrinter = findAPrinterThatTheUserMostLikelyWantsToWorkWith(printerList);
+			if (controller.autodirect != 'disabled') {
+				controller.gotoPrinterControls();
+			}
         }
 		
 		function refreshPrinters() {
@@ -62,11 +61,12 @@
 			if (postTargetPrinter) {
 			   $http.post(service, targetPrinter).then(
 	       			function(response) {
-	       				if (shouldRefreshPrinterList) {
-	       					refreshPrinters();
-	       					refreshSlicingProfiles();
-	       					refreshMachineConfigurations();
+	       				if (!shouldRefreshPrinterList) {
+	       					controller.currentPrinter = targetPrinter;
 	       				}
+       					refreshPrinters();
+       					refreshSlicingProfiles();
+       					refreshMachineConfigurations();
 	       			}, 
 	       			function(response) {
  	        			$scope.$emit("HTTPError", {status:response.status, statusText:response.data});
@@ -141,7 +141,7 @@
 	        $http.get(printer.url).success(
 	        		function (data) {
 	        			controller.editPrinter = JSON.parse(window.atob(data.content));
-	        			$scope.savePrinter(controller.editPrinter, false);
+	        			$scope.savePrinter(controller.editPrinter, true);
 	        		}).error(
     				function (data, status, headers, config, statusText) {
  	        			$scope.$emit("HTTPError", {status:status, statusText:data});
@@ -261,7 +261,7 @@
 				        "var hBridgeInMM = {\n" +
 						"   wallWidth:1,\n" +
 						"   gapLength:4,\n" +
-						"   firstGapWidth:5,\n" +
+						"   firstGapWidth:3,\n" +
 						"   numberOfGapsInRow:6,\n" +
 						"   gapWidthIncrement:3,\n" +
 						"   distanceBetweenRows:1,\n" +
@@ -280,19 +280,17 @@
 						"buildPlatformGraphics.setColor(java.awt.Color.WHITE);\n" +
 						"for (var currentRow = 0; currentRow < hBridgeInMM.numberOfRows; currentRow++) {\n" +
 						"   var currentX = startX;\n" +
-						"   for (var currentGap = 0; currentGap < hBridgeInMM.numberOfGapsInRow; currentGap ++) {\n" +
-						"      if ($CURSLICE + 1 < job.totalSlices) {\n" +
+						"   if ($CURSLICE < job.totalSlices) {\n" +
+						"      for (var currentGap = 0; currentGap < hBridgeInMM.numberOfGapsInRow; currentGap ++) {\n" +
 						"         buildPlatformGraphics.fillRect(currentX, currentY, wallWidthX, gapLengthY * 2 + wallWidthY);\n" +
 						"         currentX += wallWidthX + (hBridgeInMM.firstGapWidth + (hBridgeInMM.gapWidthIncrement * currentGap)) * pixelsPerMMX;\n" +
 						"      }\n" +
-						"   }\n" +
-						"   if ($CURSLICE + 1 < job.totalSlices) {\n" +
 						"      buildPlatformGraphics.fillRect(currentX, currentY, wallWidthX, gapLengthY * 2 + wallWidthY);\n" +
 						"      buildPlatformGraphics.fillRect(startX, currentY + gapLengthY, totalWidthX, wallWidthY);\n" +
 						"   } else {\n" +
 						"      buildPlatformGraphics.fillRect(startX, currentY, totalWidthX, gapLengthY * 2 + wallWidthY);\n" +
 						"      exposureTimers.add({\n" +
-						"      	  delayMillis:$LayerTime - (hBridgeInMM.exposureTimeDecrementMillis * currentRow),\n" + 
+						"         delayMillis:$LayerTime - (hBridgeInMM.exposureTimeDecrementMillis * currentRow),\n" + 
 						"         parameter:{x:startX, y:currentY, width:totalWidthX, height:gapLengthY * 2 + wallWidthY},\n" + 
 						"         function:function(blackRect) {\n" +
 						"            buildPlatformGraphics.setColor(java.awt.Color.BLACK);\n" +
@@ -302,6 +300,117 @@
 						"   }\n" +
 						"   currentY += gapLengthY * 2 + wallWidthY + hBridgeInMM.distanceBetweenRows * pixelsPerMMY;\n" +
 						"}\n";
+		}
+		
+		function createNewResinProfile(newResinProfile) {
+			// this adds the new resinprofile in the current selected slicingprofile
+			var newSlicingProfile = controller.currentPrinter.configuration.slicingProfile;
+			newSlicingProfile.InkConfig.push(newResinProfile);
+									
+			// this re-uploads the changed profile
+			$http.put("services/machine/slicingProfiles", newSlicingProfile).then(
+		    		function (data) {
+		    			// for some reason this is needed when it is the currently loaded profile, otherwise it won't show after refresh
+				        $http.post('/services/printers/save', controller.currentPrinter).success(
+				        		function () {
+				        			refreshSlicingProfiles();
+					    			$scope.$emit("MachineResponse", {machineResponse: {command:"Settings Saved!", message:"Your new resin profile has been added!.", response:true}, successFunction:null, afterErrorFunction:null});
+				        		}).error(
+			    				function (data, status, headers, config, statusText) {
+			 	        			$scope.$emit("HTTPError", {status:status, statusText:data});
+				        		})
+		    		},
+		    		function (error) {
+ 	        			$scope.$emit("HTTPError", {status:error.status, statusText:error.data});
+		    		}
+		    )	
+		}
+		
+		this.copySlicingProfile = function copySlicingProfile(editTitle) {
+			controller.currentSlicingProfile = JSON.parse(JSON.stringify(controller.currentPrinter.configuration.slicingProfile));
+			controller.currentSlicingProfile.name = controller.currentSlicingProfile.name + " (Copy) ";
+			openCopySlicingProfileDialog(controller.currentSlicingProfile, editTitle, controller.currentSlicingProfile.name);
+		}
+		
+		function SaveEditSlicingProfile(savedProfile){
+			$http.put("services/machine/slicingProfiles", savedProfile).then(
+		    		function (data) {
+		    			refreshSlicingProfiles();
+		    			$scope.$emit("MachineResponse", {machineResponse: {command:"Settings Saved!", message:"Your slicing profile has been copied!.", response:true}, successFunction:null, afterErrorFunction:null});
+		    		},
+		    		function (error) {
+ 	        			$scope.$emit("HTTPError", {status:error.status, statusText:error.data});
+		    		}
+		    )
+		}
+		
+		this.openSaveResinDialog = function openSaveResinDialog(editTitle) {
+			var editPrinterModal = $uibModal.open({
+		        animation: true,
+		        templateUrl: 'editResin.html',
+		        controller: 'EditResinController',
+		        size: "lg",
+		        resolve: {
+		        	title: function () {return editTitle;},
+		        	editPrinter: function () {return controller.editPrinter;}
+		        }
+			});
+		    editPrinterModal.result.then(function (newResinProfile) {
+		    	createNewResinProfile(newResinProfile)
+			});
+		}
+		
+		function openCopySlicingProfileDialog(data, editTitle, currentSlicingProfileName) {
+			var copySlicingProfileModal = $uibModal.open({
+		        animation: true,
+		        templateUrl: 'copySlicingProfile.html',
+		        controller: 'copySLicingProfileController',
+		        size: "lg",
+		        resolve: {
+		        	title: function () {return editTitle;},
+		        	sliceData: function () {return data;},
+					nameProfile: function() {return currentSlicingProfileName;}
+		        }
+			});
+		    copySlicingProfileModal.result.then(function (savedProfile) {
+				SaveEditSlicingProfile(savedProfile);  
+			});
+		}
+
+		this.deleteSlicingProfile = function deleteSlicingProfile(profileName, newProfile) {
+			
+			var profileNameEn = encodeURIComponent(profileName);
+		     $http.delete("/services/machine/slicingProfiles/" + profileNameEn).success(function (data) {
+		       	 refreshSlicingProfiles();
+		    	 $scope.$emit("MachineResponse", {machineResponse: {command:"Settings removed!", message:"Your slicing profile has been removed succesfully!.", response:true}, successFunction:null, afterErrorFunction:null});							
+		    	
+		     }).error(
+	    				function (data, status, headers, config, statusText) {
+	 	        			$scope.$emit("HTTPError", {status:status, statusText:data});
+		        		})
+		}
+		
+		this.deleteCurrentResinProfile = function deleteCurrentResinProfile(slicingProfile) {
+			// removes the selected resinprofile from the old profile
+			slicingProfile.InkConfig.splice(slicingProfile.selectedInkConfigIndex,1);
+			
+			// this re-uploads the changed profile
+			$http.put("services/machine/slicingProfiles", slicingProfile).then(
+		    		function (data) {
+		    			// for some reason this is needed when it is the currently loaded profile, otherwise it won't show after refresh
+				        $http.post('/services/printers/save', controller.currentPrinter).success(
+				        		function () {
+				        			refreshSlicingProfiles();
+					    			$scope.$emit("MachineResponse", {machineResponse: {command:"Settings Saved!", message:"Your resin profile has been removed!.", response:true}, successFunction:null, afterErrorFunction:null});
+				        		}).error(
+			    				function (data, status, headers, config, statusText) {
+			 	        			$scope.$emit("HTTPError", {status:status, statusText:data});
+				        		})
+		    		},
+		    		function (error) {
+ 	        			$scope.$emit("HTTPError", {status:error.status, statusText:error.data});
+		    		}
+		    )
 		}
 		
 		this.startCurrentPrinter = function startCurrentPrinter() {
@@ -324,6 +433,9 @@
 		}
 		
         this.gotoPrinterControls = function gotoPrinterControls() {
+        	if (controller.currentPrinter == null) {
+        		return;
+        	}
         	$location.path('/printerControlsPage').search({printerName: controller.currentPrinter.configuration.name})
         };
 		

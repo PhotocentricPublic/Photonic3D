@@ -2,7 +2,7 @@
 	var cwhApp = angular.module('cwhApp');
 	cwhApp.controller("PrintablesController", ['$scope', '$http', '$location', '$uibModal', '$anchorScroll', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $uibModal, $anchorScroll, cwhWebSocket, photonicUtils) {
 		controller = this;
-		
+	
 		this.currentPrintable = null;
 		this.currentCustomizer = null;
 		this.currentPrinter = null;
@@ -386,6 +386,30 @@
 				"currentTransform.translate(\n" +
 				"   centerX-printImage.getWidth()/2,\n" +
 				"   centerY-printImage.getHeight()/2);\n" +
+				"currentTransform";
+		}
+		
+		this.correctAspectRatio = function correctAspectRatio() {
+			controller.currentCustomizer.affineTransformSettings.affineTransformScriptCalculator = 
+				"var currentTransform = new java.awt.geom.AffineTransform();\n" +
+				"var scaleXDimension = false;\n" +
+				"var ppmmx = pixelsPerMMX;\n" +
+				"var ppmmy = pixelsPerMMY;\n" +
+				"function reduce(numerator,denominator){\n" +
+				"   var gcd = function gcd(a,b){\n" +
+				"      return b ? gcd(b, a%b) : a;\n" +
+				"   };\n" +
+				"   gcd = gcd(numerator,denominator);\n" +
+				"   return [numerator/gcd, denominator/gcd];\n" +
+				"}\n" +
+				"var reduced = reduce(ppmmx, ppmmy);" +
+				"ppmmx = reduced[0];\n" +
+				"ppmmy = reduced[1];\n" +
+				"if (scaleXDimension) {\n" +
+				"   currentTransform.scale(ppmmx / ppmmy, 1);\n" +
+				"} else {\n" +
+				"   currentTransform.scale(1, ppmmy / ppmmx);\n" +
+				"}\n" +
 				"currentTransform";
 		}
 		
