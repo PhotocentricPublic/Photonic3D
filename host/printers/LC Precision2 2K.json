@@ -66,7 +66,7 @@
          "LiftFeedRate":50.0,
          "LiftRetractRate":0.0,
          "FlipX":false,
-         "FlipY":true,
+         "FlipY":false,
          "ZLiftDistanceCalculator":"var minLift = 4.5;\nvar value = 8.0;\nif ($CURSLICE > $NumFirstLayers) {\nvalue = minLift  +  0.0015*Math.pow($buildAreaMM,1);\n}\nvalue",
          "ZLiftSpeedCalculator":"var value = 50.0;\nif ($CURSLICE > $NumFirstLayers) {\nvalue = 100.0 - 0.02 * Math.pow($buildAreaMM,1);\n}\nvalue",
          "ProjectorGradientCalculator":null,
