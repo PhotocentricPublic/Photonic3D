@@ -20,7 +20,9 @@ import org.area515.resinprinter.job.AbstractPrintFileProcessor;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.job.JobStatus;
 import org.area515.resinprinter.job.PrintJob;
-import org.area515.resinprinter.job.render.RenderedData;
+import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
+import org.area515.resinprinter.job.render.CurrentImageRenderer;
+import org.area515.resinprinter.job.render.RenderingContext;
 import org.area515.resinprinter.server.Main;
 
 public class MinerCubePrintFileProcessor extends AbstractPrintFileProcessor<Object,Object> {
@@ -51,9 +53,15 @@ public class MinerCubePrintFileProcessor extends AbstractPrintFileProcessor<Obje
 	}
 
 	@Override
-	public JobStatus processFile(PrintJob printJob) throws Exception {
-		final String MAIN_IMAGE = "lastExtrusionImage";
+	public CurrentImageRenderer createRenderer(DataAid aid, Object imageIndexToBuild) {
+		//Won't get called because we aren't using renders.
+		return null;
+	}
 
+	@Override
+	public JobStatus processFile(PrintJob printJob) throws Exception {
+		boolean footerAttempted = false;
+		DataAid dataAid = null;
 		try {
 			MinerDataAid data = (MinerDataAid)getDataAid(printJob);
 			MinerCube cube = data.cube.get();
@@ -69,21 +77,23 @@ public class MinerCubePrintFileProcessor extends AbstractPrintFileProcessor<Obje
 	
 			int firstSlices = data.inkConfiguration.getNumberOfFirstLayers();
 			List<Rectangle> rects = cube.buildNextPrintSlice(centerX, centerY);
-			RenderedData renderedData = data.cache.getOrCreateIfMissing(Boolean.TRUE);
+			RenderingContext renderedData = data.cache.getOrCreateIfMissing(Boolean.TRUE);
+
 			while (cube.hasPrintSlice()) {
+				data.startSlice();
+				
 				//Performs all of the duties that are common to most print files
 				JobStatus status = performPreSlice(data, renderedData.getScriptEngine(), null);
 				if (status != null) {
 					return status;
 				}
 				
-				BufferedImage image = new BufferedImage(data.xResolution, data.yResolution, BufferedImage.TYPE_4BYTE_ABGR);
+				BufferedImage image = data.printer.createBufferedImageFromGraphicsOutputInterface(data.xResolution, data.yResolution);
 				Graphics2D graphics = (Graphics2D)image.getGraphics();
 				graphics.setColor(Color.black);
 				graphics.fillRect(0, 0, data.xResolution, data.yResolution);
 				graphics.setColor(Color.white);
 				for (Rectangle currentRect : rects) {
-					//graphics.fillRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
 					graphics.fillRect(currentRect.x, currentRect.y, currentRect.width, currentRect.height);
 				}
 
@@ -103,9 +113,19 @@ public class MinerCubePrintFileProcessor extends AbstractPrintFileProcessor<Obje
 				}
 			}
 			
-			return performFooter(data);
+			try {
+				return performFooter(dataAid);
+			} finally {
+				footerAttempted = true;
+			}
 		} finally {
-			clearDataAid(printJob);
+			try {
+				if (!footerAttempted && dataAid != null) {
+					performFooter(dataAid);
+				}
+			} finally {
+				clearDataAid(printJob);
+			}
 		}
 	}
 	

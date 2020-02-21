@@ -36,47 +36,46 @@ import org.apache.logging.log4j.Logger;
 import sun.security.x509.X509CertImpl;
 
 public class PhotonicCrypto {
-	private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
 
-	private static final int IV_LENGTH = 16;
+    private static final int IV_LENGTH = 16;
 	private static final int AES_KEY_SIZE = 16;
 	private static final String PUBLIC_CERT_REQUEST = "X509CertsBase64NewLine";
 	private static final String BAD_UUID = "Uid of subject on certifiate didn't match expected uuid of public key.";
 	private static final PhotonicSecurityProvider SHA1PRNG_PROVIDER = new PhotonicSecurityProvider();
 	public static final String FEATURE_NAME = "Make friends through X509";
-
-	// Local User
+	
+	//Local User
 	private PrivateKeyEntry decryptor;
 	private PrivateKeyEntry signer;
 	private X509Certificate encryptor;
 	private X509Certificate verifier;
 	private UUID localUserId;
-
-	// Remote User
+	
+	//Remote User
 	private PhotonicCrypto remoteCrypto;
-
-	// ConversationState
-	private final ThreadLocal<Cipher> conversationCypher = new ThreadLocal<Cipher>();
-	private final Boolean lockSync = new Boolean(true);// TODO: synchronize around key changes if we are going to stream
-													// video. TLS probably never even does a key change...
+	
+	//ConversationState
+	private ThreadLocal<Cipher> conversationCypher = new ThreadLocal<Cipher>();
+	private Boolean lockSync = new Boolean(true);//TODO: synchronize around key changes if we are going to stream video. TLS probably never even does a key change...
 	private SecretKeySpec symKey;
-	private final boolean allowInsecureCommunication;
+	private boolean allowInsecureCommunication;
 	private boolean isKeyCreator;
 	private InitializationVectorControl keyCreatorIV;
 	private InitializationVectorControl keyReceiverIV;
-
+	
 	public static class InitializationVectorControl {
-		private final Map<Integer, byte[]> ivs = new HashMap<>();
-		private final SecureRandom random;
+		private Map<Integer, byte[]> ivs = new HashMap<>();
+		private SecureRandom random;
 		private int offset;
-
-		public InitializationVectorControl(final byte[] seed) throws NoSuchAlgorithmException {
+		
+		public InitializationVectorControl(byte[] seed) throws NoSuchAlgorithmException {
 			this.random = SecureRandom.getInstance("SHA1PRNG", SHA1PRNG_PROVIDER);
 			this.random.setSeed(seed);
 			this.offset = 0;
 		}
-
-		public byte[] getNextAvailableIV(final int findIv) {
+		
+		public byte[] getNextAvailableIV(int findIv) {
 			byte[] ivBytes = null;
 			for (; offset < findIv; offset++) {
 				ivBytes = new byte[IV_LENGTH];
@@ -86,44 +85,40 @@ public class PhotonicCrypto {
 
 			return ivs.remove(findIv);
 		}
-
-		public int getNextAvailableIV(final byte[] ivBytes) {
+		
+		public int getNextAvailableIV(byte[] ivBytes) {
 			offset++;
 			random.nextBytes(ivBytes);
 			return offset;
 		}
-
+		
 		public String toString() {
 			return "offset:" + offset + " ivs:" + ivs.keySet();
 		}
 	}
-
-	public PhotonicCrypto(final Entry signer, final Entry decryptor, final boolean allowInsecureCommunication)
-			throws CertificateExpiredException, CertificateNotYetValidException, CertificateEncodingException,
-			InvalidNameException {
+	
+	public PhotonicCrypto(Entry signer, Entry decryptor, boolean allowInsecureCommunication) throws CertificateExpiredException, CertificateNotYetValidException, CertificateEncodingException, InvalidNameException {
 		this.allowInsecureCommunication = allowInsecureCommunication;
 		if (decryptor instanceof PrivateKeyEntry) {
-			this.decryptor = (PrivateKeyEntry) decryptor;
-			this.encryptor = (X509Certificate) ((PrivateKeyEntry) decryptor).getCertificate();
+			this.decryptor = (PrivateKeyEntry)decryptor;
+			this.encryptor = (X509Certificate)((PrivateKeyEntry)decryptor).getCertificate();
 		} else if (decryptor instanceof TrustedCertificateEntry) {
-			this.encryptor = (X509Certificate) ((TrustedCertificateEntry) decryptor).getTrustedCertificate();
+			this.encryptor = (X509Certificate)((TrustedCertificateEntry) decryptor).getTrustedCertificate();
 		}
 		encryptor.checkValidity();
 
 		if (signer instanceof PrivateKeyEntry) {
-			this.signer = (PrivateKeyEntry) signer;
-			this.verifier = (X509Certificate) ((PrivateKeyEntry) signer).getCertificate();
+			this.signer = (PrivateKeyEntry)signer;
+			this.verifier = (X509Certificate)((PrivateKeyEntry)signer).getCertificate();
 		} else if (signer instanceof TrustedCertificateEntry) {
-			this.verifier = (X509Certificate) ((TrustedCertificateEntry) signer).getTrustedCertificate();
+			this.verifier = (X509Certificate)((TrustedCertificateEntry) signer).getTrustedCertificate();
 		}
 		verifier.checkValidity();
 		validateUIDOfVerifier();
 	}
-
-	// This constructor duplicates the local crypto information so it can be used to
-	// communicate with another remote.
-	public PhotonicCrypto(final PhotonicCrypto crypto) throws CertificateExpiredException, CertificateNotYetValidException,
-			CertificateEncodingException, InvalidNameException {
+	
+	//This constructor duplicates the local crypto information so it can be used to communicate with another remote.
+	public PhotonicCrypto(PhotonicCrypto crypto) throws CertificateExpiredException, CertificateNotYetValidException, CertificateEncodingException, InvalidNameException {
 		this.allowInsecureCommunication = crypto.allowInsecureCommunication;
 		this.decryptor = crypto.decryptor;
 		this.encryptor = crypto.encryptor;
@@ -133,90 +128,84 @@ public class PhotonicCrypto {
 		verifier.checkValidity();
 		validateUIDOfVerifier();
 	}
-
+	
 	public X509Certificate[] getCertificates() {
-		return new X509Certificate[] { verifier, encryptor };
+		return new X509Certificate[]{verifier, encryptor};
 	}
 
 	private void validateUIDOfVerifier() throws InvalidNameException, CertificateEncodingException {
-		final String[] userIdAndName = LdapUtils.getUserIdAndName(verifier.getSubjectDN().getName());
+		String[] userIdAndName = LdapUtils.getUserIdAndName(verifier.getSubjectDN().getName());
 		if (!UUID.fromString(userIdAndName[0]).equals(UUID.nameUUIDFromBytes(verifier.getPublicKey().getEncoded()))) {
 			throw new InvalidNameException(BAD_UUID);
 		}
 		localUserId = UUID.fromString(userIdAndName[0]);
 	}
-
+	
 	public UUID getLocalUserId() {
 		return localUserId;
 	}
-
-	public void setRemoteCrypto(final PhotonicCrypto remoteCrypto) {
+	
+	public void setRemoteCrypto(PhotonicCrypto remoteCrypto) {
 		this.remoteCrypto = remoteCrypto;
 	}
-
-	public boolean isAsymetricEncryption(final String algorithm) {
-		return algorithm != null && algorithm.equalsIgnoreCase("rsa");
+	
+	public boolean isAsymetricEncryption(String algorithm) {
+		return algorithm != null && (algorithm.equalsIgnoreCase("rsa") || algorithm.equalsIgnoreCase("EC"));
 	}
-
-	public Message buildCertificateTrustMessage(final UUID toUser) throws CertificateEncodingException {
-		final Message message = new Message();
+	
+	public Message buildCertificateTrustMessage(UUID toUser) throws CertificateEncodingException {
+		Message message = new Message();
 		message.setFrom(getLocalUserId());
 		message.setTo(toUser);
 		message.setEncryptionAlgorithm(PUBLIC_CERT_REQUEST);
-		message.setData((Base64.getEncoder().encodeToString(verifier.getEncoded()) + "\n"
-				+ Base64.getEncoder().encodeToString(encryptor.getEncoded())).getBytes());
+		message.setData((Base64.getEncoder().encodeToString(verifier.getEncoded()) + "\n" + Base64.getEncoder().encodeToString(encryptor.getEncoded())).getBytes());
 		return message;
 	}
-
-	public static Friend checkCertificateTrustExchange(final Message message)
-			throws CertificateException, InvalidNameException {
+	
+	public static Friend checkCertificateTrustExchange(Message message) throws CertificateException, InvalidNameException {
 		if (!message.getEncryptionAlgorithm().equalsIgnoreCase(PUBLIC_CERT_REQUEST)) {
 			return null;
 		}
-
-		final String signCertAndEncryptCert = new String(message.getData());
-		final int newLineSep = signCertAndEncryptCert.indexOf("\n");
-		final String signBase64 = signCertAndEncryptCert.substring(0, newLineSep);
-		final String encryptBase64 = signCertAndEncryptCert.substring(newLineSep + 1);
-		final X509CertImpl sign = new X509CertImpl(Base64.getDecoder().decode(signBase64));
-		final X509CertImpl encrypt = new X509CertImpl(Base64.getDecoder().decode(encryptBase64));
-
-		final String[] names = LdapUtils.getUserIdAndName(sign.getSubjectDN().getName());
-		if (!names[0].equals(message.getFrom().toString())) {
-			throw new InvalidNameException("User:" + names[1] + " sent a friend request with userId:" + names[0]
-					+ " on cert which doesn't match userId:" + message.getFrom() + " from which it came");
-		}
-
-		if (!UUID.fromString(names[0]).equals(UUID.nameUUIDFromBytes(sign.getPublicKey().getEncoded()))) {
-			throw new InvalidNameException(BAD_UUID);
-		}
-
-		final Friend friend = new Friend();
-		friend.setUser(new PhotonicUser(names[1], null, UUID.fromString(names[0]), null,
-				new String[] { PhotonicUser.LOGIN }, true));
-		friend.setFriendshipFeature(PhotonicCrypto.FEATURE_NAME);
-		friend.setTrustData(new String[] { signBase64, encryptBase64 });
+		
+		String signCertAndEncryptCert = new String(message.getData());
+		int newLineSep = signCertAndEncryptCert.indexOf("\n");
+		String signBase64 = signCertAndEncryptCert.substring(0, newLineSep);
+		String encryptBase64 = signCertAndEncryptCert.substring(newLineSep + 1);
+		X509CertImpl sign = new X509CertImpl(Base64.getDecoder().decode(signBase64));
+		X509CertImpl encrypt = new X509CertImpl(Base64.getDecoder().decode(encryptBase64));
+		
+    	String[] names = LdapUtils.getUserIdAndName(sign.getSubjectDN().getName());
+    	if (!names[0].equals(message.getFrom().toString())) {
+    		throw new InvalidNameException("User:" + names[1] + " sent a friend request with userId:" + names[0] + " on cert which doesn't match userId:" + message.getFrom() + " from which it came");
+    	}
+    	
+    	if (!UUID.fromString(names[0]).equals(UUID.nameUUIDFromBytes(sign.getPublicKey().getEncoded()))) {
+    		throw new InvalidNameException(BAD_UUID);
+    	}
+    	
+    	Friend friend = new Friend();
+    	friend.setUser(new PhotonicUser(names[1], null, UUID.fromString(names[0]), null, new String[]{PhotonicUser.LOGIN}, true));
+    	friend.setFriendshipFeature(PhotonicCrypto.FEATURE_NAME);
+    	friend.setTrustData(new String[]{signBase64, encryptBase64});
 		return friend;
 	}
-
+	
 	private Cipher getConversationCipher() throws NoSuchPaddingException, NoSuchAlgorithmException {
 		Cipher cipher = conversationCypher.get();
 		if (cipher == null) {
 			cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 			conversationCypher.set(cipher);
 		}
-
+		
 		return cipher;
 	}
-
-	public byte[] getData(final Message message) throws NoSuchAlgorithmException, CertificateExpiredException,
-			CertificateNotYetValidException, InvalidKeyException, SignatureException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-		// If there is a signature, check it!
-		final byte[] signature = message.getSignature();
+	
+	public byte[] getData(Message message) throws NoSuchAlgorithmException, CertificateExpiredException, CertificateNotYetValidException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+		//If there is a signature, check it!
+		byte[] signature = message.getSignature();
 		if (signature != null) {
 			remoteCrypto.verifier.checkValidity(new Date());
-			final Signature sig = Signature.getInstance(remoteCrypto.verifier.getSigAlgName());
+			Signature sig = Signature.getInstance(remoteCrypto.verifier.getSigAlgName());
 			sig.initVerify(remoteCrypto.verifier);
 			sig.update(message.getFrom().toString().getBytes());
 			sig.update(message.getTo().toString().getBytes());
@@ -232,106 +221,100 @@ public class PhotonicCrypto {
 				throw new InvalidAlgorithmParameterException("Only signed messages can be used with this Crypto.");
 			}
 		}
-
-		// No encryption was specified
+		
+		//No encryption was specified
 		if (message.getEncryptionAlgorithm() == null) {
 			if (!allowInsecureCommunication) {
 				throw new InvalidAlgorithmParameterException("Only encrypted messages can be used with this Crypto.");
 			}
-
+			
 			return message.getData();
 		}
-
-		// This must be a key exchange message
+		
+		//This must be a key exchange message
 		if (isAsymetricEncryption(message.getEncryptionAlgorithm())) {
-			final Cipher decrypt = Cipher.getInstance(message.getEncryptionAlgorithm());
+			Cipher decrypt=Cipher.getInstance(message.getEncryptionAlgorithm());
 			encryptor.checkValidity(new Date());
 			decrypt.init(Cipher.DECRYPT_MODE, decryptor.getPrivateKey());
-			final String ivAndKey = new String(decrypt.doFinal(message.getData()));
-			final int newLineSep = ivAndKey.indexOf("\n");
+			String ivAndKey = new String(decrypt.doFinal(message.getData()));
+			int newLineSep = ivAndKey.indexOf("\n");
 			synchronized (lockSync) {
 				if (newLineSep > 0) {
-					final byte[] keyCreatorSeed = Base64.getDecoder().decode(ivAndKey.substring(0, newLineSep));
-					final byte[] keyReceiverSeed = Base64.getDecoder().decode(ivAndKey.substring(0, newLineSep));
+					byte[] keyCreatorSeed = Base64.getDecoder().decode(ivAndKey.substring(0, newLineSep));
+					byte[] keyReceiverSeed = Base64.getDecoder().decode(ivAndKey.substring(0, newLineSep));
 					keyReceiverSeed[0]++;
 					keyCreatorIV = new InitializationVectorControl(keyCreatorSeed);
 					keyReceiverIV = new InitializationVectorControl(keyReceiverSeed);
 				}
 				if (newLineSep < ivAndKey.length()) {
-					symKey = new SecretKeySpec(Base64.getDecoder().decode(ivAndKey.substring(newLineSep + 1)), "AES");
+			        symKey = new SecretKeySpec(Base64.getDecoder().decode(ivAndKey.substring(newLineSep + 1)), "AES");
 				}
 				isKeyCreator = false;
 			}
-
+	        
 			getConversationCipher();
-			return null;
+	        return null;
 		}
-
-		// TODO: At this point we treat the message.getEncryptionAlgorithm() as AES
-		// encryption. Should I check it?
-
-		// It must be a data message
+		
+		//TODO: At this point we treat the message.getEncryptionAlgorithm() as AES encryption. Should I check it?
+		
+		//It must be a data message
 		if (keyCreatorIV == null || keyReceiverIV == null) {
 			throw new InvalidKeyException("You need to perform a key exchange with this crypto before you use it");
 		}
 
 		byte[] ivBytes = null;
 		synchronized (lockSync) {
-			final InitializationVectorControl properControl = isKeyCreator ? keyReceiverIV : keyCreatorIV;
+			InitializationVectorControl properControl = isKeyCreator?keyReceiverIV:keyCreatorIV;
 			ivBytes = properControl.getNextAvailableIV(message.getIvOffset());
 			if (ivBytes == null) {
 				throw new InvalidAlgorithmParameterException("Old iv offset specified. Replay attack?");
 			}
 		}
-
-		final IvParameterSpec iv = new IvParameterSpec(ivBytes);
-		final Cipher cipher = getConversationCipher();
+		
+		IvParameterSpec iv = new IvParameterSpec(ivBytes);
+		Cipher cipher = getConversationCipher();
 		cipher.init(Cipher.DECRYPT_MODE, symKey, iv);
-		return cipher.doFinal(message.getData());
+    	return cipher.doFinal(message.getData());
 	}
-
+	
 	public boolean isDueForKeyExchange() {
-		return symKey == null || keyCreatorIV == null || keyReceiverIV == null || keyCreatorIV.offset > 100
-				|| keyReceiverIV.offset > 100;
+		return symKey == null || keyCreatorIV == null || keyReceiverIV == null || keyCreatorIV.offset > 100 || keyReceiverIV.offset > 100;
 	}
-
-	public Message buildKeyExchange() throws InvalidNameException, CertificateExpiredException,
-			CertificateNotYetValidException, NoSuchAlgorithmException, InvalidKeyException, SignatureException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	
+	public Message buildKeyExchange() throws InvalidNameException, CertificateExpiredException, CertificateNotYetValidException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		if (signer == null) {
 			throw new SignatureException("This crypto is not capable of signing messages.");
 		}
-		final Message keyMessage = new Message();
+		Message keyMessage = new Message();
 		String[] userIdAndName = LdapUtils.getUserIdAndName(remoteCrypto.verifier.getSubjectDN().getName());
 		keyMessage.setTo(UUID.fromString(userIdAndName[0]));
-		userIdAndName = LdapUtils
-				.getUserIdAndName(((X509Certificate) signer.getCertificate()).getSubjectDN().getName());
+		userIdAndName = LdapUtils.getUserIdAndName(((X509Certificate)signer.getCertificate()).getSubjectDN().getName());
 		keyMessage.setFrom(UUID.fromString(userIdAndName[0]));
-		keyMessage.setEncryptionAlgorithm("RSA");
-
+		keyMessage.setEncryptionAlgorithm(signer.getPrivateKey().getAlgorithm());//RSA only right now
+		
 		remoteCrypto.encryptor.checkValidity(new Date());
-		final KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(AES_KEY_SIZE * 8);
-		final byte[] keyCreatorSeed = keyGen.generateKey().getEncoded();
-		final byte[] keyBytes = keyGen.generateKey().getEncoded();
-		final Cipher encrypt = Cipher.getInstance("RSA");
+		byte[] keyCreatorSeed = keyGen.generateKey().getEncoded();
+		byte[] keyBytes = keyGen.generateKey().getEncoded();
+		Cipher encrypt=Cipher.getInstance(remoteCrypto.encryptor.getPublicKey().getAlgorithm());//RSA only right now
 		encrypt.init(Cipher.ENCRYPT_MODE, remoteCrypto.encryptor.getPublicKey());
 		encrypt.update(Base64.getEncoder().encode(keyCreatorSeed));
-		encrypt.update(new byte[] { 10 });
-		final byte[] ivAndKey = encrypt.doFinal(Base64.getEncoder().encode(keyBytes));
+		encrypt.update(new byte[]{10});
+		byte[] ivAndKey = encrypt.doFinal(Base64.getEncoder().encode(keyBytes));
 		keyMessage.setData(ivAndKey);
-
 		verifier.checkValidity(new Date());
-		final Signature sig = Signature.getInstance(verifier.getSigAlgName());
+		Signature sig = Signature.getInstance(verifier.getSigAlgName());
 		sig.initSign(signer.getPrivateKey());
 		sig.update(keyMessage.getFrom().toString().getBytes());
 		sig.update(keyMessage.getTo().toString().getBytes());
 		sig.update(keyMessage.getEncryptionAlgorithm().getBytes());
 		sig.update(keyMessage.getData());
 		keyMessage.setSignature(sig.sign());
-
+		
 		synchronized (lockSync) {
-			final byte[] keyReceiverSeed = new byte[keyCreatorSeed.length];
+			byte[] keyReceiverSeed = new byte[keyCreatorSeed.length];
 			System.arraycopy(keyCreatorSeed, 0, keyReceiverSeed, 0, keyCreatorSeed.length);
 			keyReceiverSeed[0]++;
 
@@ -342,50 +325,46 @@ public class PhotonicCrypto {
 			symKey = new SecretKeySpec(keyBytes, "AES");
 		}
 
-		getConversationCipher();
+    	getConversationCipher();
 		return keyMessage;
 	}
-
-	public Message buildEncryptedMessage(final ByteBuffer buffer)
-			throws InvalidNameException, InvalidKeyException, InvalidAlgorithmParameterException,
-			IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException {
+	
+	public Message buildEncryptedMessage(ByteBuffer buffer) throws InvalidNameException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException {
 		if (keyCreatorIV == null || keyReceiverIV == null) {
 			throw new InvalidKeyException("You need to perform a key exchange with this crypto before you use it");
 		}
-
-		final Message keyMessage = new Message();
+		
+		Message keyMessage = new Message();
 		String[] userIdAndName = LdapUtils.getUserIdAndName(remoteCrypto.verifier.getSubjectDN().getName());
 		keyMessage.setTo(UUID.fromString(userIdAndName[0]));
-		userIdAndName = LdapUtils
-				.getUserIdAndName(((X509Certificate) signer.getCertificate()).getSubjectDN().getName());
+		userIdAndName = LdapUtils.getUserIdAndName(((X509Certificate)signer.getCertificate()).getSubjectDN().getName());
 		keyMessage.setFrom(UUID.fromString(userIdAndName[0]));
 
-		final byte[] ivBytes = new byte[IV_LENGTH];
+		byte[] ivBytes = new byte[IV_LENGTH];
 		synchronized (lockSync) {
-			final InitializationVectorControl properControl = isKeyCreator ? keyCreatorIV : keyReceiverIV;
-			final int currentOffset = properControl.getNextAvailableIV(ivBytes);
+			InitializationVectorControl properControl = isKeyCreator?keyCreatorIV:keyReceiverIV;
+			int currentOffset = properControl.getNextAvailableIV(ivBytes);
 			keyMessage.setIvOffset(currentOffset);
 		}
-
-		final IvParameterSpec iv = new IvParameterSpec(ivBytes);
+		
+		IvParameterSpec iv = new IvParameterSpec(ivBytes);
 		keyMessage.setEncryptionAlgorithm("AES/CBC/PKCS5PADDING");
-
-		final Cipher cipher = getConversationCipher();
+		
+		Cipher cipher = getConversationCipher();
 		cipher.init(Cipher.ENCRYPT_MODE, symKey, iv);
-		keyMessage.setData(cipher.doFinal(buffer.array()));
-		return keyMessage;
+    	keyMessage.setData(cipher.doFinal(buffer.array()));
+    	return keyMessage;
 	}
-
-	public Message buildMessage(final byte[] data) throws InvalidNameException, InvalidAlgorithmParameterException {
+	
+	public Message buildMessage(byte[] data) throws InvalidNameException, InvalidAlgorithmParameterException {
 		if (!allowInsecureCommunication) {
 			throw new InvalidAlgorithmParameterException("Only encrypted messages can be used with this Crypto.");
 		}
-
-		final Message keyMessage = new Message();
+		
+		Message keyMessage = new Message();
 		String[] userIdAndName = LdapUtils.getUserIdAndName(remoteCrypto.verifier.getSubjectDN().getName());
 		keyMessage.setTo(UUID.fromString(userIdAndName[0]));
-		userIdAndName = LdapUtils
-				.getUserIdAndName(((X509Certificate) signer.getCertificate()).getSubjectDN().getName());
+		userIdAndName = LdapUtils.getUserIdAndName(((X509Certificate)signer.getCertificate()).getSubjectDN().getName());
 		keyMessage.setFrom(UUID.fromString(userIdAndName[0]));
 		keyMessage.setData(data);
 		return keyMessage;

@@ -14,6 +14,7 @@ import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.util.SVGConstants;
 import org.apache.commons.io.FileUtils;
 import org.area515.resinprinter.job.AbstractPrintFileProcessor;
+import org.area515.resinprinter.job.AbstractPrintFileProcessor.DataAid;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.job.PrintJob;
 import org.area515.resinprinter.twodim.TwoDimensionalImageRenderer;
@@ -30,9 +31,10 @@ public class SVGImagePrintFileProcessor extends ImagePrintFileProcessor {
 		return name.endsWith("svg");
 	}
 	
+	
 	@Override
-	public TwoDimensionalImageRenderer createRenderer(DataAid aid, AbstractPrintFileProcessor<?, ?> processor, Object imageIndexToBuild) {
-		return new TwoDimensionalImageRenderer(aid, processor, imageIndexToBuild) {
+	public TwoDimensionalImageRenderer createTwoDimensionalRenderer(DataAid aid, Object imageIndexToBuild) {
+		return new TwoDimensionalImageRenderer(aid, this, imageIndexToBuild) {
 			@Override
 			public BufferedImage loadImageFromFile(PrintJob processingFile) throws JobManagerException {
 				try {
@@ -60,7 +62,7 @@ public class SVGImagePrintFileProcessor extends ImagePrintFileProcessor {
 				        ImageTranscoder trans = new ImageTranscoder() {
 				            @Override
 				            public BufferedImage createImage(int w, int h) {
-				                return new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
+				            	return aid.printer.createBufferedImageFromGraphicsOutputInterface(w,  h);
 				            }
 
 				            @Override
