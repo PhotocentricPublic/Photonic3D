@@ -31,7 +31,6 @@
 	    			var returnTypeEn = encodeURIComponent(returnType);
 	    			
 	    			$http.post('/services/printers/testScript/' + printerNameEn + "/" + scriptNameEn + "/" + returnTypeEn, script).success(function (data) {
-	    				console.log('/services/printers/testScript/' + printerNameEn + "/" + scriptNameEn + "/" + returnTypeEn, script);
 	    				controller.graph = data.result;
 	    				if (data.error) {
 	    					$rootScope.$emit("MachineResponse", {machineResponse: {command:scriptName, message:data.errorDescription}, successFunction:null, afterErrorFunction:null});
@@ -99,9 +98,9 @@
 		    //$httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
 
     	    $routeProvider.when('/dashboardPage', {
-     	        templateUrl: '/printables.html',
-     	        controller: 'PrintablesController',
-     	        controllerAs: 'printablesController'
+    	        templateUrl: '/dashboard.html',
+    	        controller: 'Dashboard',
+    	        controllerAs: 'dashboard'
     	    })
     	    $routeProvider.when('/printersPage', {
     	        templateUrl: '/printers.html',

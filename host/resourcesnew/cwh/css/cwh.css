@@ -13,15 +13,6 @@
   
 html, body {
   /*overflow-y: scroll;*/
-  overflow-y: auto;
+  overflow-y: hidden;
   height: 100%;
   -webkit-overflow-scrolling: touch; }
-  
-#bootcards { 
-	background-image: url("/images/background.jpg");
-	height : 100%
-}
-
-#main {
-	height : calc(100% - 43px);
-}

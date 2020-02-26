@@ -2,35 +2,11 @@
 	var cwhApp = angular.module('cwhApp');
 	cwhApp.controller("PrinterControlsController", ['$scope', '$http', '$location', '$routeParams', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $routeParams, cwhWebSocket, photonicUtils) {
 		controller = this;
-		this.currentPrintJob = null; 
+		this.currentPrintJob = null;
 		this.gcodeProcessing = "";
 		this.gCodeToSend = "";
 		this.squarePixelSize = 10;
 		var printerName = $location.search().printerName;
-		var firstPrinterName;
-		
-		function LoadPrinterName(){
-			this.currentUrl = window.location.href
-			this.currentPrinterName = currentUrl.split('printerControlsPage')[1];
-			//this.firstPrinterName = "?printerName=" + getFirstPrinterName();
-			if (currentPrinterName == ""){
-				// Find the first name of available
-				$http.get('services/printers/getFirstAvailablePrinter').success(function(data) {
-		        	// The then function here is an opportunity to modify the response
-			        this.configurationObject = data["configuration"];
-			        firstPrinterName = configurationObject["name"]
-			        printerName = firstPrinterName
-			        loadPrinter();
-			        loadPrintJob();
-					attachToPrinter(printerName);
-			     })
-				
-			} else {
-		        loadPrinter();
-		        loadPrintJob();
-				attachToPrinter(printerName);
-			}
-		}
 		
 		function refreshPrinter(printer) {
 			controller.currentPrinter = printer;
@@ -98,7 +74,7 @@
 			$http.get("services/printers/motors" + (isOn?"On":"Off") + "/" + printerName).then(gCodeSuccess, errorFunction)
 		}
         this.executeGCode = function executeGCode() {
-			$http.get("services/printers/executeGCode/" + printerName + "/" + controller.gCodeToSend).then(gCodeSuccess, errorFunction)
+			$http.get("services/printers/executeGCode/" + encodeURIComponent(printerName) + "/" + encodeURIComponent(controller.gCodeToSend)).then(gCodeSuccess, errorFunction)
 		}
         this.projector = function projector(startStop) {
 			$http.get("services/printers/" + startStop + "Projector/" + printerName).then(gCodeSuccess, errorFunction)
@@ -142,7 +118,10 @@
         this.shutter = function shutter(shutterState) {
 			$http.get("services/printers/" + shutterState + "shutter/" + printerName).then(gCodeSuccess, errorFunction)
 		}
-        LoadPrinterName()
+
+        loadPrinter();
+        loadPrintJob();
+		attachToPrinter(printerName);
 	}])
 
 })();

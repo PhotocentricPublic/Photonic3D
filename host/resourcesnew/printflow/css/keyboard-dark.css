@@ -22,7 +22,7 @@
 	overflow-x: auto;
 }
 .ui-keyboard-has-focus {
-	z-index: 16001;
+	z-index: 1;
 }
 .ui-keyboard-button {
 	border: 1px solid #404040;

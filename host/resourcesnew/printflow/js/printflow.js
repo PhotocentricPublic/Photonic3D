@@ -1,4 +1,4 @@
-var printStatus = "";
+ printStatus = "";
 var jobId="";
 var runningjobName="";
 var totalslices=0;
@@ -11,6 +11,7 @@ var PRINTERONIMAGE = "images/printer-on.png";
 var PRINTEROFFIMAGE = "images/printer-off.png";
             
 function startpage(){
+        doorupdate();
         if (typeof Cookies.get('lastwifi') !== 'undefined'){
                 signalstrength = Cookies.get('lastwifi');
                 if (signalstrength > -45) {
@@ -36,13 +37,12 @@ function startpage(){
                 document.getElementById("printerstatus").src = Cookies.get('printerstatus');
         }
         else{
-                printerStatus();
+                printerStatus(); 
         }
-        
         
         // do the first updates
         //document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-        printredirect();
+        printredirect(); 
        
         setInterval(function() {
                 //time handling/updating
@@ -50,31 +50,112 @@ function startpage(){
                 //redirect to print dialogue on user initiating a print
                 printredirect();
                 printerStatus();
-	}, 1000);
+				doorupdate();
+        }, 1000);
         
         setInterval(function() {
                 //wifi updating
-                wifiupdate();    
+                wifiupdate();
 	}, 3000);
 }
 
-function printerStatus(){
-        if (document.getElementById("printerstatus").src.indexOf("midchange") == -1){
-                $.getJSON("/services/printers/get/"+encodeURI(printerName)).done(function (data){
-                        if (data.started)
-                        {
-                                Cookies.set('printerstatus',PRINTERONIMAGE);
+function startpage_printdialogue(){
+		printdialogue_doorupdate();
+        if (typeof Cookies.get('lastwifi') !== 'undefined'){
+                signalstrength = Cookies.get('lastwifi');
+                if (signalstrength > -45) {
+                        document.getElementById("wifi").src="images/wifi-3.png";
+                }
+                else if (signalstrength > -67) {
+                        document.getElementById("wifi").src="images/wifi-2.png";
+                }
+                else if (signalstrength > -72) {
+                        document.getElementById("wifi").src="images/wifi-1.png";
+                }
+                else if (signalstrength > -80) {
+                        document.getElementById("wifi").src="images/wifi-0.png";
+                }
+                else document.getElementById("wifi").src="images/wifi-nc.png";
+        }
+        else{
+                wifiupdate();
+        }
+        //handles page setup and the common things across all pages:
+        
+        if (typeof Cookies.get('printerstatus') !== 'undefined'){
+                document.getElementById("printerstatus").src = Cookies.get('printerstatus');
+        }
+        else{
+                printerStatus(); 
+        }
+        
+        // do the first updates
+        //document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
+        printredirect(); 
+       
+        setInterval(function() {
+                //time handling/updating
+		//document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
+                //redirect to print dialogue on user initiating a print
+                printredirect();
+                printerStatus();
+        }, 1000);
+        
+        setInterval(function() {
+                //wifi updating
+                wifiupdate();
+				printdialogue_doorupdate();
+	}, 3000);
+}
+
+function printerStatus() {
+        if (document.getElementById("printerstatus").src.indexOf("midchange") == -1) {
+                $.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
+                        if (data.started) {
+                                Cookies.set('printerstatus', PRINTERONIMAGE);
                                 document.getElementById("printerstatus").src = PRINTERONIMAGE;
                         }
-                        else
-                        {
-                                Cookies.set('printerstatus',PRINTEROFFIMAGE);
+                        else {
+                                Cookies.set('printerstatus', PRINTEROFFIMAGE);
                                 document.getElementById("printerstatus").src = PRINTEROFFIMAGE;
                         }
                 });
         }
 }
 
+function doorupdate() {
+        $.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+                var text = JSON.stringify(result);
+                axisPos = text.indexOf("Y: not stopped");
+				maxisPos = text.indexOf("Y: at min stop");
+                if (axisPos > -1) {
+                        document.getElementById("doorcheck").src = "images/closed.png";
+                }
+				else if (maxisPos > -1) {
+                        document.getElementById("doorcheck").src = "images/opened.png";
+                }
+                else {
+                        document.getElementById("doorcheck").src = "images/pixel.png";
+                }
+        });
+}
+
+function printdialogue_doorupdate() {
+		$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+                var text = JSON.stringify(result);
+                axisPos = text.indexOf("Y: not stopped");
+				maxisPos = text.indexOf("Y: at min stop");
+				if (axisPos > -1) {
+                        document.getElementById("doorcheck").src = "images/closed_without_msg.png";
+                }
+				else if (maxisPos > -1) {
+                        document.getElementById("doorcheck").src = "images/open_with_msg.png";
+                }
+                else {
+                        document.getElementById("doorcheck").src = "images/pixel.png";
+                }
+			});
+}
 
 function wifiupdate(){
 	//TODO: JSON to query the server's wifi status and display it
@@ -106,7 +187,7 @@ function wifiupdate(){
         else if (signalstrength > -80) {
                 wifiurl="images/wifi-0.png";
         }
-        else wifiurl="images/wifi-nc.png";
+        else wifiurl="images/wifi-nc.png"; 
 
 	document.getElementById("wifi").src = wifiurl;
 }
@@ -158,7 +239,7 @@ function printredirect(){
                         if ((typeof Cookies.get('lastfailedjob') === 'undefined')||(Cookies.get('lastfailedjob')!=jobId)){
                                 Cookies.set('lastfailedjob',jobId);
                                 setTimeout(function() {
-                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photocentric3d.com</b>");
+                                        window.location.href=("error.html?errorname=Print Failed&errordetails=The print of "+runningjobName+" [Job ID: "+jobId+"] has unexpectedly failed.&errordetails2=Please retry the print, and if the issue persists, contact Technical Support via <b>www.photocentricgroup.com/support/</b>");
                                 }, 100);  
                         }
 		}
@@ -171,8 +252,8 @@ function printredirect(){
                         if ((typeof Cookies.get('lastcancelledjob') === 'undefined')||(Cookies.get('lastcancelledjob')!=jobId)){
                                 Cookies.set('lastcancelledjob',jobId);
                                 setTimeout(function() {
-                                        window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> [Job ID: "+jobId+"] was cancelled.");
-                                }, 100);                        
+                                        window.location.href=("error.html?type=info&errorname=Print Cancelled&errordetails=The print of <b>"+runningjobName+"</b> was cancelled. Please wait for platform to home and press OK.");
+                                }, 100);                                 
                         }
 		}
     }				
