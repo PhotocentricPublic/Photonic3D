@@ -40,6 +40,13 @@ public class DispManXDevice implements GraphicsOutputInterface {
     private Memory calibrationAndGridPixels;
     private BufferedImage calibrationAndGridImage;
     
+    // Robin for correcting delays
+    private long startingTimeForCurrentSlice;
+    private long timeAfterShowingTheSlice;
+    public static long timeWaitedForPreviousSliceToShow;
+    private long oldTimeWaitedForPreviousSliceToShow;
+    private long delayTimingOffBy;
+    
     public DispManXDevice(String displayName, SCREEN screen) throws InappropriateDeviceException {
 		this.displayName = displayName;
 		this.screen = screen;
@@ -49,6 +56,11 @@ public class DispManXDevice implements GraphicsOutputInterface {
         DispManX.INSTANCE.vc_dispmanx_rect_set(sourceRect, 0, 0, 0, 0);
 	}
     
+    public static int gettingLastDelay(){
+    	int lastDelay = (int) timeWaitedForPreviousSliceToShow;
+    	return lastDelay;
+    }
+   
     private static void bcmHostInit() {
     	if (BCM_INIT) {
     		return;
@@ -156,13 +168,13 @@ public class DispManXDevice implements GraphicsOutputInterface {
 			destPixels = new Memory(pitch * image.getHeight());
 		}
 		
-		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.startTimer(IMAGE_REALIZE_TIMER));
+		logger.debug("loadBitmapARGB8888 alg started:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
         		destPixels.setInt((y*(pitch / bytesPerPixel) + x) * bytesPerPixel, image.getRGB(x, y));
             }
         }
-		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
+		logger.debug("loadBitmapARGB8888 alg complete:{}", () -> Log4jUtil.splitTimer(IMAGE_REALIZE_TIMER));
 
         width.setValue(image.getWidth());
         height.setValue(image.getHeight());
@@ -296,6 +308,8 @@ public class DispManXDevice implements GraphicsOutputInterface {
 	@Override
 	public void showImage(BufferedImage image, boolean performFullUpdate) {
 		logger.debug("Image assigned:{}", () -> Log4jUtil.startTimer(IMAGE_REALIZE_TIMER));
+		startingTimeForCurrentSlice = System.currentTimeMillis();
+
 		if (image.getWidth() == imageWidth && image.getHeight() == imageHeight) {
 			imagePixels = showImage(imagePixels, image);
 		} else {
@@ -303,6 +317,15 @@ public class DispManXDevice implements GraphicsOutputInterface {
 		}
 		imageWidth = image.getWidth();
 		imageHeight = image.getHeight();
+		logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
+		
+		timeAfterShowingTheSlice = System.currentTimeMillis();
+		timeWaitedForPreviousSliceToShow = timeAfterShowingTheSlice - startingTimeForCurrentSlice;
+		delayTimingOffBy = timeWaitedForPreviousSliceToShow - oldTimeWaitedForPreviousSliceToShow;
+		oldTimeWaitedForPreviousSliceToShow = timeWaitedForPreviousSliceToShow;
+		logger.info("time waited " + timeWaitedForPreviousSliceToShow);
+		logger.info("The timing was wrong by " + delayTimingOffBy + "ms");
+
 		logger.debug("Image realized:{}", () -> Log4jUtil.completeTimer(IMAGE_REALIZE_TIMER));
 	}
 	

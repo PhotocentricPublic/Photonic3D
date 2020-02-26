@@ -2,24 +2,12 @@
     <head>
         <title>wifisetup</title>
         <style>
-			*{
-				cursor: none;
-			}
-			::-webkit-scrollbar
-			{
-    		width:0px;
-			}
-			::-webkit-scrollbar-track-piece
-			{
-   			background-color:transparent;
-			}
-		.nettitle { 
-			font-size: 20px;
+		.Nettitle { 
+			font-size: 15px;
+			font-weight: bolder;
 			padding-bottom: 5px;
-			font-family: Helvetica;
 		}
-		.hostname {
-			font-weight: bold; 
+		.hostname { 
 			font-size: 15px;
 			padding-bottom: 2.5px;
 			padding-left: 5px;
@@ -30,100 +18,74 @@
 			padding-left: 5px;
 		}
 		.IP { 
-			font-weight: bold;
 			font-size: 15px;
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
 		.details { 
-			font-size: 15px;
+			font-size: 12px;
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
 		.MAC { 
-			font-weight: bold;
 			font-size: 15px;
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
 		.visiblelabel { 
 			position: absolute; 
-			top: 55px; 
-			left: 355px;
-			width:350px;
+			top: 130px; 
+			left: 250px;
+			width:300px;
 			color: white;
-			text-align: left;
 			padding-left: 20px;
 			padding-top: 5px;
-			font-size: 20px;
+			font-size: 30px;
 			z-index: 2;
-			font-family: Helvetica;
 		}
-
+		.savebutton { 
+			position: absolute; 
+			top: 315px; 
+			left: 250px;
+			width:300px;
+			color: white;
+			text-align: center;
+			font-size: 30px;
+			z-index: 2;
+		}
 		.wifiselect { 
 			position: absolute; 
-			top: 150px; 
-			left: 355px;
+			top: 191px; 
+			left: 266px;
 			width: 270px;
 			height: 109px;
 			background-color: transparent;
 			color: white;
 			border: none;
-			line-height: 50px;
-			font-size: 20px;
-			overflow: hidden;
+			font-size: large;
+			overflow-y: auto;
 		}
-		.home{
-			position: absolute; 
-			top: 360px; 
-			left: 27px;
-			height: 90px;
-			width: 80px;
-			user-drag: none; 
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 3;
-		}
-		.connect{
-			position: absolute; 
-			top: 360px; 
-			left: 115px;
-			height: 90px;
-			width: 100px;
-			user-drag: none; 
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-			z-index: 3;
-		}
-				
+        </style>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-		</style>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="../jquery/jquery.min.js"></script>
 
-<!-- jQuery library -->
-<script src="../jquery/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
 
-<!-- Latest compiled JavaScript -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <!-- Latest v1 Angular -->
+        <script src="../angular/js/angular.min.js"></script>
 
-<!-- Latest v1 Angular -->
-<script src="../angular/js/angular.min.js"></script>
-
-<script src="js/moment.min.js"></script>
-
-<script src="js/printflow.js"></script>
-<script src="js/printerconfig.js"></script>
-
-<script src="js/js.cookie.js"></script>
-
-<link href="css/printflow.css" rel="stylesheet">
+        <script src="js/moment.min.js"></script>
+		
+		<script src="js/printflow.js"></script>
+		<script src="js/printerconfig.js"></script>
+		
+		<script src="js/js.cookie.js"></script>
+		
+		<link href="css/printflow.css" rel="stylesheet">
     </head>
     <body style="background-color: black;" onload="init();">
 		<script>
@@ -138,19 +100,21 @@
 				.done(function(data){
 					
 					 document.getElementById("hostvar").innerHTML=data.Hostname;
-					 var MACs ="";
+					 var MACs = "";
 					 $.each(data.MACs, function(key,value){
 						console.log(key+", "+value);
-						MACs += key + ": "+value+"<BR/> ";
+						MACs += key + ": "+value+"<BR/>";
 					 });
 					 document.getElementById("MACaddress").innerHTML  = MACs;
+					 
 					 var IPs = "";
 					 $.each(data.IPs, function(key,value){
-						IPs += key + ": "+value+"<BR/> ";
+						IPs += key + ": "+value+"<BR/>";
 					 });
 					 document.getElementById("IPaddress").innerHTML  = IPs;
 				})
 				.fail(function(){
+					
 				});
 				
 				var select = document.getElementById("wifiselect");
@@ -183,28 +147,34 @@
 			}
 		
 		</script>
-		
         <div class="screen">
             <div class="main">
-				<img src="images/wifisettings.png" usemap="wifisettings" class="uilayer"></img>
-				<div name="visiblelabel" class="visiblelabel" id="visiblelabel" >AVAILABLE Wi-Fi NETWORKS</div>
+				<img src="images/wifisettings.png" usemap="wifisettings" class="uilayer">
+				<map name="wifisettings">
+					<area  alt="" title="" href="wifisettings.html" shape="poly" coords="160,40,137,45,118,58,105,77,100,100,105,123,118,142,137,155,160,160,183,155,202,142,215,123,220,100,215,77,202,58,183,45" style="outline:none;" target="_self"     />
+					<area  alt="" title="" href="settings.html" shape="poly" coords="65,132,52,135,40,142,33,154,30,167,33,180,40,192,52,199,65,202,78,199,90,192,97,180,100,167,97,154,90,142,78,135" style="outline:none;" target="_self"     />
+					<area  alt="" title="" href="index.html" shape="poly" coords="48,16,35,19,25,26,18,36,15,49,18,62,25,72,35,79,48,82,61,79,71,72,78,62,81,49,78,36,71,26,61,19" style="outline:none;" target="_self"     />
+					<area  alt="" title="Setup" shape="rect" coords="252,268,548,324" style="outline:none;" target="_self" onClick="setupWifi();" />
+
+				</map>
+				<div name="visiblelabel" class="visiblelabel" id="visiblelabel" >Visible Networks</div>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
-				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
-				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
-				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
-					<div name="info" id="info" class="info">
-						<div name="nettitle" id="nettitle" class="nettitle">NETWORK DETAILS</div>
-						<div name="hostname" id="hostname" class="hostname">Hostname:<br/><span id="hostvar" class="hostname"></span>.local</div>
-						<div name="IP" id="IP" class="IP">IP address:<br/><span id="IPaddress" class="details"></span></div>
-						<div name="MAC" id="MAC" class="MAC">MAC Address:<br/><span id="MACaddress" class="details"></span></div>
-					</div>
+				<div name="info" id="info" class="info">
+					<div name="nettitle" id="nettitle" class="nettitle">Current Network :</div>
+					<div name="hostname" id="hostname" class="hostname">Hostname:<br/><span id="hostvar" class="hostname"></span>.local</div>
+					<div name="IP" id="IP" class="IP">IP:<br/><span id="IPaddress" class="details"></span></div>
+					<div name="MAC" id="MAC" class="MAC">MAC:<br/><span id="MACaddress" class="details"></span></div>
 				</div>
-				<div name="home" class="home" id="home" onClick="location.href='index.html';"><img src="images/menumainbuttonANIM.png"></div>
-				<div name="connect" class="connect" id="connect" onClick="setupWifi();"><img src="images/menumainbuttonANIM.png"></div>
-				<select name="wifiselect" class="wifiselect" id="wifiselect" size="9">
-					<option value="" disabled selected hidden>Select network if available</option>
+				<div name="savebutton" class="savebutton" id="savebutton" onClick="setupWifi();">Setup Network</div>
+				<select name="wifiselect" class="wifiselect" id="wifiselect" size="5">
+					<option>Loading...</option>
 				</select>
+				
+				
+				<img name="homehighlight" id="homehighlight" class="homehighlight" src="images/homehighlightANIM.png" onClick="location.href='index.html';">
+				<img name="bigbuttonhighlight" id="bigbuttonhighlight" class="bigbuttonhighlight" src="images/bigbuttonANIM.png" onClick="location.href='wifisettings.html';">
+				<img name="smallbuttonhighlight" id="smallbuttonhighlight" class="smallbuttonhighlight" src="images/homehighlightANIM.png" onClick="location.href='settings.html';">
             </div>
         </div>
     </body>

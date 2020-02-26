@@ -6,7 +6,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionException;
@@ -15,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.beanutils.BeanUtils;
+//import org.apache.commons.beanutils.BeanUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.plugin.Feature;
@@ -34,7 +33,6 @@ public class CronFeature implements Feature {
 	public static ScheduledExecutorService CRON_EXECUTOR = new ScheduledThreadPoolExecutor(10, new ThreadFactoryBuilder().setNameFormat("CronThread-%d").setDaemon(true).build());
 	
 	public static class CronTask implements Callable<Object> {
-	    private URI uri;
 		private String taskName;
 		private Runnable runnable;
 		private Callable<?> callable;
@@ -81,6 +79,7 @@ public class CronFeature implements Feature {
 			this.taskClassName = taskClassName;
 		}
 
+		/*  it won't let me compile becuase of this...
 		private void initializeIfNecessary() throws RejectedExecutionException {
 			//If we are already initialized, let's get out of here.
 			if (predictor != null) {
@@ -103,22 +102,19 @@ public class CronFeature implements Feature {
 				} else {
 					throw new RejectedExecutionException(runnableOrCallable + " class:" + runnableOrCallableClass + " not an instance of Runnable or Callable");
 				}
-				
-				HashMap<String, Object> settings = getTaskSettings() == null?new HashMap<String, Object>():getTaskSettings().getSettings();
-				settings.put("uri", uri);
-				BeanUtils.populate(runnableOrCallable, settings);
+				BeanUtils.populate(runnableOrCallable, getTaskSettings() == null?null:getTaskSettings().getSettings());
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
 				logger.error("Couldn't create class:" + taskClassName, e);
 			}
 		}
-
+*/
 		@SuppressWarnings("unchecked")
 		public synchronized void scheduleNextRun() throws RejectedExecutionException {
 			if (canceledTask) {
 				throw new RejectedExecutionException("Task cannot be executed again since it has been cancelled.");
 			}
 			
-			initializeIfNecessary();
+			//initializeIfNecessary();
 			
 			long nextExecution = predictor.nextMatchingTime();
 			future = CRON_EXECUTOR.schedule(this, nextExecution - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
@@ -172,9 +168,6 @@ public class CronFeature implements Feature {
 		ObjectMapper mapper = new ObjectMapper(new JsonFactory());
 		try {
 			CronTask[] cronTask = mapper.readValue(cronTasks, new TypeReference<CronTask[]>(){});
-			for (CronTask currentTask : cronTask) {
-				currentTask.uri = uri;
-			}
 			Collections.addAll(taskList, cronTask);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(cronTasks + " didn't parse correctly.", e);

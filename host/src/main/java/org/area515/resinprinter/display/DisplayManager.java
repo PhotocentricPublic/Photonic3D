@@ -19,7 +19,6 @@ public class DisplayManager {
     private static final Logger logger = LogManager.getLogger();
 
     private static DisplayManager INSTANCE = null;
-	
 	private GraphicsEnvironment ge = null;
 	private ConcurrentHashMap<Printer, String> displayIdsByPrinter = new ConcurrentHashMap<Printer, String>();
 	private ConcurrentHashMap<String, Printer> printersByDisplayIDString = new ConcurrentHashMap<String, Printer>();
