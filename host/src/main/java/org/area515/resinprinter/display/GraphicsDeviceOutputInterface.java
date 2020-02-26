@@ -10,8 +10,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
-import org.area515.resinprinter.printer.PrinterConfiguration;
-
 public class GraphicsDeviceOutputInterface implements GraphicsOutputInterface {
 	private String displayName;
 	private GraphicsDevice device;
@@ -80,7 +78,7 @@ public class GraphicsDeviceOutputInterface implements GraphicsOutputInterface {
 	}
 
 	@Override
-	public GraphicsOutputInterface initializeDisplay(String displayId, PrinterConfiguration configuration) {
+	public GraphicsOutputInterface initializeDisplay(String displayId) {
 		GraphicsDevice device;
 		try {
 			device = ((GraphicsDeviceOutputInterface)DisplayManager.Instance().getDisplayDevice(displayId)).device;
@@ -95,10 +93,8 @@ public class GraphicsDeviceOutputInterface implements GraphicsOutputInterface {
 		refreshFrame.setMinimumSize(dim);
 		refreshFrame.setSize(dim);
 		refreshFrame.setVisible(true);
-		FullScreenMode fullScreenMode = configuration.getMachineConfig().getMonitorDriverConfig().getFullScreenMode();
-		if (fullScreenMode == FullScreenMode.AlwaysUseFullScreen || 
-			(fullScreenMode == FullScreenMode.UseFullScreenWhenExclusiveIsAvailable && device.isFullScreenSupported())) {
-			device.setFullScreenWindow(refreshFrame);
+		if (device.isFullScreenSupported()) {
+			device.setFullScreenWindow(refreshFrame);//TODO: Does projector not support full screen
 		}
 		//This can only be done with a real graphics device since it would reassign the printer Simulation
 		//OLD getConfiguration().getMachineConfig().setOSMonitorID(device.getDefaultConfiguration().getDevice().getIDstring());
@@ -112,10 +108,5 @@ public class GraphicsDeviceOutputInterface implements GraphicsOutputInterface {
 	    Cursor invisibleCursor = toolkit.createCustomCursor(cursorImage, hotSpot, "InvisibleCursor");        
 	    refreshFrame.setCursor(invisibleCursor);
 	    return refreshFrame;
-	}
-
-	@Override
-	public BufferedImage buildBufferedImage(int x, int y) {
-		return new BufferedImage(x, y, BufferedImage.TYPE_4BYTE_ABGR);
 	}
 }

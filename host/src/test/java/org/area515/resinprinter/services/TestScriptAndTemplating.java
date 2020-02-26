@@ -1,7 +1,6 @@
 package org.area515.resinprinter.services;
 
 import org.area515.resinprinter.display.InappropriateDeviceException;
-import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.printer.Printer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,7 +8,7 @@ import org.mockito.Mockito;
 
 public class TestScriptAndTemplating {
 	@Test
-	public void testzLiftDistanceCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testzLiftDistanceCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);
@@ -19,7 +18,7 @@ public class TestScriptAndTemplating {
 	}
 	
 	@Test
-	public void testzLiftSpeedCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testzLiftSpeedCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);
@@ -29,7 +28,7 @@ public class TestScriptAndTemplating {
 	}
 	
 	@Test
-	public void testExposureTimeCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testExposureTimeCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);
@@ -39,7 +38,7 @@ public class TestScriptAndTemplating {
 	}
 	
 	@Test
-	public void testGraphCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testGraphCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);
@@ -50,7 +49,7 @@ public class TestScriptAndTemplating {
 	}
 	
 	@Test
-	public void testProjectorGradientCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testProjectorGradientCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);
@@ -60,7 +59,7 @@ public class TestScriptAndTemplating {
 	}
 	
 	@Test
-	public void testSyntaxErrorCalculator() throws InappropriateDeviceException, JobManagerException {
+	public void testSyntaxErrorCalculator() throws InappropriateDeviceException {
 		Printer printer = PrinterService.INSTANCE.createTemplatePrinter();
 		PrinterService mockPrinterService = Mockito.mock(PrinterService.class, Mockito.RETURNS_DEFAULTS);
 		Mockito.when(mockPrinterService.getPrinter(Mockito.anyString())).thenReturn(printer);

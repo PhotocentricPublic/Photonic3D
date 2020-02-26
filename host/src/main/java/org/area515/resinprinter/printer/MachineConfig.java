@@ -8,9 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.area515.resinprinter.display.ControlFlow;
-import org.area515.resinprinter.display.FullScreenMode;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -70,8 +67,6 @@ public class MachineConfig implements Named {
 		private int monitorBottom;
 		@XmlElement(name="UseMask")
 		private boolean useMask;
-		@XmlElement(name="FullScreenMode")
-		private FullScreenMode fullScreenMode;
 		
 		@XmlTransient
 		public boolean isUseMask() {
@@ -103,18 +98,6 @@ public class MachineConfig implements Named {
 		}
 		public void setComPortSettings(ComPortSettings comPortSettings) {
 			this.comPortSettings = comPortSettings;
-		}
-		
-		@XmlTransient
-		public FullScreenMode getFullScreenMode() {
-			if (fullScreenMode == null) {
-				return FullScreenMode.NeverUseFullScreen;
-			}
-			
-			return fullScreenMode;
-		}
-		public void setFullScreenMode(FullScreenMode fullScreenMode) {
-			this.fullScreenMode = fullScreenMode;
 		}
 	}
 	
@@ -154,8 +137,6 @@ public class MachineConfig implements Named {
 	private Boolean overrideModelNormalsWithRightHandRule;
 	@XmlElement(name="RestartSerialOnTimeout")
 	private Boolean restartSerialOnTimeout;
-	private ControlFlow footerExecution;
-	
 	private String name;
 
 	@XmlTransient
@@ -165,18 +146,6 @@ public class MachineConfig implements Named {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	
-	@XmlElement(name="FooterExecutionHandling")
-	@JsonProperty
-	public ControlFlow getFooterExecutionHandling() {
-		if (footerExecution == null) {
-			footerExecution = ControlFlow.OnSuccess;
-		}
-		return footerExecution;
-	}
-	public void setFooterExecutionHandling(ControlFlow footerExecution) {
-		this.footerExecution = footerExecution;
 	}
 	
 	@XmlTransient
@@ -280,7 +249,8 @@ public class MachineConfig implements Named {
 	public void setRestartSerialOnTimeout(Boolean restartSerialOnTimeout) {
 		this.restartSerialOnTimeout = restartSerialOnTimeout;
 	}
-	
+
+
 	@XmlTransient
 	public String getOSMonitorID() {
 		return monitorDriverConfig.osMonitorID;

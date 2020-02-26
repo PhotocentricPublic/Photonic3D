@@ -13,8 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.area515.resinprinter.exception.SliceHandlingException;
 import org.area515.resinprinter.job.render.CurrentImageRenderer;
-import org.area515.resinprinter.job.render.RenderingContext;
+import org.area515.resinprinter.job.render.RenderedData;
 import org.area515.resinprinter.printer.BuildDirection;
+import org.area515.resinprinter.server.Main;
 import org.area515.resinprinter.slice.CloseOffMend;
 import org.area515.resinprinter.slice.StlError;
 import org.area515.resinprinter.slice.ZSlicer;
@@ -33,11 +34,6 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 	}
 
 	@Override
-	public CurrentImageRenderer createRenderer(DataAid aid, Object imageIndexToBuild) {
-		return new STLImageRenderer(aid, this, imageIndexToBuild, false);
-	}
-
-	@Override
 	public boolean acceptsFile(File processingFile) {
 		return processingFile.getName().toLowerCase().endsWith("stl");
 	}
@@ -49,11 +45,8 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 
 	@Override
 	public JobStatus processFile(PrintJob printJob) throws Exception {
-		JobStatus status = printJob.getStatus();
-		STLDataAid dataAid = null;
-		boolean footerAttempted = false;
 		try {
-			dataAid = (STLDataAid)initializeJobCacheWithDataAid(printJob);
+			STLDataAid dataAid = (STLDataAid)initializeJobCacheWithDataAid(printJob);
 			boolean overrideNormals = dataAid.configuration.getMachineConfig().getOverrideModelNormalsWithRightHandRule() == null?false:dataAid.configuration.getMachineConfig().getOverrideModelNormalsWithRightHandRule();
 			ZSlicer slicer = new ZSlicer(dataAid.customizer.getZScale(), 
 					dataAid.xPixelsPerMM / dataAid.customizer.getZScale(), 
@@ -72,14 +65,16 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 			int endPoint = dataAid.slicingProfile.getDirection() == BuildDirection.Bottom_Up?(slicer.getZMaxIndex() + 1 - dataAid.customizer.getNextSlice()): (slicer.getZMinIndex() + 1);
 			dataAid.slicer.setZIndex(startPoint);
 			Boolean nextRenderingPointer = (Boolean)dataAid.cache.getCurrentRenderingPointer();
-			Future<RenderingContext> currentImage = startImageRendering(dataAid, nextRenderingPointer);
-			//renderingImage
+			CurrentImageRenderer renderingImage = new STLImageRenderer(dataAid, this, nextRenderingPointer, false);
+			Future<RenderedData> currentImage = Main.GLOBAL_EXECUTOR.submit(renderingImage);
+			
 			//Everything needs to be setup in the dataByPrintJob before we start the header
 			performHeader(dataAid);
+			
 			for (int z = startPoint; dataAid.slicingProfile.getDirection().isSliceAvailable(z, endPoint) && dataAid.printer.isPrintActive(); z += dataAid.slicingProfile.getDirection().getVector()) {
 				
 				//Performs all of the duties that are common to most print files
-				status = performPreSlice(dataAid, dataAid.currentlyRenderingImage.getScriptEngine(), slicer.getStlErrors());
+				JobStatus status = performPreSlice(dataAid, renderingImage.getScriptEngine(), slicer.getStlErrors());
 				if (status != null) {
 					return status;
 				}
@@ -87,7 +82,7 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 				logger.info("SliceOverheadStart:{}", ()->Log4jUtil.startTimer(STL_OVERHEAD));
 				
 				//Wait until the image has been properly rendered. Most likely, it's already done though...
-				RenderingContext renderedData = currentImage.get();
+				RenderedData renderedData = currentImage.get();
 				
 				logger.info("SliceOverhead:{}", ()->Log4jUtil.completeTimer(STL_OVERHEAD));
 				
@@ -100,7 +95,8 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 				//Render the next image while we are waiting for the current image to cure
 				if (z < slicer.getZMaxIndex() + 1) {
 					slicer.setZIndex(z);
-					currentImage = startImageRendering(dataAid, nextRenderingPointer);
+					renderingImage = new STLImageRenderer(dataAid, this, nextRenderingPointer, false);
+					currentImage = Main.GLOBAL_EXECUTOR.submit(renderingImage);
 				}
 				
 				//Performs all of the duties that are common to most print files
@@ -110,19 +106,9 @@ public class STLFileProcessor extends AbstractPrintFileProcessor<Iterator<Triang
 				}
 			}
 			
-			try {
-				return performFooter(dataAid);
-			} finally {
-				footerAttempted = true;
-			}
+			return performFooter(dataAid);
 		} finally {
-			try {
-				if (!footerAttempted && dataAid != null) {
-					performFooter(dataAid);
-				}
-			} finally {
-				clearDataAid(printJob);
-			}
+			clearDataAid(printJob);
 		}
 	}
 	

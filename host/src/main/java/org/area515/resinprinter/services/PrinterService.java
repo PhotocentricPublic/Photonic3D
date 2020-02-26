@@ -1,6 +1,7 @@
 
 package org.area515.resinprinter.services;
 
+import freemarker.template.TemplateException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -19,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
-import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.ws.rs.Consumes;
@@ -45,6 +45,7 @@ import org.area515.resinprinter.job.InkDetector;
 import org.area515.resinprinter.job.JobManagerException;
 import org.area515.resinprinter.job.PrintJob;
 import org.area515.resinprinter.job.PrintJobManager;
+import org.area515.resinprinter.job.render.StubPrintFileProcessor;
 import org.area515.resinprinter.printer.BuildDirection;
 import org.area515.resinprinter.printer.ComPortSettings;
 import org.area515.resinprinter.printer.MachineConfig;
@@ -73,10 +74,10 @@ public class PrinterService {
 	public static Font DEFAULT_FONT = new Font("Dialog", 200);
 	private PrinterService(){}
 	
-	private MachineResponse openShutter(String printerName, boolean shutter) throws InappropriateDeviceException, JobManagerException {
+	private MachineResponse openShutter(String printerName, boolean shutter) throws InappropriateDeviceException {
 		String name = shutter?"OpenShutter":"CloseShutter";
 		Printer printer = PrinterManager.Instance().getPrinter(printerName);
-		PrintJob job = TemplateEngine.buildStubJob(printer);
+		PrintJob job = buildStubJob(printer);
 		if (printer == null) {
 			return new MachineResponse(name, false, "Printer:" + printerName + " not started");
 		}
@@ -84,7 +85,7 @@ public class PrinterService {
 		String shutterGCode = printer.getConfiguration().getSlicingProfile().getgCodeShutter();
 		if (shutterGCode != null && shutterGCode.trim().length() > 0) {
 			printer.setShutterOpen(shutter);
-			return new MachineResponse(name, true, printer.getPrinterController().executeCommands(job, printer.getConfiguration().getSlicingProfile().getgCodeShutter(), false));
+			return new MachineResponse(name, true, printer.getGCodeControl().executeGCodeWithTemplating(job, printer.getConfiguration().getSlicingProfile().getgCodeShutter(), false));
 		}
 		
 		return new MachineResponse(name, false, "This printer doesn't support a shutter.");
@@ -97,7 +98,7 @@ public class PrinterService {
 	@GET
 	@Path("openshutter/{printername}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MachineResponse openShutter(@PathParam("printername") String printerName) throws InappropriateDeviceException, JobManagerException {
+	public MachineResponse openShutter(@PathParam("printername") String printerName) throws InappropriateDeviceException {
 		return openShutter(printerName, true);
 	}
 	
@@ -109,7 +110,7 @@ public class PrinterService {
 	@GET
 	@Path("closeshutter/{printername}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MachineResponse closeShutter(@PathParam("printername") String printerName) throws InappropriateDeviceException, JobManagerException {
+	public MachineResponse closeShutter(@PathParam("printername") String printerName) throws InappropriateDeviceException {
 		return openShutter(printerName, false);
 	}
 	
@@ -446,7 +447,7 @@ public class PrinterService {
 		
 		TwoDimensionalSettings settings = new TwoDimensionalSettings();
 		settings.setFont(DEFAULT_FONT);
-		settings.setPlatformCalculator("var extrusionX = printImage.getWidth();\nvar extrusionY = printImage.getHeight();\nbuildPlatformGraphics.fillRoundRect(centerX - (extrusionX / 2), centerY - (extrusionY / 2), extrusionX, extrusionY, 50, 50);");
+		settings.setPlatformCalculator("var extrusionX = printImage.getWidth();\nvar extrusionY = printImage.getHeight();\nplatformGraphics.fillRoundRect(centerX - (extrusionX / 2), centerY - (extrusionY / 2), extrusionX, extrusionY, 50, 50);");
 		settings.setExtrusionHeightMM(1.5);
 		settings.setPlatformHeightMM(1.5);
 		settings.setEdgeDetectionDisabled(false);
@@ -489,39 +490,6 @@ public class PrinterService {
 			return new MachineResponse("gridscreenshown", true, "Showed calibration screen on:" + printerName);
 		} catch (InappropriateDeviceException e) {
 		    logger.error("Error showing grid screen for printer:" + printerName, e);
-			return new MachineResponse("gridscreenshown", false, e.getMessage());
-		}
-	}
-    
-    @ApiOperation(value="Display pre-configured image on the printing screen, for example the manufacturer logo for LCD printers, just to test the screen is connected")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, response=MachineResponse.class, message = SwaggerMetadata.MACHINE_RESPONSE),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-	@GET
-	@Path("showLogo/{printername}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public MachineResponse showLogo(@PathParam("printername") String printerName) {
-		try {
-			Printer currentPrinter = PrinterManager.Instance().getPrinter(printerName);
-			if (currentPrinter == null) {
-				throw new InappropriateDeviceException("Printer:" + printerName + " not started");
-			}
-			
-			if (currentPrinter.isDisplayBusy()) {
-				throw new InappropriateDeviceException("Printer:" + printerName + " display is busy, try again later.");
-			}
-			BufferedImage img = null;
-			try {
-				img = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream("PhotonicSplash.png"));
-			} catch (IOException e) {
-			    logger.error("Error showing logo for printer:" + printerName + " Location:" + getClass().getProtectionDomain().getCodeSource().getLocation(), e);
-				return new MachineResponse("showLogo" + this.getClass().getProtectionDomain().getCodeSource().getLocation(), false, e.getMessage());
-			}
-			currentPrinter.setStatus(currentPrinter.getStatus());//This is to make sure the slicenumber is reset.
-			currentPrinter.showImage(img, true);
-			return new MachineResponse("logo shown", true, "Showed logo screen on:" + printerName);
-		} catch (InappropriateDeviceException e) {
-		    logger.error("Error showing logo for printer:" + printerName, e);
 			return new MachineResponse("gridscreenshown", false, e.getMessage());
 		}
 	}
@@ -622,8 +590,7 @@ public class PrinterService {
 		}
 	}
 	
-    @ApiOperation(value="Executes the specified device dependent code(generally gcode) on the Printer given by the printername."
-    		+ "This service call is identical in every way to the executeCode service method.")
+    @ApiOperation(value="Executes the specified device dependent code(generally gcode) on the Printer given by the printername.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, response=MachineResponse.class, message = SwaggerMetadata.MACHINE_RESPONSE),
             @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
@@ -631,25 +598,14 @@ public class PrinterService {
 	@Path("executeGCode/{printername}/{gcode}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public MachineResponse executeGCode(@PathParam("printername") String printerName, @PathParam("gcode") String gcode) {
-    	return executeCode(printerName, gcode);
-    }
-
-    @ApiOperation(value="Executes the specified device dependent code on the Printer given by the printername.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, response=MachineResponse.class, message = SwaggerMetadata.MACHINE_RESPONSE),
-            @ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
-	@GET
-	@Path("executeCode/{printername}/{code}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public MachineResponse executeCode(@PathParam("printername") String printerName, @PathParam("gcode") String code) {
 		Printer printer = PrinterManager.Instance().getPrinter(printerName);
 		if (printer == null) {
 			return new MachineResponse("gcode", false, "Printer:" + printerName + " not started");
 		}
 		
-		return new MachineResponse("gcode", true, printer.getPrinterController().executeSingleCommand(code));
+		return new MachineResponse("gcode", true, printer.getGCodeControl().sendGcode(gcode));
 	}
-    
+
 	//X Axis Move (sedgwick open aperature)
 	//MachineControl.cmdMoveX()
     @ApiOperation(value="Executes an X based movement for the Printer specified by the printername.")
@@ -665,8 +621,8 @@ public class PrinterService {
 			return new MachineResponse("movex", false, "Printer:" + printerName + " not started");
 		}
 		
-		printer.getPrinterController().executeSetRelativePositioning();
-		return new MachineResponse("movex", true, printer.getPrinterController().executeMoveX(Double.parseDouble(dist)));
+		printer.getGCodeControl().executeSetRelativePositioning();
+		return new MachineResponse("movex", true, printer.getGCodeControl().executeMoveX(Double.parseDouble(dist)));
 	}
 	
 	//Y Axis Move (sedgwick close aperature)
@@ -684,8 +640,8 @@ public class PrinterService {
 			return new MachineResponse("movey", false, "Printer:" + printerName + " not started");
 		}
 		
-		printer.getPrinterController().executeSetRelativePositioning();
-		return new MachineResponse("movey", true, printer.getPrinterController().executeMoveY(Double.parseDouble(dist)));
+		printer.getGCodeControl().executeSetRelativePositioning();
+		return new MachineResponse("movey", true, printer.getGCodeControl().executeMoveY(Double.parseDouble(dist)));
 	}
 	
 	//Z Axis Move(double dist)
@@ -709,8 +665,8 @@ public class PrinterService {
 			return new MachineResponse("movez", false, "Printer:" + printerName + " not started");
 		}
 	
-		printer.getPrinterController().executeSetRelativePositioning();
-		String response = printer.getPrinterController().executeMoveZ(Double.parseDouble(dist));
+		printer.getGCodeControl().executeSetRelativePositioning();
+		String response = printer.getGCodeControl().executeMoveZ(Double.parseDouble(dist));
 		return new MachineResponse("movez", true, response);
 	}
 	 
@@ -726,8 +682,8 @@ public class PrinterService {
 		if (printer == null) {
 			return new MachineResponse("homez", false, "Printer:" + printerName + " not started");
 		}
-		printer.getPrinterController().executeSetRelativePositioning();
-		return new MachineResponse("homez", true, printer.getPrinterController().executeZHome());
+		printer.getGCodeControl().executeSetRelativePositioning();
+		return new MachineResponse("homez", true, printer.getGCodeControl().executeZHome());
 	 }
 	 
     @ApiOperation(value="Homes the X axis for the Printer specified by the printername.")
@@ -743,8 +699,8 @@ public class PrinterService {
 			return new MachineResponse("homex", false, "Printer:" + printerName + " not started");
 		}
 			
-		printer.getPrinterController().executeSetRelativePositioning();
-		return new MachineResponse("homex", true, printer.getPrinterController().executeXHome());
+		printer.getGCodeControl().executeSetRelativePositioning();
+		return new MachineResponse("homex", true, printer.getGCodeControl().executeXHome());
 	}	 
 	
     @ApiOperation(value="Homes the Y axis for the Printer specified by the printername.")
@@ -760,8 +716,8 @@ public class PrinterService {
 			return new MachineResponse("homey", false, "Printer:" + printerName + " not started");
 		}
 		
-		printer.getPrinterController().executeSetRelativePositioning();
-		return new MachineResponse("homey", true, printer.getPrinterController().executeYHome());
+		printer.getGCodeControl().executeSetRelativePositioning();
+		return new MachineResponse("homey", true, printer.getGCodeControl().executeYHome());
 	}
 
     @ApiOperation(value="Turns off the motors so that they can be manually turned by hand.")
@@ -777,7 +733,7 @@ public class PrinterService {
 			return new MachineResponse("motorsoff", false, "Printer:" + printerName + " not started");
 		}
 			
-		return new MachineResponse("motorsoff", true, printer.getPrinterController().executeMotorsOff());
+		return new MachineResponse("motorsoff", true, printer.getGCodeControl().executeMotorsOff());
 	}
 	 
     @ApiOperation(value="Turns on the motors so that they can't be manually turned by hand.")
@@ -793,7 +749,7 @@ public class PrinterService {
 			return new MachineResponse("motorson", false, "Printer:" + printerName + " not started");
 		}
 		
-		return new MachineResponse("motorson", true, printer.getPrinterController().executeMotorsOn());
+		return new MachineResponse("motorson", true, printer.getGCodeControl().executeMotorsOn());
 	}
 
     @ApiOperation(value="Starts the projector(if it's supported) for the Printer specified by the printername.")
@@ -916,7 +872,14 @@ public class PrinterService {
 		
 		return seriesData;
 	}
-
+	
+	private static PrintJob buildStubJob(Printer printer) {
+		PrintJob job = new PrintJob(null);//Null job for testing...
+		StubPrintFileProcessor<Object,Object> processor = new StubPrintFileProcessor<>();
+		job.setPrintFileProcessor(processor);
+		job.setPrinter(printer);
+		return job;
+	}
 	/*Fix the two places where we assign icons to all of the image types in javascript
 	Fix all of the test buttons in photonic javascript
 	/*private Map<String, Object> buildPrintInProgressSimulation() {properly embed this...
@@ -950,9 +913,9 @@ public class PrinterService {
 	@POST
 	@Path("testScript/{printername}/{scriptname}/{returnType}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public TestingResult testScript(@PathParam("printername")String printerName, @PathParam("scriptname")String scriptName, String javascript, @PathParam("returnType")String expectedReturnTypeString) throws InappropriateDeviceException, JobManagerException {
+	public TestingResult testScript(@PathParam("printername")String printerName, @PathParam("scriptname")String scriptName, String javascript, @PathParam("returnType")String expectedReturnTypeString) throws InappropriateDeviceException {
 		Printer printer = getPrinter(printerName);
-		PrintJob job = TemplateEngine.buildStubJob(printer);
+		PrintJob job = buildStubJob(printer);
 
 		try {
 			Class expectedReturnType = null;
@@ -1042,7 +1005,18 @@ public class PrinterService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public TestingResult testTemplate(@PathParam("printername")String printerName, @PathParam("templatename")String templateName, String template) throws InappropriateDeviceException {
 		Printer printer = getPrinter(printerName);
-		return printer.getPrinterController().testTemplate(printer, templateName, template);
+		PrintJob job = buildStubJob(printer);
+		
+		try {
+			String returnValue = TemplateEngine.buildData(job, printer, template);
+			return new TestingResult(returnValue);
+		} catch (IOException e) {
+			TestingResult result = new TestingResult(e.getMessage(), -1);
+			return result;
+		} catch (TemplateException e) {
+			TestingResult result = new TestingResult(e.getMessage(), e.getLineNumber());
+			return result;
+		}
 	}
 	
     @ApiOperation(value="Returns the remaining print material left in the printer using the org.area515.resinprinter.inkdetection.PrintMaterialDetector that is setup in the Printer specified by the printerName.")
@@ -1052,13 +1026,13 @@ public class PrinterService {
 	@GET
 	@Path("remainingPrintMaterial/{printername}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MachineResponse getRemainingResin(@PathParam("printername") String printerName) throws InappropriateDeviceException, JobManagerException {
+	public MachineResponse getRemainingResin(@PathParam("printername") String printerName) throws InappropriateDeviceException {
 		Printer printer = getPrinter(printerName);
 		if (printer == null) {
 			return new MachineResponse("remainingPrintMaterial", false, "Printer not started:" + printerName);
 		}
 		
-		InkDetector detector = printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getInkDetector(TemplateEngine.buildStubJob(printer));
+		InkDetector detector = printer.getConfiguration().getSlicingProfile().getSelectedInkConfig().getInkDetector(buildStubJob(printer));
 		if (detector == null) {
 			return new MachineResponse("remainingPrintMaterial", false, "This printer doesn't have a PrintMaterialDetector configured. Save and restart the printer.");
 		}
