@@ -1,10 +1,9 @@
 package org.area515.resinprinter.network;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class MockNetworkManager implements NetworkManager {
 	@Override
@@ -24,8 +23,6 @@ public class MockNetworkManager implements NetworkManager {
 		wNetwork0.setSsid("Test Wireless Network");
 		wNetwork1.setSupportedWirelessEncryption(encryptions);
 		wNetwork1.setSsid("Test Another Wireless Network");
-		wNetwork1.setSignalStrength((-new Random().nextInt(100)) + "");
-		wNetwork1.setAssociated(true);
 		wNetwork2.setSupportedWirelessEncryption(encryptions);
 		wNetwork2.setSsid("Test Final Wireless Network");
 		
@@ -64,22 +61,23 @@ public class MockNetworkManager implements NetworkManager {
 	}
 
 	@Override
+	public String getCurrentSSID() {
+		return "test";
+	}
+
+	@Override
 	public String getHostname() {
 		return "test";
 	}
 	
 	@Override
-	public Map<String, String> getIPs() { 
-		HashMap<String, String> map = new HashMap<>();
-		map.put("localhost", "127.0.0.1");
-		return map;
+	public Map getIPs() { 
+		return null;
 	}
 
 	@Override
-	public Map<String, String> getMACs() { 
-		HashMap<String, String> mac = new HashMap<>();
-		mac.put("localhost", "abcdef123");
-		return mac;
+	public Map getMACs() { 
+		return null;
 	}
 	
 	@Override
