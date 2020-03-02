@@ -150,8 +150,22 @@
 			function init(){
 				startpage();
 				doorupdate();
+				toggleONSTART();
 				updateNetworkInfo();
 				setInterval(updateNetworkInfo(), 5000);
+			}
+
+			function toggleONSTART() {
+				$.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
+					if (data.started) {
+					}
+					else { 
+						$.getJSON('/services/printers/start/' + printerName).done(function () {
+							//document.getElementById("printerstatus").src = PRINTERONIMAGE;
+							//Cookies.set('printerstatus', PRINTERONIMAGE);
+						});
+					}
+				});
 			}
 
 			function updateNetworkInfo() {
