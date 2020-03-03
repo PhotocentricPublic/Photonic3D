@@ -130,7 +130,29 @@
 				startpage();
 				setInterval(updateNetworkInfo(), 10000);
 			}
-
+			function movedown() {
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+					var text = JSON.stringify(result);
+					axisPos = text.indexOf("Y: at min stop");
+					if (axisPos > -1) {
+						$('#home').hide();
+						$('#start').hide();
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/G1 Z-250 F600');
+						setTimeout(function () {
+							location.href = 'calibration_platf_4.html';
+						}, 26000);
+						$('#warning').html("Platform moving down. Please wait.");
+						$('#warning').show();
+					}
+					else {
+						$('#warning').html("Please close the hood and try again");
+						$('#warning').show();
+						setTimeout(function () {
+							$('#warning').hide();
+						}, 5000);
+					}
+				});
+			}
 			function updateNetworkInfo() {
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 					.done(function (data) {
@@ -154,7 +176,7 @@
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<div name="printwarn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse"></div></div>
 				<div name="home" class="home" id="home" onClick="location.href = 'calibration_platf_2.html';"><img src="images/menumainbuttonANIM.png"></div>
-				<div name="start" class="start" id="start" onClick="location.href = 'calibration_platf_4.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="start" class="start" id="start" onClick="movedown();"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>

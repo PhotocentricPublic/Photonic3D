@@ -130,6 +130,30 @@
 				startpage();
 				setInterval(updateNetworkInfo(), 10000);
 			}
+			
+			function movedown() {
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+					var text = JSON.stringify(result);
+					axisPos = text.indexOf("Y: at min stop");
+					if (axisPos > -1) {
+						$('#home').hide();
+						$('#start').hide();
+						$.getJSON('../services/printers/executeGCode/' + printerName + '/G28')
+							.done(function (data) {
+								location.href = 'maintain.html';
+							});
+						$('#warning').html("Platform homing. Please wait.");
+						$('#warning').show();
+					}
+					else {
+						$('#warning').html("Please close the hood and try again");
+						$('#warning').show();
+						setTimeout(function () {
+							$('#warning').hide();
+						}, 5000);
+					}
+				});
+			}
 
 			function updateNetworkInfo() {
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
@@ -149,13 +173,13 @@
         <div class="screen">
             <div class="main">
 				<img id="overlay" class="overlay hide" src="images/34.gif"/>
-				<img src="images/calibration_platf_6.png" class="uilayer">
+				<img src="images/calibration_platf_7.png" class="uilayer">
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
 				<div name="printwarn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ></div></div>
 				<div name="home" class="home" id="home" onClick="location.href = 'calibration_platf_5.html';"><img src="images/menumainbuttonANIM.png"></div>
-				<div name="start" class="start" id="start" onClick="location.href = 'calibration_platf_7.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="start" class="start" id="start" onClick="movedown();"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>

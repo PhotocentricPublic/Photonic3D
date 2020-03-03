@@ -150,20 +150,8 @@
 			function init(){
 				startpage();
 				doorupdate();
-				toggleONSTART();
 				updateNetworkInfo();
 				setInterval(updateNetworkInfo(), 5000);
-			}
-
-			function toggleONSTART() {
-				$.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
-					if (data.started) {
-					}
-					else { 
-						$.getJSON('/services/printers/start/' + printerName).done(function () {
-						});
-					}
-				});
 			}
 
 			function updateNetworkInfo() {
@@ -179,7 +167,7 @@
 					});
 			}
 		</script>
-
+		
         <div class="screen">
             <div class="main">
 				<img src="images/mainmenu.png" usemap="mainmenu" class="uilayer"></img>

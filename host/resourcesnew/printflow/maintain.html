@@ -237,8 +237,8 @@
 			var url = "http://localhost:9091/services/customizers/upsert";
 			var xhr = new XMLHttpRequest();
 			var data = {
-				"name": "display_cure_to_be_hidden.zip.Photocentric Dental",
-				"printerName": "Photocentric Dental",
+				"name": "display_cure_to_be_hidden.zip.LC Dental",
+				"printerName": "LC Dental",
 				"printableName": "display_cure_to_be_hidden",
 				"printableExtension": "zip",
 				"supportsAffineTransformSettings": true,
@@ -277,8 +277,8 @@
 			var url = "http://localhost:9091/services/customizers/upsert";
 			var xhr = new XMLHttpRequest();
 			var data = {
-				"name": "display_test_to_be_hidden.zip.Photocentric Dental",
-				"printerName": "Photocentric Dental",
+				"name": "display_test_to_be_hidden.zip.LC Dental",
+				"printerName": "LC Dental",
 				"printableName": "display_test_to_be_hidden",
 				"printableExtension": "zip",
 				"supportsAffineTransformSettings": true,
@@ -390,7 +390,7 @@
 			$('#warning').html("Backlight ON");
 			$('#warning').show();
 			no();
-			$.getJSON('../services/printers/showBlankScreen/Photocentric Dental');
+			$.getJSON('../services/printers/showBlankScreen/LC Dental');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S1')
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 P"fans_on.g"');
@@ -417,7 +417,7 @@
 			$("#homeZ").show();
 			$("#testdisplaybtn").show();
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
-			$.getJSON('../services/printers/showBlankScreen/Photocentric Dental');
+			$.getJSON('../services/printers/showBlankScreen/LC Dental');
 			$("#togglebutton").show();
 			$("#whitecure").show();
 			$("#LedOn").show();
@@ -431,7 +431,7 @@
 		}
 
 		function hbutton() {
-			$.getJSON('../services/printers/showBlankScreen/Photocentric Dental');
+			$.getJSON('../services/printers/showBlankScreen/LC Dental');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 P"fans_off.g"')
 				.done(function (data) {
@@ -440,7 +440,7 @@
 		}
 
 		function calibutton() {
-			$.getJSON('../services/printers/showBlankScreen/Photocentric Dental');
+			$.getJSON('../services/printers/showBlankScreen/LC Dental');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 P"fans_off.g"');
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0')
 				.done(function (data) {
@@ -456,7 +456,7 @@
 			$("#LedOn").hide();
 			$("#homeZ").hide();
 			$("#testdisplaybtn").hide();
-			$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.Photocentric Dental')
+			$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_test_to_be_hidden.zip.LC Dental')
 				.done(function (data) {
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 P"fans_on.g"');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
@@ -464,7 +464,7 @@
 				});
 			LT4 = setTimeout(function () {
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Dental');
+				$.getJSON('../services/printers/showBlankScreen/LC Dental');
 				$("#togglebutton").show();
 				$("#whitecure").show();
 				$("#LedOn").show();
@@ -533,7 +533,7 @@
 			$("#LedOff").hide();
 			$("#LedOn").hide();
 			$("#whitecure").hide();
-			$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_cure_to_be_hidden.zip.Photocentric Dental')
+			$.getJSON('../services/customizers/projectCustomizerOnPrinter/display_cure_to_be_hidden.zip.LC Dental')
 				.done(function (data) {
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 P"fans_on.g"');
 					$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P1 S1');
@@ -541,7 +541,7 @@
 				});
 			setTimeout(function () {
 				$.getJSON('../services/printers/executeGCode/' + printerName + '/M42 P0 S0');
-				$.getJSON('../services/printers/showBlankScreen/Photocentric Dental')
+				$.getJSON('../services/printers/showBlankScreen/LC Dental')
 					.done(function (data) {
 						$("#homeZ").show();
 						$("#togglebutton").show();
