@@ -64,6 +64,11 @@ public class MockNetworkManager implements NetworkManager {
 	}
 
 	@Override
+	public String getCurrentSSID() {
+		return "test";
+	}
+
+	@Override
 	public String getHostname() {
 		return "test";
 	}

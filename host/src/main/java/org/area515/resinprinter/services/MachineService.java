@@ -218,7 +218,36 @@ public class MachineService {
 		}
 	}
     
-	//TODO: getWirelessStrength
+// Early modifications to support fetching of WiFi signal strength. Feel free to discard or replace as necessary.
+@ApiOperation(value = "Enumerates the signal strength in dBm for the currently connected wireless host.")
+@ApiResponses(value = {
+		@ApiResponse(code = 200, message = SwaggerMetadata.SUCCESS),
+		@ApiResponse(code = 500, message = SwaggerMetadata.UNEXPECTED_ERROR)})
+ @GET
+ @Path("wirelessNetworks/getWirelessStrength")
+ @Produces(MediaType.APPLICATION_JSON)
+ public String getWirelessStrength() {
+	Class<NetworkManager> managerClass = HostProperties.Instance().getNetworkManagerClass();
+	try {
+		NetworkManager networkManager = managerClass.newInstance();
+		List<NetInterface> interfaces = networkManager.getNetworkInterfaces();
+		String currentSSID = networkManager.getCurrentSSID();
+		String signal = "-100";
+
+		for (NetInterface network : interfaces) {
+			for (WirelessNetwork wnetwork : network.getWirelessNetworks()) {
+				if (wnetwork.getSsid().compareToIgnoreCase(currentSSID)==0){
+					signal = wnetwork.getSignalStrength();
+				}
+			}
+		}
+		
+		return signal;
+	} catch (InstantiationException | IllegalAccessException e) {
+		logger.error("Error retrieving wireless networks", e);
+		return null;
+	}
+ }
     @ApiOperation(value="Retrieves all of the supported file types that are returned from the each of the org.area515.resinprinter.job.PrintFileProcessor.getFileExtensions()."
     		+ SwaggerMetadata.PRINT_FILE_PROCESSOR)
     @ApiResponses(value = {
@@ -450,6 +479,7 @@ public class MachineService {
 				   networkHost.put("MACs", networkManager.getMACs());
 				   networkHost.put("IPs", networkManager.getIPs());
 				   networkHost.put("Hostname",networkManager.getHostname());
+				   networkHost.put("SSID",networkManager.getCurrentSSID());
 				   return networkHost;
 			   } catch (InstantiationException | IllegalAccessException e) {
 				   logger.error("Error retrieving network host configuration", e);
