@@ -16,8 +16,8 @@
 
 		.print{
 			position: absolute; 
-			top: 70px; 
-			left: 280px;
+			top: 50px; 
+			left: 270px;
 			height: 200px;
 			width: 250px;
 			z-index: 5;
@@ -31,8 +31,8 @@
 		
 		.maintain{
 			position: absolute; 
-			top: 250px; 
-			left: 120px;
+			top: 230px; 
+			left: 115px;
 			height: 150px;
 			width: 150px;
 			user-drag: none; 
@@ -45,8 +45,8 @@
 				
 		.settings{
 			position: absolute; 
-			top: 250px; 
-			left: 535px;
+			top: 230px; 
+			left: 525px;
 			height: 150px;
 			width: 150px;
 			z-index: 5;
@@ -60,8 +60,8 @@
 		
 		.network{
 			position: absolute; 
-			top: 280px; 
-			left: 330px;
+			top: 260px; 
+			left: 320px;
 			height: 150px;
 			width: 150px;
 			z-index: 5;
@@ -78,12 +78,6 @@
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
-		.details { 
-			font-size: 15px;
-			padding-bottom: 2.5px;
-			padding-left: 5px;
-		}
-		
 		.details { 
 			font-size: 15px;
 			padding-bottom: 2.5px;
@@ -123,50 +117,45 @@
 				cursor: none;
 			}
 		</style> -->
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="../jquery/jquery.min.js"></script>
+        <!-- jQuery library -->
+        <script src="../jquery/jquery.min.js"></script>
 
-<!-- Latest compiled JavaScript -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
 
-<!-- Latest v1 Angular -->
-<script src="../angular/js/angular.min.js"></script>
+        <!-- Latest v1 Angular -->
+        <script src="../angular/js/angular.min.js"></script>
 
-<script src="js/moment.min.js"></script>
-
-<script src="js/printflow.js"></script>
-<script src="js/printerconfig.js"></script>
-
-<script src="js/js.cookie.js"></script>
-
-<link href="css/printflow.css" rel="stylesheet">
+        <script src="js/moment.min.js"></script>
+		
+		<script src="js/printflow.js"></script>
+		<script src="js/printerconfig.js"></script>
+		
+		<script src="js/js.cookie.js"></script>
+		
+		<link href="css/printflow.css" rel="stylesheet">
     </head>
     <body style="background-color: black;" onload="init();">
 		<script>
 
 			function init(){
 				startpage();
-				doorupdate();
-				togglePrinter();
-				updateNetworkInfo();
+				pagelight();
 				setInterval(updateNetworkInfo(), 5000);
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M106 P0 S0');
 			}
 
-			function togglePrinter() {
-				$.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
-					if (data.started) {
-					}
-					else { // turn the printer on
-						$.getJSON('/services/printers/start/' + printerName).done(function () {
-						});
-					}
-				});
+
+			function pagelight(){
+				$.getJSON('../services/printers/executeGCode/'+printerName+'/M150 R255 U0 B0');
 			}
-		
+
+
 			function updateNetworkInfo() {
+
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 					.done(function (data) {
 						var IPs = "";
@@ -178,6 +167,7 @@
 					.fail(function () {
 					});
 			}
+
 		</script>
 		
         <div class="screen">
@@ -185,16 +175,16 @@
 				<img src="images/mainmenu.png" usemap="mainmenu" class="uilayer"></img>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 				<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
-				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printflowprintables.html';"/>
+				<img name="print" id="print" class="print" src="images/menumainbuttonANIM.png" onClick="location.href='printables.html';"/>
 				<img name="maintain" id="maintain" class="maintain" src="images/menumainbuttonANIM.png" onClick="location.href='maintain.html';">
-				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='printflowsettings.html';">
+				<img name="settings" id="settings" class="settings" src="images/menumainbuttonANIM.png" onClick="location.href='settings.html';">
 				<img name="network" id="network" class="network" src="images/menumainbuttonANIM.png" onClick="location.href='wifisettings.html';">
 				<div onmousedown="event.preventDefault ? event.preventDefault() : event.returnValue = false">	
 					<div name="webinfo" id="webinfo" class="webinfo">
-						<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>	
+						<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 					</div>
-				
 				</div>
 			</div>
         </div>

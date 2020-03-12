@@ -1,4 +1,4 @@
- printStatus = "";
+var printStatus = "";
 var jobId="";
 var runningjobName="";
 var totalslices=0;
@@ -12,55 +12,7 @@ var PRINTEROFFIMAGE = "images/printer-off.png";
             
 function startpage(){
         doorupdate();
-        if (typeof Cookies.get('lastwifi') !== 'undefined'){
-                signalstrength = Cookies.get('lastwifi');
-                if (signalstrength > -45) {
-                        document.getElementById("wifi").src="images/wifi-3.png";
-                }
-                else if (signalstrength > -67) {
-                        document.getElementById("wifi").src="images/wifi-2.png";
-                }
-                else if (signalstrength > -72) {
-                        document.getElementById("wifi").src="images/wifi-1.png";
-                }
-                else if (signalstrength > -80) {
-                        document.getElementById("wifi").src="images/wifi-0.png";
-                }
-                else document.getElementById("wifi").src="images/wifi-nc.png";
-        }
-        else{
-                wifiupdate();
-        }
-        //handles page setup and the common things across all pages:
-        
-        if (typeof Cookies.get('printerstatus') !== 'undefined'){
-                document.getElementById("printerstatus").src = Cookies.get('printerstatus');
-        }
-        else{
-                printerStatus(); 
-        }
-        
-        // do the first updates
-        //document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-        printredirect(); 
-       
-        setInterval(function() {
-                //time handling/updating
-		//document.getElementById("time").innerHTML = moment().format("HH:mm:ss[<br>]DD-MMM-YY");
-                //redirect to print dialogue on user initiating a print
-                printredirect();
-                printerStatus();
-				doorupdate();
-        }, 1000);
-        
-        setInterval(function() {
-                //wifi updating
-                wifiupdate();
-	}, 3000);
-}
-
-function startpage_printdialogue(){
-		printdialogue_doorupdate();
+        interruptcheck();
         if (typeof Cookies.get('lastwifi') !== 'undefined'){
                 signalstrength = Cookies.get('lastwifi');
                 if (signalstrength > -45) {
@@ -104,7 +56,8 @@ function startpage_printdialogue(){
         setInterval(function() {
                 //wifi updating
                 wifiupdate();
-				printdialogue_doorupdate();
+                doorupdate();
+                interruptcheck();
 	}, 3000);
 }
 
@@ -127,36 +80,32 @@ function doorupdate() {
         $.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
                 var text = JSON.stringify(result);
                 axisPos = text.indexOf("Y: not stopped");
-				maxisPos = text.indexOf("Y: at min stop");
                 if (axisPos > -1) {
                         document.getElementById("doorcheck").src = "images/closed.png";
                 }
-				else if (maxisPos > -1) {
-                        document.getElementById("doorcheck").src = "images/opened.png";
-                }
                 else {
-                        document.getElementById("doorcheck").src = "images/pixel.png";
+                        document.getElementById("doorcheck").src = "images/open.png";
                 }
         });
 }
 
-function printdialogue_doorupdate() {
-		$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
-                var text = JSON.stringify(result);
-                axisPos = text.indexOf("Y: not stopped");
-				maxisPos = text.indexOf("Y: at min stop");
-				if (axisPos > -1) {
-                        document.getElementById("doorcheck").src = "images/closed_without_msg.png";
+function interruptcheck() {
+        $.getJSON('../services/printers/executeGCode/' + printerName + '/M408 S0', function (result) {
+                var tem = result["message"];
+                var messtripped = tem.substr(0, tem.length - 3); // to strip off end chars "msgBox.mode\":-1}\n\nok\n"
+                var messObj = JSON.parse(messtripped);
+                var HACKinterlockFlagArr = messObj["fanPercent"];   
+                var interlockSetTrue = HACKinterlockFlagArr[2] == 100;
+                if (interlockSetTrue) {
+                        document.getElementById("interlockcheck").src = "images/locked-padlock.png";
                 }
-				else if (maxisPos > -1) {
-                        document.getElementById("doorcheck").src = "images/open_with_msg.png";
+                else {// if gets here - invalid value - but set unlocked
+                        document.getElementById("interlockcheck").src = "images/unlocked-padlock.png";
                 }
-                else {
-                        document.getElementById("doorcheck").src = "images/pixel.png";
-                }
-			});
-}
 
+        });
+}
+        
 function wifiupdate(){
 	//TODO: JSON to query the server's wifi status and display it
         

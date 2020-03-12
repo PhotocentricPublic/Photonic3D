@@ -89,26 +89,27 @@
 		}
 
 		</style>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+		
+               <!-- Latest compiled and minified CSS -->
+			   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="../jquery/jquery.min.js"></script>
-
-<!-- Latest compiled JavaScript -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
-
-<!-- Latest v1 Angular -->
-<script src="../angular/js/angular.min.js"></script>
-
-<script src="js/moment.min.js"></script>
-
-<script src="js/printflow.js"></script>
-<script src="js/printerconfig.js"></script>
-
-<script src="js/js.cookie.js"></script>
-
-<link href="css/printflow.css" rel="stylesheet">
+			   <!-- jQuery library -->
+			   <script src="../jquery/jquery.min.js"></script>
+	   
+			   <!-- Latest compiled JavaScript -->
+			   <script src="../bootstrap/js/bootstrap.min.js"></script>
+	   
+			   <!-- Latest v1 Angular -->
+			   <script src="../angular/js/angular.min.js"></script>
+	   
+			   <script src="js/moment.min.js"></script>
+			   
+			   <script src="js/printflow.js"></script>
+			   <script src="js/printerconfig.js"></script>
+			   
+			   <script src="js/js.cookie.js"></script>
+			   
+			   <link href="css/printflow.css" rel="stylesheet">
     </head>
     <body style="background-color: black;"  onload="init()">
 		
@@ -139,7 +140,7 @@
 					console.log(data);
 					data=sortBy(data,"startTime");
 					$.each(data, function (key, val) {
-						document.getElementById("log").innerHTML+="Started printing: "+val.jobName+"\n&nbsp;&nbsp;&nbsp;&nbsp;Status: "+val.status+"\n";
+						document.getElementById("log").innerHTML+="["+moment(val.startTime).format("HH:mm:ss[ ]DD-MMM-YY")+"] Started printing: "+val.jobName+"\n&nbsp;&nbsp;&nbsp;&nbsp;Status: "+val.status+"\n";
 					});
 			});
 
@@ -156,7 +157,9 @@
 						.fail(function () {
 						});
 				}
-		</script>	
+
+		</script>
+		
         <div class="screen">
             <div class="main">
 				<img src="images/syslog.png" usemap="syslog" class="uilayer">
@@ -169,11 +172,13 @@
 				<textarea class="log" id="log"></textarea>
 				<div name="warn" id="warn" class="warn"></div>
 				<div name="home" class="home" id="home" onClick="location.href='index.html';"><img src="images/menumainbuttonANIM.png"></div>
-				<div name="back" class="back" id="back" onClick="location.href='printflowsettings.html';"><img src="images/menumainbuttonANIM.png"></div>
+				<div name="back" class="back" id="back" onClick="location.href='settings.html';"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="webinfo" id="webinfo" class="webinfo">
 					<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
 				</div>
 			</div>
         </div>
+
+	
     </body>
 </html>

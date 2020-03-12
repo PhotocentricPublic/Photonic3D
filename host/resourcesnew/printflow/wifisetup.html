@@ -24,7 +24,6 @@
 			left: 241px; 
 			color: white;
 			font-size: large;
-			font-family: Helvetica;
 		}
 		.SSID { 
 			position: absolute; 
@@ -42,7 +41,6 @@
 			left: 241px;
 			color: white;
 			font-size: large;
-			font-family: Helvetica;
 		}
 		.pass { 
 			position: absolute; 
@@ -66,23 +64,6 @@
 			font-size: large;
 			overflow-y: auto;
 		}
-		.toggleimg {
-			user-drag: none;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			-ms-user-select: none;
-		}
-		
-		.toggle {
-			position: absolute; 
-			top: 199px; 
-			left: 550px;
-			background-color: transparent;
-			color: white;
-			font-size: large;
-		}
 		
 		.savelabel { 
 			position: absolute; 
@@ -97,10 +78,10 @@
 		
 		.savebutton{
 			position: absolute; 
-			top: 160px; 
-			left: 620px;
+			top: 150px; 
+			left: 662px;
 			height: 90px;
-			width: 100px;
+			width: 80px;
 			user-drag: none; 
 			user-select: none;
 			-moz-user-select: none;
@@ -112,8 +93,8 @@
 
 		.home{
 			position: absolute; 
-			top: 160px; 
-			left: 10px;
+			top: 150px; 
+			left: 51px;
 			height: 90px;
 			width: 80px;
 			user-drag: none; 
@@ -127,8 +108,8 @@
 		
 		.back{
 			position: absolute; 
-			top: 160px; 
-			left: 100px;
+			top: 33px; 
+			left: 51px;
 			height: 90px;
 			width: 80px;
 			user-drag: none; 
@@ -139,30 +120,41 @@
 			-ms-user-select: none;
 			z-index: 3;
 		}
+		
+		.toggle {
+			position: absolute; 
+			top: 199px; 
+			left: 550px;
+			background-color: transparent;
+			color: white;
+			font-size: large;
+		}
 
 		</style>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+		
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="../jquery/jquery.min.js"></script>
+         <!-- jQuery library -->
+        <script src="../jquery/jquery.min.js"></script>
+	    
+        <!-- Latest compiled JavaScript -->
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
 
-<!-- Latest compiled JavaScript -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <!-- Latest v1 Angular -->
+        <script src="../angular/js/angular.min.js"></script>
 
-<!-- Latest v1 Angular -->
-<script src="../angular/js/angular.min.js"></script>
+        <script src="js/moment.min.js"></script>
 
-<script src="js/moment.min.js"></script>
-
-<script src="js/printflow.js"></script>
-<script src="js/printerconfig.js"></script>
-
-<script src="js/js.cookie.js"></script>
-<link href="css/keyboard-dark.css" rel="stylesheet">
-<script src="js/jquery.keyboard.js"></script>
-<link href="css/printflow.css" rel="stylesheet">
-
+		<script src="js/printflow.js"></script>
+		<script src="js/printerconfig.js"></script>
+		
+		<link href="css/printflow.css" rel="stylesheet">
+		
+		<script src="js/js.cookie.js"></script>
+		
+		<link href="css/keyboard-dark.css" rel="stylesheet">
+		<script src="js/jquery.keyboard.js"></script>
 		<script>
 		$(function(){
 			$('#SSID').keyboard({  usePreview : false, autoAccept : true,});
@@ -258,16 +250,17 @@
 				<img src="images/wifisetup.png" usemap="wifisettings" class="uilayer">
 				<map name="wifisettings">
 				</map>
-				<div class="toggle" name="toggle" id="toggle" onclick="if (pass.type == 'text') pass.type = 'password'; else pass.type = 'text';"><img name="toggleimg" id="toggleimg" class="toggleimg" src="images/toggle_pswd.png"></div>
+				<div class="toggle" name="toggle" id="toggle" onclick="if (pass.type == 'text') pass.type = 'password'; else pass.type = 'text';"><img src="images/toggle_pswd.png"></div>
 				<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
+				<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
 				<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 				<img name="wifisettings" id="wifisettings" class="wifisettings" src="" onClick="location.href='wifisettings.html';">
-				<div name="SSIDlabel" class="SSIDlabel" id="SSIDlabel">NETWORK</div>
+				<div name="SSIDlabel" class="SSIDlabel" id="SSIDlabel">Network</div>
 				<input name="SSID" class="SSID" id="SSID" value=""></input>
-				<div name="passlabel" class="passlabel" id="passlabel">PASSWORD</div>
+				<div name="passlabel" class="passlabel" id="passlabel">Password</div>
 				<input name="pass" class="pass" id="pass" type="password" value=""></input>
 				<div name="savebutton" class="savebutton" id="savebutton" onClick="saveWifi();"><img src="images/menumainbuttonANIM.png"></div>
-				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ><strong>Error</strong><br>Could not save settings. Please check your password.</div></div>
+				<div name="warn" id="warn" class="warn"><div id="warning" role="alert" class="alert alert-danger collapse" ><strong>Error</strong><br>Could not save settings</div></div>
 				<div name="home" class="home" id="home" onClick="location.href='index.html';"><img src="images/menumainbuttonANIM.png"></div>
 				<div name="back" class="back" id="back" onClick="location.href='wifisettings.html';"><img src="images/menumainbuttonANIM.png"></div>
             </div>

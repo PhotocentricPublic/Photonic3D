@@ -1,11 +1,10 @@
-<!DOCTYPE html>
 <html>
 
 <head>
 	<title>Print Dialogue</title>
 	<style>
 		*{
-				cursor: none;
+			cursor: none;
 			}
 		.pause {
 			position: absolute;
@@ -76,6 +75,19 @@
 			-webkit-user-drag: none;
 			-webkit-user-select: none;
 			-ms-user-select: none;
+		}
+
+		.progressbardiv {
+			position: absolute;
+			top: 297px;
+			left: 253px;
+			width: 292px;
+			max-width: 292px;
+			height: 10px;
+			color: white;
+			font-size: 10px;
+			text-align: right;
+			z-index: 0;
 		}
 
 		.filename {
@@ -188,6 +200,32 @@
 			z-index: 2;
 		}
 
+		.pause_question {
+			position: absolute;
+			top: 300px;
+			left: 380px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
+		.resume_question {
+			position: absolute;
+			top: 300px;
+			left: 380px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
 		.cancel_approve {
 			position: absolute;
 			top: 330px;
@@ -200,6 +238,33 @@
 			-ms-user-select: none;
 			z-index: 2;
 		}
+
+		.resume_approve {
+			position: absolute;
+			top: 330px;
+			left: 445px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
+		.pause_approve {
+			position: absolute;
+			top: 330px;
+			left: 445px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
 
 		.cancel_decline {
 			position: absolute;
@@ -214,7 +279,59 @@
 			z-index: 2;
 		}
 
+		.resume_decline {
+			position: absolute;
+			top: 330px;
+			left: 525px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
+		.pause_decline {
+			position: absolute;
+			top: 330px;
+			left: 525px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+
 		.cancelling {
+			position: absolute;
+			top: 300px;
+			left: 380px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+		
+		.resuming {
+			position: absolute;
+			top: 300px;
+			left: 380px;
+			user-drag: none;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-drag: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			z-index: 2;
+		}
+		
+		.pausing {
 			position: absolute;
 			top: 300px;
 			left: 380px;
@@ -242,74 +359,70 @@
 		}
 
 		@keyframes pauseglyph {
-			0% {color: rgba(128, 128, 0, 128);}
-			25% {color: rgba(128, 96, 0, 112);}
-			50% {color: rgba(128, 64, 0, 96);}
-			75% {color: rgba(128, 32, 0, 80);}
-			100% {color: rgba(128, 0, 0, 64);}
+			0% {
+				color: rgba(128, 128, 0, 128);
+			}
+
+			25% {
+				color: rgba(128, 96, 0, 112);
+			}
+
+			50% {
+				color: rgba(128, 64, 0, 96);
+			}
+
+			75% {
+				color: rgba(128, 32, 0, 80);
+			}
+
+			100% {
+				color: rgba(128, 0, 0, 64);
+			}
 		}
 
 		@keyframes playfade {
-			0% {color: rgba(128, 128, 0, 128);}
-			25% {color: rgba(128, 96, 0, 96);}
-			50% {color: rgba(128, 64, 0, 64);}
-			75% {color: rgba(128, 32, 0, 32);}
-			100% {color: rgba(128, 0, 0, 0);}
-		}
-	
-		.progressbar {
-			position: absolute;
-			top: 298px;
-			left: 350px;
-			border-radius: 14px;
-		}
+			0% {
+				color: rgba(128, 128, 0, 128);
+			}
 
-		progress[value] {
-			-webkit-appearance: none;
-  			appearance: none;
-  			width: 351px;
- 			height: 10px;
-		}
+			25% {
+				color: rgba(128, 96, 0, 96);
+			}
 
-		progress[value]::-webkit-progress-bar {
-			border-radius: 20px;
-  			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
-			  background: #eef1f3;
-		}
+			50% {
+				color: rgba(128, 64, 0, 64);
+			}
 
-		progress[value]::-webkit-progress-value {
-  			background-image:
-	   			-webkit-linear-gradient(-45deg, 
-	                transparent 33%, rgba(0, 0, 0, .1) 33%, 
-	                rgba(0,0, 0, .1) 66%, transparent 66%),
-	   			-webkit-linear-gradient(top, 
-	                rgba(255, 255, 255, .25), 
-	                rgba(0, 0, 0, .25)),
-	   			-webkit-linear-gradient(left, #00b8e6, #00b8e6);
-    			border-radius: 20px; 
-    			background-size: 35px 20px, 100% 100%, 100% 100%;
+			75% {
+				color: rgba(128, 32, 0, 32);
+			}
+
+			100% {
+				color: rgba(128, 0, 0, 0);
+			}
 		}
 	</style>
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
 
-<!-- jQuery library -->
-<script src="../jquery/jquery.min.js"></script>
+	<!-- jQuery library -->
+	<script src="../jquery/jquery.min.js"></script>
 
-<!-- Latest compiled JavaScript -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+	<script src="../bootstrap/js/bootstrap.min.js"></script>
 
-<!-- Latest v1 Angular -->
-<script src="../angular/js/angular.min.js"></script>
+	<!-- Latest v1 Angular -->
+	<script src="../angular/js/angular.min.js"></script>
 
-<script src="js/moment.min.js"></script>
+	<script src="js/moment.min.js"></script>
 
-<script src="js/printflow.js"></script>
-<script src="js/printerconfig.js"></script>
+	<script src="js/printflow.js"></script>
+	<script src="js/printerconfig.js"></script>
 
-<script src="js/js.cookie.js"></script>
+	<script src="js/js.cookie.js"></script>
 
-<link href="css/printflow.css" rel="stylesheet">
+	<link href="css/printflow.css" rel="stylesheet">
 </head>
 
 <body style="background-color: black;" onload="init();">
@@ -321,22 +434,20 @@
 		maxHeight = 0; // set this as 0 too to be safe!
 
 		function init() {
-			startpage_printdialogue();
+			startpage();
 			$('#pause').hide();
 			$('#cancellabel').hide();
 			setTimeout(function () {
-					$('#pause').show();
-					$('#cancellabel').show();
-				}, 3000);
+					$('#pause').fadeIn();
+					$('#cancellabel').fadeIn();
+				}, 8000);
 			setInterval(updateNetworkInfo(), 10000);
 			$.getJSON('../services/printJobs/getByPrinterName/' + printerName)
 				.done(function (data) {
-					console.log(data);
 					temp = data;
 					starttime = parseInt(data.startTime);
 					currentslice = parseInt(data.currentSlice);
 					totalslices = parseInt(data.totalSlices);
-					estimatedSliceTime = parseInt(data.estimatedSliceTime);
 					jobId = (data.id);
 					runningjobName = (data.jobName);
 					totalslices = parseInt(data.totalSlices);
@@ -399,8 +510,7 @@
 						document.getElementById("totaltimes").innerHTML = moment.duration(endtime - starttime).humanize();
 						initialsliceurl = "../services/printJobs/currentSliceImage/" + jobId;
 						document.getElementById("layerslice").src = initialsliceurl + "?q=" + currentslice;
-						var v = document.getElementById("jobProgress");
-						v.value = parseInt((currentslice / totalslices) * 100);
+						document.getElementById("progress").style = "width:" + parseInt((currentslice / totalslices) * 100) + "%";
 					}
 					else {
 						// double check sliceHeight. If it's a crazy value, do not do the thing with raising the bed. We don't want a Z collision.
@@ -419,43 +529,116 @@
 				}
 			}, 2500);
 		}
+		
 		window.ondragstart = function () { return false; }
 
 		function pauseit() {
 			if (document.getElementById("pause").innerHTML == '<img src=\"images/pause.png\">') {
-				document.getElementById("pause").innerHTML = '<img src=\"images/resume.png\">';
-				document.getElementById("pauseglyph").innerHTML = '<span class="glyphicon glyphicon-pause"></span>';
-				$('#pause').hide();
-				$('#cancellabel').hide();
-				$('#warning').html("Pausing print. Please wait for the layer to finish.");
-				$('#warning').show();
-				$.getJSON("../services/printJobs/togglePause/" + jobId);
-				setTimeout(function () {
-					$('#pause').show();
-					$('#warning').hide();
-					$('#cancellabel').show();
-				}, 20000);
+				pause_query();
 			}
 			else if (document.getElementById("pause").innerHTML == '<img src=\"images/resume.png\">') {
-				doResume();
+				resume_query();
 			}
 			else {
-				$('#cancel_question').hide();
-				$('#cancel_decline').hide();
-				$('#cancel_approve').hide();
-				$('#cancellabel').show();
+				$('#cancellabel').fadeIn();
+				$('#pause').fadeIn();
 			}
-		}            
+		}
+		
+		function resume_query() {
+			$('#pause').fadeOut();
+			$('#cancellabel').fadeOut();
+			$('#resume_question').fadeIn();
+			$('#resume_decline').fadeIn();
+			$('#resume_approve').fadeIn();
+		}
+		
+		function pause_query() {
+			$('#pause').fadeOut();
+			$('#cancellabel').fadeOut();
+			$('#pause_question').fadeIn();
+			$('#pause_decline').fadeIn();
+			$('#pause_approve').fadeIn();
+		}
+		
+		function decline() {
+			$('#cancel_decline').fadeOut();
+			$('#cancel_approve').fadeOut();
+			$('#cancel_question').fadeOut();
+			$('#pause_decline').fadeOut();
+			$('#pause_approve').fadeOut();
+			$('#pause_question').fadeOut();
+			$('#resume_decline').fadeOut();
+			$('#resume_approve').fadeOut();
+			$('#resume_question').fadeOut();
+			$('#cancellabel').fadeIn();
+			$('#pause').fadeIn();
+			clearTimeout(canceltimer);
+		}
+
+		function do_Pause() {
+			$('#pause_question').fadeOut();
+			$('#pause_decline').fadeOut();
+			$('#pause_approve').fadeOut();
+			$.getJSON("../services/printJobs/togglePause/" + jobId);
+			document.getElementById("pauseglyph").innerHTML = '<span class="glyphicon glyphicon-pause"></span>';
+			$('#pausing').fadeIn();
+			setTimeout(function () {
+				$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Punlock.g');
+				$('#pause').fadeIn();
+				$('#cancellabel').fadeIn();
+				$('#pausing').fadeOut();
+			}, 25000);
+			document.getElementById("pause").innerHTML = '<img src=\"images/resume.png\">';
+		}
+
+		function DoEndstop() {
+			$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+				var text = JSON.stringify(result);
+				axisPos = text.indexOf("Y: not stopped");
+				if (axisPos > -1) {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M400');
+					$('#cancellabel').fadeOut();
+					doResume();
+				}
+				else {
+					$('#warning').html("Please close the door and try again");
+					$('#warning').show();
+					setTimeout(function () {
+						$('#warning').fadeOut();
+					}, 5000);
+				}
+			});
+		}
+
+		function Dodoorcheck() {
+			$.getJSON('../services/printers/executeGCode/' + printerName + '/M119', function (result) {
+				var text = JSON.stringify(result);
+				axisPos = text.indexOf("Y: not stopped");
+				if (axisPos > -1) {
+					$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Plock.g');
+					cancel();
+				}
+				else {
+					$('#warning').html("Please close the door and try again");
+					$('#warning').show();
+					setTimeout(function () {
+						$('#warning').hide();
+					}, 5000);
+				}
+			});
+		}
 
 		function doResume() {
-			$('#warning').html("Resuming print...");
-			$('#warning').show();
-			$('#pause').hide();
-			$('#cancellabel').hide();
+			$('#resume_question').fadeOut();
+			$('#resume_approve').fadeOut();
+			$('#resume_decline').fadeOut();
+			$('#resuming').fadeIn();
 			setTimeout(function () {
-				$('#warning').hide();
-				$('#pause').show();
-				$('#cancellabel').show();
+				$('#pause').fadeIn();
+				$('#cancellabel').fadeIn();
+				$('#resuming').fadeOut();
 			}, 5000);
 			$.getJSON("../services/printJobs/togglePause/" + jobId);
 			document.getElementById("pause").innerHTML = '<img src=\"images/pause.png\">';
@@ -466,43 +649,32 @@
 		}
 
 		function cancelshow() {
-				$('#pause').hide();
-				$('#cancellabel').hide();
-				$('#cancel_question').show();
-				$('#cancel_decline').show();
-				$('#cancel_approve').show();
+				$('#pause').fadeOut();
+				$('#cancellabel').fadeOut();
+				$('#cancel_question').fadeIn();
+				$('#cancel_decline').fadeIn();
+				$('#cancel_approve').fadeIn();
 				canceltimer = setTimeout(function () {
-					$('#warning').hide();
-					$('#cancellabel').show();
-					$('#pause').show();
-					$('#cancel_question').hide();
-					$('#cancel_decline').hide();
-					$('#cancel_approve').hide();
+					$('#warning').fadeOut();
+					$('#cancellabel').fadeIn();
+					$('#pause').fadeIn();
+					$('#cancel_question').fadeOut();
+					$('#cancel_decline').fadeOut();
+					$('#cancel_approve').fadeOut();
 				}, 10000);
-		}
-		
-		var canceltimer;
+			}
 
 		function cancel() {
-			$('#cancel_question').hide();
-			$('#cancel_decline').hide();
-			$('#cancel_approve').hide();
+			$('#cancel_question').fadeOut();
+			$('#cancel_decline').fadeOut();
+			$('#cancel_approve').fadeOut();
 			clearTimeout(canceltimer);
-			$('#cancelling').show();
+			$('#cancelling').fadeIn();
 			$.getJSON("../services/printJobs/stopJob/" + jobId);
 			$.getJSON('../services/printers/executeGCode/' + printerName + '/M98 Pcancel.g')
 				.done(function (data) {
 					location.href = "index.html";
 				});
-		}
-
-		function cancelhide() {
-				$('#cancel_question').hide();
-				$('#cancel_decline').hide();
-				$('#cancel_approve').hide();
-				$('#cancellabel').show();
-				$('#pause').show();
-				clearTimeout(canceltimer);
 		}
 
 		function updateNetworkInfo() {
@@ -516,12 +688,7 @@
 					})
 					.fail(function () {
 					});
-		}
-
-		function myFunction() {
-  			var x = document.getElementById("myProgress").value;
-  			document.getElementById("demo").innerHTML = x;
-		}
+			}
 
 	</script>
 	<div class="screen">
@@ -530,16 +697,27 @@
 			<map name="printdialogue" style="z-index: 100;"></map>
 			<img name="wifi" id="wifi" class="wifi" src="images/pixel.png">
 			<img name="printerstatus" id="printerstatus" class="printerstatus" src="images/pixel.png">
-			<img name="dialogue_doorcheck" id="dialogue_doorcheck" class="dialogue_doorcheck" src="images/pixel.png">
-
+			<img name="interlockcheck" id="interlockcheck" class="interlockcheck" src="images/pixel.png">
+			<img name="doorcheck" id="doorcheck" class="doorcheck" src="images/pixel.png">
 			<div name="cancellabel" class="cancellabel" id="cancellabel" onClick="cancelshow();"><img src="images/cancel.png"></div>
 			<div name="printwarn" id="warn" class="warn">
 				<div id="warning" role="alert" class="alert alert-danger collapse"></div>
 			</div>
 			<img name="cancel_question" id="cancel_question" class="cancel_question collapse" src="images/cancel_q.png">
-			<img name="cancel_approve" id="cancel_approve" class="cancel_approve collapse" src="images/cancel_a.png" onclick="cancel();">
-			<img name="cancel_decline" id="cancel_decline" class="cancel_decline collapse" src="images/cancel_d.png" onclick="cancelhide();">
+			<img name="cancel_approve" id="cancel_approve" class="cancel_approve collapse" src="images/cancel_a.png" onclick="Dodoorcheck();">
+			<img name="cancel_decline" id="cancel_decline" class="cancel_decline collapse" src="images/cancel_d.png" onclick="decline();">
 			<img name="cancelling" id="cancelling" class="cancelling collapse" src="images/cancelling.png">
+			
+			<img name="pause_question" id="pause_question" class="pause_question collapse" src="images/pause_q.png">
+			<img name="pause_approve" id="pause_approve" class="pause_approve collapse" src="images/cancel_a.png" onclick="do_Pause();">
+			<img name="pause_decline" id="pause_decline" class="pause_decline collapse" src="images/cancel_d.png" onclick="decline();">
+			<img name="pausing" id="pausing" class="pausing collapse" src="images/pausing.png">
+
+			<img name="resume_question" id="resume_question" class="resume_question collapse" src="images/resume_q.png">
+			<img name="resume_approve" id="resume_approve" class="resume_approve collapse" src="images/cancel_a.png" onclick="DoEndstop();">
+			<img name="resume_decline" id="resume_decline" class="resume_decline collapse" src="images/cancel_d.png" onclick="decline();">
+			<img name="resuming" id="resuming" class="resuming collapse" src="images/resuming.png">
+
 			<div name="pause" class="pause" id="pause" onClick="pauseit();"><img src="images/pause.png"></div>
 			<div name="info" id="info" class="info">
 				<div name="filename" id="filename" class="filename">
@@ -552,14 +730,16 @@
 			</div>
 			<div name="jobid" id="jobid" class="jobid">
 			</div>
+
 			<div class="printlayer" id="printlayer">
 				<img id="layerslice" class="layerslice" src=""></img>
 			</div>
 			<img name="windowframe" id="windowframe" class="windowframe">
 			<div name="pauseglyph" class="pauseglyph" id="pauseglyph"></div>
-			
-			<div name="progressbar" class="progressbar" id="progressbar">
-			<progress id="jobProgress" name="jobProgress" class="jobProgress" value="" max="100"></progress>
+			<div name="progressbardiv" class="progressbardiv">
+				<div id="progress" class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width:0%">
+					<span class="sr-only">70% Complete</span>
+				</div>
 			</div>
 			<div name="webinfo" id="webinfo" class="webinfo">
 				<div name="IP" id="IP" class="IP"><span id="IPaddress" class="details"></span></div>
@@ -568,4 +748,4 @@
 	</div>
 </body>
 
-</html>
+</h
