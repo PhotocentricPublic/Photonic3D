@@ -150,10 +150,22 @@
 			function init(){
 				startpage();
 				doorupdate();
+				togglePrinter();
 				updateNetworkInfo();
 				setInterval(updateNetworkInfo(), 5000);
 			}
 
+			function togglePrinter() {
+				$.getJSON("/services/printers/get/" + encodeURI(printerName)).done(function (data) {
+					if (data.started) {
+					}
+					else { // turn the printer on
+						$.getJSON('/services/printers/start/' + printerName).done(function () {
+						});
+					}
+				});
+			}
+		
 			function updateNetworkInfo() {
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 					.done(function (data) {

@@ -24,11 +24,6 @@
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
-		.SSID { 
-			font-size: 15px;
-			padding-bottom: 2.5px;
-			padding-left: 5px;
-		}
 		.IP { 
 			font-weight: bold;
 			font-size: 15px;
@@ -46,6 +41,14 @@
 			padding-bottom: 2.5px;
 			padding-left: 5px;
 		}
+		
+		.ssid { 
+			font-weight: bold;
+			font-size: 15px;
+			padding-bottom: 2.5px;
+			padding-left: 5px;
+		}
+		
 		.visiblelabel { 
 			position: absolute; 
 			top: 55px; 
@@ -131,16 +134,15 @@
 				startpage();
 				setInterval(updateNetworkInfo(), 10000);
 			}
-
+			
 			function updateNetworkInfo(){
 
 				$.getJSON('/services/machine/getNetworkHostConfiguration')
 				.done(function(data){
-					
+					 console.log(data);
 					 document.getElementById("hostvar").innerHTML=data.Hostname;
 					 var MACs ="";
 					 $.each(data.MACs, function(key,value){
-						console.log(key+", "+value);
 						MACs += key + ": "+value+"<BR/> ";
 					 });
 					 document.getElementById("MACaddress").innerHTML  = MACs;
@@ -149,6 +151,7 @@
 						IPs += key + ": "+value+"<BR/> ";
 					 });
 					 document.getElementById("IPaddress").innerHTML  = IPs;
+					 document.getElementById("SSIDconnected").innerHTML=data.SSID;
 				})
 				.fail(function(){
 				});
@@ -160,12 +163,11 @@
 						select.options[i] = null;
 					}
 				}
+				
 				$.getJSON('/services/machine/wirelessNetworks/list')
 				.done(function(data){
-					console.log(data);
 					var i = 0;
 					$.each(data, function (key, val) {
-						console.log(i + ": "+key+" "+val);
 						option = document.createElement('option');
 						option.id = option.text = option.value = val.ssid;
 						option.style = "background: url(images/wifi-tiny.png) no-repeat; padding-top: 2px; padding-right: 10px;";
@@ -197,6 +199,7 @@
 						<div name="nettitle" id="nettitle" class="nettitle">NETWORK DETAILS</div>
 						<div name="hostname" id="hostname" class="hostname">Hostname:<br/><span id="hostvar" class="hostname"></span>.local</div>
 						<div name="IP" id="IP" class="IP">IP address:<br/><span id="IPaddress" class="details"></span></div>
+						<div name="ssid" id="ssid" class="ssid">SSID connected:<br/><span id="SSIDconnected" class="details"></span></div>
 						<div name="MAC" id="MAC" class="MAC">MAC Address:<br/><span id="MACaddress" class="details"></span></div>
 					</div>
 				</div>
