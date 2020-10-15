@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>CERAMET 1</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="vue-touch-keyboard/vue-touch-keyboard.css">
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <div id="app">
+    <v-app dark id="sandbox">
+      <v-tabs dark grow>
+        <v-tab dark >
+          <v-icon left>mdi-file-multiple</v-icon>
+          PRINT
+        </v-tab>
+        <v-tab>
+          <v-icon left>mdi-cog-box</v-icon>
+          CONTROL PANEL
+        </v-tab>
+        <v-tab>
+          <v-icon left>mdi-cog-box</v-icon>
+          CONTROL PANEL
+        </v-tab>
+        <!--....................................................................................................................................-->
+        <v-tab-item>
+          <v-card flat>
+            <div class="container">
+              <v-card dark flat style="max-height: 80vh">
+                <v-flex style="overflow: auto; height: 80vh;">
+
+                  <v-data-table dark :headers="headers" :items="posts" item-key="name" :single-expand="singleExpand"
+                    :expanded.sync="expanded" show-expand disable-pagination :hide-default-footer="true">
+
+                    <template v-slot:expanded-item="{ headers, item }">
+
+                      <td :colspan="headers.length">
+
+                        <div class="row">
+                          <div class="col-sm-12 col-md-12  col-lg-12">
+                            <br>
+                            Name: {{ item.name }}
+                            <br>Size: {{ item.size | prettyBytes(1, true) }}
+                            <br>Type: {{ item.extension }}
+                            <br>Upload Date: {{ item.modifiedDate }}
+                          </div>
+
+                          <div class="col-sm-12 col-md-12 col-lg-12">
+                            <v-btn class="my-2" block color="light-blue lighten-1" text x-large
+                              @click.stop="dialog_print = true">
+                              <v-icon left>mdi-check-bold</v-icon>Start Print
+                            </v-btn>
+                            <v-btn class="my-2" block color="orange darken-1" text x-large
+                              @click.stop="dialog_delete = true">
+                              <v-icon left>mdi-delete</v-icon>Delete File
+                            </v-btn>
+                            <v-dialog v-model="dialog_print" max-width="600" dark>
+                              <v-card>
+                                <v-card-title class="headline">CONFIRMATION</v-card-title>
+
+                                <v-card-text>
+                                  Start printing {{ item.name }}.{{ item.extension }} ?
+                                </v-card-text>
+
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+
+                                  <v-btn color="orange darken-1" text x-large @click="dialog_print = false">
+                                    No
+                                  </v-btn>
+
+                                  <v-btn color="light-blue lighten-1" text x-large
+                                    @click="dialog_printing = true; dialog_print = false">
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                            <v-dialog v-model="dialog_delete" max-width="600" dark>
+                              <v-card>
+                                <v-card-title class="headline">CONFIRMATION</v-card-title>
+
+                                <v-card-text>
+                                  Delete {{ item.name }}.{{ item.extension }} ?
+                                </v-card-text>
+
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+
+                                  <v-btn color="orange darken-1" text x-large @click="dialog_delete = false">
+                                    No
+                                  </v-btn>
+
+                                  <v-btn color="light-blue lighten-1" text x-large @click="dialog_delete = false">
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                          </div>
+                        </div>
+                      </td>
+                    </template>
+                  </v-data-table>
+
+                </v-flex>
+              </v-card>
+            </div>
+            <template></template>
+            <v-row justify="center">
+              <v-dialog v-model="dialog_printing" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-card>
+                  <v-toolbar dark color="warning">
+                    <v-btn icon dark @click="dialog_printing = false">
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-toolbar-title>Printing</v-toolbar-title>
+                  </v-toolbar>
+                  <v-list three-line subheader>
+                    <v-subheader>User Controls</v-subheader>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>Pause / Resume </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                  <v-divider></v-divider>
+                  <v-list three-line subheader>
+                    <v-subheader>Progress</v-subheader>
+                    <v-list-item>
+
+                      <v-list-item-content>
+                        <v-progress-circular :rotate="360" :size="150" :width="35" :value="value" color="red">
+                          {{ value }}
+                        </v-progress-circular>
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+
+                      <v-list-item-content>
+                        <v-list-item-title>Slice</v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+
+                  </v-list>
+                </v-card>
+              </v-dialog>
+            </v-row>
+            </template>
+          </v-card>
+        </v-tab-item>
+        <!--....................................................................................................................................-->
+        <v-tab-item>
+          <template>
+
+            <v-container>
+              <v-row>
+
+                <v-col order="1">
+                  <v-card class="pa-2">
+                    <v-btn text color="light" large>B/P System Test</v-btn>
+                  </v-card>
+                </v-col>
+
+                <v-col order="2">
+                  <v-card class="pa-2">
+                    <v-btn text large color="light">Display test</v-btn>
+                  </v-card>
+                </v-col>
+
+                <v-col order="3">
+                  <v-card class="pa-2">
+                    <v-btn text large color="light">Backlight ON</v-btn>
+                  </v-card>
+                </v-col>
+
+                <v-col order="4">
+                  <v-card class="pa-2">
+                    <v-btn text large color="light">Backlight OFF</v-btn>
+                  </v-card>
+                </v-col>
+
+              </v-row>
+            </v-container>
+
+          </template>
+          <v-form>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+
+                  <v-text-field id="entered_code" v-model="message" outlined clearable label="Gcode Terminal"
+                    type="text" @focus="show" data-layout="normal">
+                    <template v-slot:prepend>
+                    </template>
+                    <template v-slot:append>
+                      <v-fade-transition leave-absolute>
+                        <v-progress-circular v-if="loading" size="24" color="info" indeterminate></v-progress-circular>
+                        <img v-else width="24" height="24" src="https://cdn.vuetifyjs.com/images/logos/v-alt.svg"
+                          alt="">
+                      </v-fade-transition>
+                    </template>
+                    <template v-slot:append-outer>
+                      <v-menu style="top: -12px" offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn v-bind="attrs" v-on="on">
+                            <v-icon left>mdi-menu</v-icon>
+                            Options
+                          </v-btn>
+                        </template>
+                        <v-card>
+                          <v-card-text>
+                            <v-btn class="my-1" text @click="command1">
+                              M106
+                            </v-btn><br>
+                            <v-btn class="my-1" text @click="command2">
+                              G1
+                            </v-btn><br>
+                            <v-btn class="my-1" text @click="command3">
+                              G28
+                            </v-btn><br>
+                            <v-btn class="my-1" text @click="command4">
+                              M42
+                            </v-btn><br>
+                            <v-btn class="my-1" text @click="command5">
+                              M112
+                            </v-btn><br>
+                            <v-btn class="my-1" text @click="command6">
+                              M567
+                            </v-btn>
+                          </v-card-text>
+                        </v-card>
+                      </v-menu>
+                    </template>
+
+                  </v-text-field>
+                  <div class="text-center">
+                    <v-bottom-sheet v-model="sheet" persistent>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn @click="gcode">SEND</v-btn>
+                      </template>
+                    </v-bottom-sheet>
+                  </div>
+                  <br>
+
+                  <v-list label="" clearable readonly no-resize rows="5">{{ gcode_response }}</v-list>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-tab-item>
+        <v-tab-item>
+          <v-card flat>
+            CONNECTIONS TAB CONTENTS
+            <v-card-text>
+              <p>
+                List of visible WiFi networks
+              </p>
+              <p class="mb-0">
+                Network details<br>
+                IP Address<br>
+                MAC Address<br>
+                Hostname<br>
+              </p>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
+      <v-main>
+        <v-container fluid>
+          <v-row align="center" justify="center">
+            <v-col cols="12">
+              <v-card>
+                <v-tabs-items v-model="tab">
+                  <v-tab-item v-for="item in items" :key="item.tab">
+                    <v-card flat>
+                      <v-card-text>{{ item.content }}</v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-main>
+
+      <v-footer :inset="footer.inset" app>
+        <div class="text-center">
+          <div id="network_ip" class="network_ip"></div>
+        </div>
+        <div class="container">
+          <vue-touch-keyboard id="keyboard" v-if="visible" :layout="layout" :cancel="hide" :accept="accept"
+            :input="input" />
+        </div>
+      </v-footer>
+    </v-app>
+
+  </div>
+  <script src="jquery/jquery-3.5.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="vue-touch-keyboard/vue-touch-keyboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-pretty-bytes-filter@1.0.2/vue.pretty-print-bytes.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    var printerName = 'Photocentric Magna';
+    var printerStatus = '../services/printers/get/' + printerName;
+    var dataURL = '../services/printables/list';
+    var networkURL = '../services/machine/getNetworkHostConfiguration';
+
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      components: {
+        "vue-touch-keyboard": VueTouchKeyboard.component
+      },
+      data: () => ({
+        dialog_printing: false,
+        notifications: false,
+        sound: true,
+        widgets: false,
+        posts: [],
+        item: [],
+        singleExpand: true,
+        expanded: [],
+        sheet: false,
+        gcode_response: null,
+        message: '',
+        loading: false,
+        multiLine: true,
+        items: false,
+        snackbar: false,
+        dialog_grid: false,
+        dialog_print: false,
+        dialog_delete: false,
+        kods: [],
+        footer: {
+          inset: false,
+        },
+        headers: [
+          {
+            text: 'NAME',
+            align: 'start',
+            value: 'name',
+          }
+        ],
+        tab: null,
+        model: null,
+        visible: false,
+        layout: "normal",
+        input: null,
+        options: {
+          useKbEvents: false,
+          preventClickEvent: false
+        },
+        interval: {},
+        value: 0,
+      }),
+      beforeDestroy() {
+        clearInterval(this.interval)
+      },
+      methods: {
+        gcode: function () {
+          var thh = this // create a closure to access component in the callback below
+          thh.kods = document.getElementById('entered_code').value;
+          var code = document.getElementById('entered_code').value;
+          axios.get('../services/printers/executeGCode/Photocentric%20Magna/' + encodeURI(code))
+            .then(response => (this.gcode_response = code + ' ' + ': ' + response.data.message));
+        },
+        accept(text) {
+          this.hide();
+        },
+
+        show(e) {
+          this.input = e.target;
+          this.layout = e.target.dataset.layout;
+
+          if (!this.visible)
+            this.visible = true
+        },
+
+        hide() {
+          this.visible = false;
+        },
+        command1() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'M106'
+          }, 1000)
+        },
+        command2() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'G1'
+          }, 1000)
+        },
+        command3() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'G28'
+          }, 1000)
+        },
+        command4() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'M42'
+          }, 1000)
+        },
+        command5() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'M112'
+          }, 1000)
+        },
+        command6() {
+          this.loading = true
+          this.message = 'Adding command...'
+          setTimeout(() => {
+            this.loading = false
+            this.message = 'M567'
+          }, 1000)
+        }
+      },
+      mounted() { // when the Vue app is booted up, this is run automatically.
+        this.$vuetify.theme.dark = true;
+
+        var self = this // create a closure to access component in the callback below
+
+        $.getJSON(dataURL, function (data) {
+          self.posts = data;
+          console.log(self.posts);
+          var count = Object.keys(data).length;
+          // document.getElementById("printables_count").innerHTML = count;
+        });
+
+        $.getJSON(printerStatus, function (data) {
+          console.log(data.started);
+          if (data.started === true) {
+            console.log(data.started + 'is ON');
+          }
+          else {
+            console.log(data.started + 'is OFF');
+          }
+        });
+
+        $.getJSON(networkURL, function (data) {
+          console.log(JSON.stringify({ data }));
+          //document.getElementById("network_host").innerHTML = "Hostname: <br>" + data.Hostname;
+          //var MACs ="";
+          //$.each(data.MACs, function(key,value){
+          //console.log(key+", "+value);
+          //MACs += key + ": "+value+"<BR/> ";
+          //});
+          //document.getElementById("network_mac").innerHTML  = "Mac Address: <br>" + MACs;
+          var IPs = "";
+          $.each(data.IPs, function (key, value) {
+            IPs += value + ' : 9091';
+          });
+          document.getElementById("network_ip").innerHTML = IPs;
+        });
+
+        this.interval = setInterval(() => {
+          if (this.value === 100) {
+            return (this.value = 0)
+          }
+          this.value += 1
+        }, 400)
+      }
+    });
+  </script>
+</body>
+
+</html>
