@@ -2,11 +2,10 @@
 <html>
 
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <link type="text/css" rel="stylesheet" href="vue-touch-keyboard/vue-touch-keyboard.css">
     <link rel="stylesheet" href="index.css">
 </head>
@@ -38,14 +37,25 @@
 
                     </v-card>
                     <v-card id="target" flat>
-                        <v-card-text>
-                            <p>List of Files here</p>
-                            <p>The beach was named and discovered in 1879 by Staff Commander EP Bedwell. 'Whitehaven'
-                                was one of the many names, from the then English county of Cumberland, which Bedwell
-                                brought to the area. It followed James Cook's 1770 naming of the island group, the
-                                Cumberland Islands.</p>
-                        </v-card-text>
-
+                        <v-list printables_list rounded>
+                            <v-list-item-group
+                              v-model="item"
+                              color="purple"
+                              mandatory
+                            >
+                              <v-list-item
+                                v-for="(item, i) in items"
+                                :key="i"
+                              >
+                              <v-list-item-action>
+                                <v-checkbox :input-value="active"></v-checkbox>
+                              </v-list-item-action>
+                                <v-list-item-content>
+                                  <v-list-item-title v-text="item.name"></v-list-item-title>
+                                </v-list-item-content>
+                              </v-list-item>
+                            </v-list-item-group>
+                          </v-list>
                     </v-card>
                 </v-tab-item>
 
@@ -76,35 +86,42 @@
             theme: {
                 dark: true,
                 duration: 300,
-                // themes: {
-                //     dark: {
-                //         primary: '#1976D2',
-                //         secondary: '#424242',
-                //         accent: '#82B1FF',
-                //         error: '#FF5252',
-                //         info: '#2196F3',
-                //         success: '#4CAF50',
-                //         warning: '#FFC107',
-                //     },
-                //     light: {
-                //         pprimary: '#1976D2',
-                //         secondary: '#424242',
-                //         accent: '#82B1FF',
-                //         error: '#FF5252',
-                //         info: '#2196F3',
-                //         success: '#4CAF50',
-                //         warning: '#FFC107',
-                //     },
-                // },
-                tabs: null,
-                isActive: false,
+                    // themes: {
+                    //     dark: {
+                    //         primary: '#1976D2',
+                    //         secondary: '#424242',
+                    //         accent: '#82B1FF',
+                    //         error: '#FF5252',
+                    //         info: '#2196F3',
+                    //         success: '#4CAF50',
+                    //         warning: '#FFC107',
+                    //     },
+                    //     light: {
+                    //         pprimary: '#1976D2',
+                    //         secondary: '#424242',
+                    //         accent: '#82B1FF',
+                    //         error: '#FF5252',
+                    //         info: '#2196F3',
+                    //         success: '#4CAF50',
+                    //         warning: '#FFC107',
+                    //     },
+                    // },
+                    tabs: null,
+                    isActive: false,
+            },
+            data: {
+                item: 1,
+                items: [],
+                active: [],
             },
             mounted() { // when the Vue app is booted up, this is run automatically.
                 this.$vuetify.theme.dark = true;
 
+                var self = this
+
                 $.getJSON(dataURL, function (data) {
-                    self.posts = data;
-                    console.log(self.posts);
+                    self.items = data;
+                    console.log(self.items);
                     var count = Object.keys(data).length;
                     // document.getElementById("printables_count").innerHTML = count;
                 });

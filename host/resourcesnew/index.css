@@ -30,6 +30,16 @@
 	height: 100vh;
 }
 
+.printables_list {
+  height: 95vh;
+}
+
+.v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
+  line-height: 3;
+  font-weight: 400;
+	font-size: 2rem;
+}
+
 .v-tab {
 	font-weight: 400;
 	font-size: 2rem;
@@ -63,7 +73,7 @@
   text-align: center;
   padding: 3%;
   font-weight: 300;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color:#B0BEC5;
 }
 

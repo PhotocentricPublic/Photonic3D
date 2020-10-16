@@ -192,7 +192,6 @@
             <v-container>
               <v-row>
                 <v-col cols="12">
-
                   <v-text-field id="entered_code" v-model="message" outlined clearable label="Gcode Terminal"
                     type="text" @focus="show" data-layout="normal">
                     <template v-slot:prepend>
@@ -325,6 +324,7 @@
         widgets: false,
         posts: [],
         item: [],
+        items: false,
         singleExpand: true,
         expanded: [],
         sheet: false,
@@ -332,7 +332,6 @@
         message: '',
         loading: false,
         multiLine: true,
-        items: false,
         snackbar: false,
         dialog_grid: false,
         dialog_print: false,
