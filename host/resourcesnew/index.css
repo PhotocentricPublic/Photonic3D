@@ -4,10 +4,17 @@
     font-family: 'Roboto', sans-serif !important;
 }
 
+::-webkit-scrollbar
+			{
+    		width:0px;
+			}
+			::-webkit-scrollbar-track-piece
+			{
+   			background-color:transparent;
+			}
+
 .theme--dark.v-tabs>.v-tabs-bar {
-	background-color: #000;
-	position: sticky !important;
-  z-index: 2;
+	background-color:#121213;
 }
 
 .theme--dark.v-tabs>.v-tabs-bar .v-tab--disabled, .theme--dark.v-tabs>.v-tabs-bar .v-tab:not(.v-tab--active), .theme--dark.v-tabs>.v-tabs-bar .v-tab:not(.v-tab--active)>.v-btn, .theme--dark.v-tabs>.v-tabs-bar .v-tab:not(.v-tab--active)>.v-icon {
@@ -24,8 +31,8 @@
 }
 
 .v-tab {
-	font-weight: 300;
-	font-size: 1.8rem;
+	font-weight: 400;
+	font-size: 2rem;
 	text-transform: none;
 }
 
@@ -44,6 +51,22 @@
 	border-radius: 10px;
 }
 
+.ready_to_print {
+  text-align: center;
+  padding: 20%;
+  font-weight: 300;
+  font-size: 4rem;
+  color:#B0BEC5;
+}
+
+.swipe_down_text {
+  text-align: center;
+  padding: 3%;
+  font-weight: 300;
+  font-size: 1.2rem;
+  color:#B0BEC5;
+}
+
  .vue-touch-keyboard .keyboard .key {
     background-color: #141414 !important;
     border: 0px solid #252525 !important;
@@ -51,9 +74,9 @@
 }
 
 .downArrow{
-	position: fixed;
-	bottom: 45%;
-	left: 50%;
+	position: absolute;
+	bottom: 20%;
+	left: 47.5%;
 }
 
 .bounce {

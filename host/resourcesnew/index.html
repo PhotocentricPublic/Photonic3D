@@ -14,7 +14,7 @@
 <body>
     <div>
         <v-app id="app">
-            <v-tabs grow color="dark" slider-color="white">
+            <v-tabs height="100" grow color="white" slider-color="white">
                 <v-tab dark>
                     Print
                 </v-tab>
@@ -26,11 +26,16 @@
                 </v-tab>
 
                 <v-tab-item>
+
                     <v-card flat>
-                                    
-                        <div class="downArrow bounce" @click="$vuetify.goTo(this.target, this.duration)">
-                            <img width="60" height="60" alt="" src="thin-arrowheads-pointing-down.png" />
-                        </div>
+                        <h1 class="ready_to_print">Ready to Print</h1>
+                        <h3 class="swipe_down_text">Access your print files</h3>
+                        <v-card-actions>
+                            <div class="downArrow bounce" @click="$vuetify.goTo(this.target, this.duration)">
+                                <img width="60" height="60" alt="" src="thin-arrowheads-pointing-down.png" />
+                            </div>
+                        </v-card-actions>
+
                     </v-card>
                     <v-card id="target" flat>
                         <v-card-text>
@@ -60,41 +65,49 @@
 
         </v-app>
     </div>
-
+    <script src="jquery/jquery-3.5.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script>
+        var dataURL = '../services/printables/list';
         new Vue({
             el: '#app',
             vuetify: new Vuetify(),
             theme: {
                 dark: true,
                 duration: 300,
-                themes: {
-                    dark: {
-                        primary: '#1976D2',
-                        secondary: '#424242',
-                        accent: '#82B1FF',
-                        error: '#FF5252',
-                        info: '#2196F3',
-                        success: '#4CAF50',
-                        warning: '#FFC107',
-                    },
-                    light: {
-                        pprimary: '#1976D2',
-                        secondary: '#424242',
-                        accent: '#82B1FF',
-                        error: '#FF5252',
-                        info: '#2196F3',
-                        success: '#4CAF50',
-                        warning: '#FFC107',
-                    },
-                },
+                // themes: {
+                //     dark: {
+                //         primary: '#1976D2',
+                //         secondary: '#424242',
+                //         accent: '#82B1FF',
+                //         error: '#FF5252',
+                //         info: '#2196F3',
+                //         success: '#4CAF50',
+                //         warning: '#FFC107',
+                //     },
+                //     light: {
+                //         pprimary: '#1976D2',
+                //         secondary: '#424242',
+                //         accent: '#82B1FF',
+                //         error: '#FF5252',
+                //         info: '#2196F3',
+                //         success: '#4CAF50',
+                //         warning: '#FFC107',
+                //     },
+                // },
                 tabs: null,
                 isActive: false,
             },
             mounted() { // when the Vue app is booted up, this is run automatically.
                 this.$vuetify.theme.dark = true;
+
+                $.getJSON(dataURL, function (data) {
+                    self.posts = data;
+                    console.log(self.posts);
+                    var count = Object.keys(data).length;
+                    // document.getElementById("printables_count").innerHTML = count;
+                });
             },
         })
     </script>
