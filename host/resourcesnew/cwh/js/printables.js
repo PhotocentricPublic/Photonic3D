@@ -1,15 +1,15 @@
 (function() {
 	var cwhApp = angular.module('cwhApp');
-	cwhApp.controller("PrintablesController", ['$scope', '$http', '$location', '$uibModal', '$anchorScroll', '$window', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $uibModal, $anchorScroll, $window, cwhWebSocket, photonicUtils) {
+	cwhApp.controller("PrintablesController", ['$scope', '$http', '$location', '$uibModal', '$anchorScroll', 'cwhWebSocket', 'photonicUtils', function ($scope, $http, $location, $uibModal, $anchorScroll, cwhWebSocket, photonicUtils) {
 		controller = this;
-	
+		
 		this.currentPrintable = null;
 		this.currentCustomizer = null;
 		this.currentPrinter = null;
 		this.supportedFileTypes = null;
 		this.currentPreviewImg = null;
 		this.errorMsg = null;
-		this.projectImage = "fa-sun-o";
+		this.projectImage = false;
 		
 		this.handlePreviewError = function handlePreviewError() {
 			var printableName = encodeURIComponent(controller.currentPrintable.name);
@@ -89,7 +89,7 @@
 		this.refreshPrintables = function refreshPrintables() {
 	  		$http.get("services/printables/list").success(
 	  			function (data) {
-					  controller.printables = data;
+	  				controller.printables = data;
 	  			})
 		};
 		
@@ -153,14 +153,9 @@
 			this.saveCustomizer();
 		}
 		
-		this.setProjectImage = function setProjectImage() {
+		this.setProjectImage = function setProjectImage(projectImage) {
 			var serviceCall = null;
-			var oldValue = null;
-			if (controller.projectImage != "fa-refresh fa-spin") {
-				oldValue = controller.projectImage;
-				controller.projectImage = "fa-refresh fa-spin";
-			}
-			if (oldValue == "fa-sun-o") {
+			if (projectImage) {
 				serviceCall = "services/customizers/projectCustomizerOnPrinter/" + encodeURIComponent(controller.currentCustomizer.name);
 			} else {
 				if (controller.currentPrinter == null) {
@@ -171,16 +166,8 @@
 			}
 			
 			$http.get(serviceCall).success(function (data) {
-	        	if (data.command == "blankscreenshown") {
-					controller.projectImage = "fa-sun-o";
-	        	} else {
-	        		controller.projectImage = "fa-certificate";
-	        	}
-	        }).error(function (data, status, headers, config, statusText) {
-	        	if (oldValue != null) {
-	        		controller.projectImage = oldValue;
-	        	}
-			});
+	        	controller.projectImage = projectImage;
+	        });
 		}
 
 		this.resetTranslation = function resetTranslation() {
@@ -244,10 +231,6 @@
     		})
 	    };
 	    
-		$scope.downloadPrintable = function downloadPrintable(printable) {
-        	$window.location.href = "services/printables/downloadPrintableFile/" + encodeURIComponent(printable.name + "." + printable.extension);
-        }
-
 		//TODO: When we get an upload complete message, we need to refresh file list...
 		this.showUpload = function showUpload() {
 			var fileChosenModal = $uibModal.open({
@@ -256,7 +239,7 @@
 		        controller: 'UploadFileController',
 		        size: "lg",
 		        resolve: {
-		        	title: function () {return "Upload Print File";},
+		        	title: function () {return "Upload Printable";},
 		        	supportedFileTypes: function () {return null},
 		        	getRestfulFileUploadURL: function () {return function (filename) {return '/services/printables/uploadPrintableFile/' + encodeURIComponent(filename);}},
 		        	getRestfulURLUploadURL: function () {return function (filename, url) {return "services/printables/uploadviaurl/" + encodeURIComponent(filename) + "/" + encodeURIComponent(url);}}
@@ -403,30 +386,6 @@
 				"currentTransform.translate(\n" +
 				"   centerX-printImage.getWidth()/2,\n" +
 				"   centerY-printImage.getHeight()/2);\n" +
-				"currentTransform";
-		}
-		
-		this.correctAspectRatio = function correctAspectRatio() {
-			controller.currentCustomizer.affineTransformSettings.affineTransformScriptCalculator = 
-				"var currentTransform = new java.awt.geom.AffineTransform();\n" +
-				"var scaleXDimension = false;\n" +
-				"var ppmmx = pixelsPerMMX;\n" +
-				"var ppmmy = pixelsPerMMY;\n" +
-				"function reduce(numerator,denominator){\n" +
-				"   var gcd = function gcd(a,b){\n" +
-				"      return b ? gcd(b, a%b) : a;\n" +
-				"   };\n" +
-				"   gcd = gcd(numerator,denominator);\n" +
-				"   return [numerator/gcd, denominator/gcd];\n" +
-				"}\n" +
-				"var reduced = reduce(ppmmx, ppmmy);" +
-				"ppmmx = reduced[0];\n" +
-				"ppmmy = reduced[1];\n" +
-				"if (scaleXDimension) {\n" +
-				"   currentTransform.scale(ppmmx / ppmmy, 1);\n" +
-				"} else {\n" +
-				"   currentTransform.scale(1, ppmmy / ppmmx);\n" +
-				"}\n" +
 				"currentTransform";
 		}
 		

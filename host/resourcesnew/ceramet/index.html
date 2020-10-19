@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="vue-touch-keyboard/vue-touch-keyboard.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div>
+        <v-app id="app">
+            <v-tabs height="100" dark grow color="white" slider-color="white">
+                <v-tab dark>
+                    Print
+                </v-tab>
+                <v-tab>
+                    Controls
+                </v-tab>
+                <v-tab>
+                    Settings
+                </v-tab>
+
+                <v-tab-item>
+
+                    <v-card flat>
+                        <h1 class="ready_to_print">Ready to Print</h1>
+                        <h3 class="swipe_down_text">Access your print files</h3>
+                        <v-card-actions>
+                            <div class="downArrow bounce" @click="$vuetify.goTo(this.target, this.duration)">
+                                <img width="60" height="60" alt="" src="thin-arrowheads-pointing-down.png" />
+                            </div>
+                        </v-card-actions>
+
+                    </v-card>
+                    <v-card id="target" flat>
+                        <v-list printables_list rounded>
+                            <v-list-item-group
+                              v-model="item"
+                              color="purple"
+                              mandatory
+                            >
+                              <v-list-item
+                                v-for="(item, i) in items"
+                                :key="i"
+                              >
+                              <v-list-item-action> 
+                                <v-checkbox :input-value="active"></v-checkbox>
+                              </v-list-item-action>
+                                <v-list-item-content>
+                                  <v-list-item-title v-text="item.name"></v-list-item-title>
+                                </v-list-item-content>
+                              </v-list-item>
+                            </v-list-item-group>
+                          </v-list>
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+
+                    </v-card>
+                </v-tab-item>
+
+                <v-tab-item>
+                    <v-card flat>
+                        <!-- <v-switch color="info" v-model="$vuetify.theme.dark"> -->
+                    </v-card>
+                </v-tab-item>
+            </v-tabs>
+
+
+        </v-app>
+    </div>
+    <script src="jquery/jquery-3.5.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script>
+        var dataURL = '../services/printables/list';
+        new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            theme: {
+                dark: true,
+                duration: 300,
+                    // themes: {
+                    //     dark: {
+                    //         primary: '#1976D2',
+                    //         secondary: '#424242',
+                    //         accent: '#82B1FF',
+                    //         error: '#FF5252',
+                    //         info: '#2196F3',
+                    //         success: '#4CAF50',
+                    //         warning: '#FFC107',
+                    //     },
+                    //     light: {
+                    //         pprimary: '#1976D2',
+                    //         secondary: '#424242',
+                    //         accent: '#82B1FF',
+                    //         error: '#FF5252',
+                    //         info: '#2196F3',
+                    //         success: '#4CAF50',
+                    //         warning: '#FFC107',
+                    //     },
+                    // },
+                    tabs: null,
+                    isActive: false,
+            },
+            data: {
+                item: 1,
+                items: [],
+                active: [],
+            },
+            mounted() { // when the Vue app is booted up, this is run automatically.
+                this.$vuetify.theme.dark = true;
+
+                var self = this
+
+                $.getJSON(dataURL, function (data) {
+                    self.items = data;
+                    console.log(self.items);
+                    var count = Object.keys(data).length;
+                    // document.getElementById("printables_count").innerHTML = count;
+                });
+            },
+        })
+    </script>
+</body>
+
+</html>
